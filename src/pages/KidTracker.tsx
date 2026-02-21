@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChild, getTodayLog, togglePrayer, getChildProgress, AVATARS, PRAYER_NAMES, type PrayerLog, type PrayerName } from '@/lib/store';
+import { getChild, getTodayLog, togglePrayer, getChildProgress, AVATAR_IMAGES, PRAYER_NAMES, type PrayerLog, type PrayerName } from '@/lib/store';
 import PrayerButton from '@/components/PrayerButton';
 import { ArrowLeft, Trophy } from 'lucide-react';
 
@@ -22,7 +22,7 @@ export default function KidTracker() {
   if (!child) {
     return (
       <div className="min-h-screen gradient-night flex items-center justify-center">
-        <p className="text-foreground text-xl">Child not found 😢</p>
+        <p className="text-foreground text-xl">الطفل غير موجود 😢</p>
       </div>
     );
   }
@@ -37,7 +37,7 @@ export default function KidTracker() {
     }
   };
 
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const today = new Date().toLocaleDateString('ar-SA', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-8 relative overflow-hidden">
@@ -72,10 +72,10 @@ export default function KidTracker() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <button onClick={() => navigate('/kids')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
-            <ArrowLeft size={24} />
+            <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            <span className="text-3xl">{AVATARS[child.avatarIndex]}</span>
+            <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-10 h-10 rounded-full object-cover" />
             <div>
               <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
               <p className="text-muted-foreground text-sm">{today}</p>
@@ -97,15 +97,15 @@ export default function KidTracker() {
           <div className="inline-flex items-center gap-2 bg-card px-6 py-3 rounded-2xl border border-border">
             <span className="text-star text-2xl">⭐</span>
             <span className="text-3xl font-extrabold text-gold">{progress.total}</span>
-            <span className="text-muted-foreground font-medium">stars</span>
+            <span className="text-muted-foreground font-medium">نجمة</span>
           </div>
         </motion.div>
 
         {/* Progress bar */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground font-medium">Today's Progress</span>
-            <span className="text-gold font-bold">{progress.today}/5</span>
+            <span className="text-muted-foreground font-medium">تقدّم اليوم</span>
+            <span className="text-gold font-bold">{progress.today}/٥</span>
           </div>
           <div className="h-3 bg-muted rounded-full overflow-hidden">
             <motion.div
@@ -121,7 +121,7 @@ export default function KidTracker() {
           {PRAYER_NAMES.map((prayer, i) => (
             <motion.div
               key={prayer.key}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.08 }}
             >

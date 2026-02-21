@@ -1,3 +1,10 @@
+import avatarBoy1 from '@/assets/avatar-boy1.png';
+import avatarGirl1 from '@/assets/avatar-girl1.png';
+import avatarBoy2 from '@/assets/avatar-boy2.png';
+import avatarGirl2 from '@/assets/avatar-girl2.png';
+import avatarBoy3 from '@/assets/avatar-boy3.png';
+import avatarGirl3 from '@/assets/avatar-girl3.png';
+
 export interface Child {
   id: string;
   name: string;
@@ -29,7 +36,7 @@ const defaultData: AppData = {
   pin: '1234',
   children: [],
   prayerLogs: [],
-  rewardText: 'Ice Cream Party! 🍦',
+  rewardText: 'آيس كريم عند 50 نجمة! 🍦',
   rewardGoal: 50,
 };
 
@@ -136,12 +143,13 @@ export function getReward(): { text: string; goal: number } {
   return { text: data.rewardText, goal: data.rewardGoal };
 }
 
-export const AVATARS = ['🧒', '👦', '👧', '🧒🏽', '👦🏽', '👧🏽', '🧒🏿', '👦🏿', '👧🏿', '👶', '👶🏽', '👶🏿'];
+export const AVATAR_IMAGES = [avatarBoy1, avatarGirl1, avatarBoy2, avatarGirl2, avatarBoy3, avatarGirl3];
+export const AVATAR_LABELS = ['ولد ١', 'بنت ١', 'ولد ٢', 'بنت ٢', 'ولد ٣', 'بنت ٣'];
 
 export const PRAYER_NAMES: { key: PrayerName; label: string; emoji: string }[] = [
-  { key: 'fajr', label: 'Fajr', emoji: '🌅' },
-  { key: 'dhuhr', label: 'Dhuhr', emoji: '☀️' },
-  { key: 'asr', label: 'Asr', emoji: '🌤️' },
-  { key: 'maghrib', label: 'Maghrib', emoji: '🌇' },
-  { key: 'isha', label: 'Isha', emoji: '🌙' },
+  { key: 'fajr', label: 'الفجر', emoji: '🌅' },
+  { key: 'dhuhr', label: 'الظهر', emoji: '☀️' },
+  { key: 'asr', label: 'العصر', emoji: '🌤️' },
+  { key: 'maghrib', label: 'المغرب', emoji: '🌇' },
+  { key: 'isha', label: 'العشاء', emoji: '🌙' },
 ];
