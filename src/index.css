@@ -1,96 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 230 45% 12%;
+    --foreground: 45 100% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 230 40% 16%;
+    --card-foreground: 45 100% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 230 40% 16%;
+    --popover-foreground: 45 100% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 42 100% 55%;
+    --primary-foreground: 230 45% 12%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 160 60% 40%;
+    --secondary-foreground: 45 100% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 230 30% 22%;
+    --muted-foreground: 230 20% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 280 50% 55%;
+    --accent-foreground: 45 100% 95%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 230 30% 25%;
+    --input: 230 30% 25%;
+    --ring: 42 100% 55%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 230 40% 14%;
+    --sidebar-foreground: 45 100% 95%;
+    --sidebar-primary: 42 100% 55%;
+    --sidebar-primary-foreground: 230 45% 12%;
+    --sidebar-accent: 230 30% 22%;
+    --sidebar-accent-foreground: 45 100% 95%;
+    --sidebar-border: 230 30% 25%;
+    --sidebar-ring: 42 100% 55%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Custom tokens */
+    --gold: 42 100% 55%;
+    --gold-glow: 42 100% 65%;
+    --emerald: 160 60% 40%;
+    --night-sky: 230 45% 12%;
+    --night-card: 230 40% 18%;
+    --star-yellow: 45 100% 70%;
+    --lantern-orange: 25 95% 55%;
+    --lantern-glow: 25 95% 65%;
+    --prayer-done: 160 60% 45%;
+    --prayer-pending: 230 30% 28%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    font-family: 'Baloo 2', 'Quicksand', sans-serif;
   }
 }
 
@@ -101,5 +68,64 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Baloo 2', 'Quicksand', sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+
+  .bg-night-card {
+    background-color: hsl(var(--night-card));
+  }
+
+  .bg-night-sky {
+    background-color: hsl(var(--night-sky));
+  }
+
+  .text-star {
+    color: hsl(var(--star-yellow));
+  }
+
+  .bg-prayer-done {
+    background-color: hsl(var(--prayer-done));
+  }
+
+  .bg-prayer-pending {
+    background-color: hsl(var(--prayer-pending));
+  }
+
+  .bg-lantern {
+    background-color: hsl(var(--lantern-orange));
+  }
+
+  .text-lantern {
+    color: hsl(var(--lantern-orange));
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px hsl(var(--gold) / 0.4), 0 0 40px hsl(var(--gold) / 0.2);
+  }
+
+  .glow-star {
+    box-shadow: 0 0 15px hsl(var(--star-yellow) / 0.5), 0 0 30px hsl(var(--star-yellow) / 0.25);
+  }
+
+  .glow-lantern {
+    box-shadow: 0 0 20px hsl(var(--lantern-orange) / 0.4), 0 0 40px hsl(var(--lantern-orange) / 0.15);
+  }
+
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold)), hsl(var(--gold-glow)));
+  }
+
+  .gradient-night {
+    background: linear-gradient(180deg, hsl(230 45% 8%), hsl(230 45% 16%));
   }
 }
