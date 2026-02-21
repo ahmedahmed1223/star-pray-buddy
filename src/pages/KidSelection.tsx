@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChildren, AVATARS, type Child } from '@/lib/store';
+import { getChildren, AVATAR_IMAGES, type Child } from '@/lib/store';
 import { ArrowLeft } from 'lucide-react';
 
 export default function KidSelection() {
@@ -15,9 +15,9 @@ export default function KidSelection() {
       <div className="max-w-md mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
-            <ArrowLeft size={24} />
+            <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
-          <h1 className="text-2xl font-bold text-gold">Who's Praying? 🤲</h1>
+          <h1 className="text-2xl font-bold text-gold">من يصلّي؟ 🤲</h1>
         </div>
 
         {children.length === 0 ? (
@@ -27,8 +27,8 @@ export default function KidSelection() {
             className="bg-card rounded-2xl p-8 text-center border border-border"
           >
             <p className="text-5xl mb-4">😅</p>
-            <p className="text-foreground font-bold text-lg mb-2">No kids yet!</p>
-            <p className="text-muted-foreground">Ask a parent to add you first.</p>
+            <p className="text-foreground font-bold text-lg mb-2">لا يوجد أطفال!</p>
+            <p className="text-muted-foreground">اطلب من الوالدين إضافتك أولاً.</p>
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
@@ -43,7 +43,7 @@ export default function KidSelection() {
                 onClick={() => navigate(`/tracker/${child.id}`)}
                 className="bg-card border-2 border-border hover:border-primary rounded-3xl p-6 flex flex-col items-center gap-3 transition-colors"
               >
-                <span className="text-6xl">{AVATARS[child.avatarIndex]}</span>
+                <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-20 h-20 rounded-full object-cover" />
                 <span className="text-foreground font-bold text-lg">{child.name}</span>
                 <span className="text-star text-sm font-medium">⭐ {child.totalStars}</span>
               </motion.button>

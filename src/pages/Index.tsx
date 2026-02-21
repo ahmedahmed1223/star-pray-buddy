@@ -10,14 +10,12 @@ export default function Index() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${ramadanBg})` }}
       />
       <div className="absolute inset-0 gradient-night opacity-60" />
 
-      {/* Content */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -33,10 +31,10 @@ export default function Index() {
         </motion.div>
 
         <h1 className="text-4xl font-extrabold text-gold mb-2 drop-shadow-lg">
-          Salat Tracker
+          متابع الصلاة
         </h1>
         <p className="text-foreground/80 text-lg mb-10 font-medium">
-          Ramadan Edition ✨
+          إصدار رمضان ✨
         </p>
 
         <div className="space-y-4">
@@ -46,7 +44,7 @@ export default function Index() {
             onClick={() => navigate('/kids')}
             className="w-full gradient-gold text-primary-foreground font-bold text-xl py-5 rounded-2xl glow-gold shadow-lg"
           >
-            🧒 Kids Mode
+            👧 وضع الأطفال
           </motion.button>
 
           <motion.button
@@ -55,7 +53,7 @@ export default function Index() {
             onClick={() => setPinOpen(true)}
             className="w-full bg-card border-2 border-border text-foreground font-bold text-xl py-5 rounded-2xl hover:bg-muted transition-colors"
           >
-            🔒 Parent Mode
+            🔒 وضع الوالدين
           </motion.button>
         </div>
       </motion.div>

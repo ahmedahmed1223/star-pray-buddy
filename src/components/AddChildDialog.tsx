@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addChild, AVATARS } from '@/lib/store';
+import { addChild, AVATAR_IMAGES, AVATAR_LABELS } from '@/lib/store';
 import { X, UserPlus } from 'lucide-react';
 
 interface Props {
@@ -40,7 +40,7 @@ export default function AddChildDialog({ open, onClose, onAdded }: Props) {
             <div className="flex justify-between items-center mb-5">
               <div className="flex items-center gap-2 text-gold">
                 <UserPlus size={20} />
-                <span className="font-bold text-lg">Add Child</span>
+                <span className="font-bold text-lg">إضافة طفل</span>
               </div>
               <button onClick={onClose} className="text-muted-foreground"><X size={20} /></button>
             </div>
@@ -48,23 +48,24 @@ export default function AddChildDialog({ open, onClose, onAdded }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Child's name..."
+              placeholder="اسم الطفل..."
               className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground text-lg font-medium mb-5 outline-none focus:ring-2 focus:ring-primary"
             />
 
-            <p className="text-sm text-muted-foreground mb-2 font-medium">Choose an Avatar:</p>
-            <div className="grid grid-cols-6 gap-2 mb-6">
-              {AVATARS.map((av, i) => (
+            <p className="text-sm text-muted-foreground mb-3 font-medium">اختر صورة:</p>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {AVATAR_IMAGES.map((av, i) => (
                 <button
                   key={i}
                   onClick={() => setAvatarIndex(i)}
-                  className={`text-3xl p-2 rounded-xl transition-all ${
+                  className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                     avatarIndex === i
-                      ? 'bg-primary/20 ring-2 ring-primary scale-110'
+                      ? 'bg-primary/20 ring-2 ring-primary scale-105'
                       : 'bg-muted hover:bg-muted/70'
                   }`}
                 >
-                  {av}
+                  <img src={av} alt={AVATAR_LABELS[i]} className="w-14 h-14 rounded-full object-cover" />
+                  <span className="text-xs text-muted-foreground">{AVATAR_LABELS[i]}</span>
                 </button>
               ))}
             </div>
@@ -74,7 +75,7 @@ export default function AddChildDialog({ open, onClose, onAdded }: Props) {
               disabled={!name.trim()}
               className="w-full gradient-gold text-primary-foreground font-bold text-lg py-3 rounded-xl active:scale-95 transition-transform disabled:opacity-50"
             >
-              Add ⭐
+              إضافة ⭐
             </button>
           </motion.div>
         </motion.div>

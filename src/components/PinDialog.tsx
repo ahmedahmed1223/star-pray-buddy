@@ -47,11 +47,12 @@ export default function PinDialog({ open, onClose, onSuccess }: PinDialogProps) 
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             className="bg-card rounded-2xl p-6 w-full max-w-xs shadow-xl border border-border"
+            dir="ltr"
           >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4" dir="rtl">
               <div className="flex items-center gap-2 text-gold">
                 <Lock size={20} />
-                <span className="font-bold text-lg">Parent PIN</span>
+                <span className="font-bold text-lg">رمز الوالدين</span>
               </div>
               <button onClick={() => { setPin(''); onClose(); }} className="text-muted-foreground">
                 <X size={20} />
@@ -76,7 +77,7 @@ export default function PinDialog({ open, onClose, onSuccess }: PinDialogProps) 
             </div>
 
             {error && (
-              <p className="text-center text-destructive text-sm mb-3">Wrong PIN, try again!</p>
+              <p className="text-center text-destructive text-sm mb-3">رمز خاطئ، حاول مرة أخرى!</p>
             )}
 
             <div className="grid grid-cols-3 gap-2">
@@ -101,7 +102,7 @@ export default function PinDialog({ open, onClose, onSuccess }: PinDialogProps) 
               ))}
             </div>
 
-            <p className="text-center text-muted-foreground text-xs mt-4">Default PIN: 1234</p>
+            <p className="text-center text-muted-foreground text-xs mt-4" dir="rtl">الرمز الافتراضي: ١٢٣٤</p>
           </motion.div>
         </motion.div>
       )}

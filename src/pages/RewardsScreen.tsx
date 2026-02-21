@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChild, getReward, AVATARS } from '@/lib/store';
+import { getChild, getReward, AVATAR_IMAGES } from '@/lib/store';
 import { ArrowLeft, Star } from 'lucide-react';
 
 export default function RewardsScreen() {
@@ -12,7 +12,7 @@ export default function RewardsScreen() {
   if (!child) {
     return (
       <div className="min-h-screen gradient-night flex items-center justify-center">
-        <p className="text-foreground text-xl">Child not found 😢</p>
+        <p className="text-foreground text-xl">الطفل غير موجود 😢</p>
       </div>
     );
   }
@@ -25,9 +25,9 @@ export default function RewardsScreen() {
       <div className="max-w-md mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate(`/tracker/${child.id}`)} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
-            <ArrowLeft size={24} />
+            <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
-          <h1 className="text-2xl font-bold text-gold">Rewards 🎁</h1>
+          <h1 className="text-2xl font-bold text-gold">المكافآت 🎁</h1>
         </div>
 
         {/* Avatar & Stars */}
@@ -36,13 +36,13 @@ export default function RewardsScreen() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <motion.span
+          <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="text-7xl inline-block mb-3"
+            className="inline-block mb-3"
           >
-            {AVATARS[child.avatarIndex]}
-          </motion.span>
+            <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-24 h-24 rounded-full object-cover mx-auto" />
+          </motion.div>
           <h2 className="text-2xl font-bold text-foreground mb-1">{child.name}</h2>
           <div className="inline-flex items-center gap-2 text-star">
             <Star size={28} fill="currentColor" />
@@ -58,7 +58,7 @@ export default function RewardsScreen() {
           className={`bg-card rounded-3xl p-6 border-2 ${achieved ? 'border-primary glow-gold' : 'border-border'}`}
         >
           <div className="text-center mb-4">
-            <p className="text-lg text-muted-foreground font-medium mb-1">Reward Goal</p>
+            <p className="text-lg text-muted-foreground font-medium mb-1">هدف المكافأة</p>
             <p className="text-2xl font-bold text-foreground">{reward.text}</p>
           </div>
 
@@ -93,8 +93,8 @@ export default function RewardsScreen() {
               className="text-center"
             >
               <p className="text-3xl mb-2">🎉🏆🎉</p>
-              <p className="text-gold font-bold text-xl">Goal Achieved!</p>
-              <p className="text-foreground">MashaAllah! Great job!</p>
+              <p className="text-gold font-bold text-xl">تم تحقيق الهدف!</p>
+              <p className="text-foreground">ماشاء الله! أحسنت!</p>
             </motion.div>
           )}
         </motion.div>
