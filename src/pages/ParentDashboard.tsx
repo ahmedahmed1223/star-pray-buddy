@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChildren, getChildProgress, getReward, setReward, removeChild, AVATAR_IMAGES, type Child } from '@/lib/store';
+import { getChildren, getChildProgress, getReward, setReward, removeChild, resetChildStars, setPin, AVATAR_IMAGES, type Child } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
-import { ArrowLeft, Plus, Trash2, Gift, Star } from 'lucide-react';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { ArrowLeft, Plus, Trash2, Gift, Star, KeyRound, RotateCcw } from 'lucide-react';
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -13,6 +14,11 @@ export default function ParentDashboard() {
   const [editingReward, setEditingReward] = useState(false);
   const [rewardText, setRewardText] = useState(reward.text);
   const [rewardGoal, setRewardGoal] = useState(String(reward.goal));
+  const [deleteTarget, setDeleteTarget] = useState<Child | null>(null);
+  const [resetTarget, setResetTarget] = useState<Child | null>(null);
+  const [changingPin, setChangingPin] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [pinSaved, setPinSaved] = useState(false);
 
   const refresh = () => setChildren(getChildren());
   useEffect(refresh, []);
@@ -22,6 +28,32 @@ export default function ParentDashboard() {
     setReward(rewardText, goal);
     setRewardState({ text: rewardText, goal });
     setEditingReward(false);
+  };
+
+  const handleDelete = () => {
+    if (deleteTarget) {
+      removeChild(deleteTarget.id);
+      refresh();
+      setDeleteTarget(null);
+    }
+  };
+
+  const handleReset = () => {
+    if (resetTarget) {
+      resetChildStars(resetTarget.id);
+      refresh();
+      setResetTarget(null);
+    }
+  };
+
+  const handleChangePin = () => {
+    if (newPin.length === 4) {
+      setPin(newPin);
+      setNewPin('');
+      setChangingPin(false);
+      setPinSaved(true);
+      setTimeout(() => setPinSaved(false), 2000);
+    }
   };
 
   return (
@@ -34,6 +66,53 @@ export default function ParentDashboard() {
           </button>
           <h1 className="text-2xl font-bold text-gold">لوحة الوالدين</h1>
         </div>
+
+        {/* Change PIN */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card rounded-2xl p-5 border border-border mb-4"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <KeyRound size={20} className="text-gold" />
+            <span className="font-bold text-lg text-foreground">رمز الدخول</span>
+          </div>
+          {changingPin ? (
+            <div className="flex gap-2 items-center">
+              <input
+                value={newPin}
+                onChange={e => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="رمز جديد (4 أرقام)"
+                type="tel"
+                maxLength={4}
+                className="flex-1 bg-muted border border-border rounded-xl px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary text-center text-lg tracking-widest"
+                dir="ltr"
+              />
+              <button
+                onClick={handleChangePin}
+                disabled={newPin.length !== 4}
+                className="gradient-gold text-primary-foreground font-bold px-5 py-2 rounded-xl disabled:opacity-50"
+              >
+                حفظ
+              </button>
+              <button onClick={() => { setChangingPin(false); setNewPin(''); }} className="text-muted-foreground px-3 py-2">
+                إلغاء
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-muted-foreground text-sm">يمكنك تغيير رمز الدخول للوالدين</p>
+              <button onClick={() => setChangingPin(true)} className="text-gold text-sm font-medium underline">
+                تغيير
+              </button>
+            </div>
+          )}
+          {pinSaved && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-secondary text-sm mt-2 font-medium">
+              ✅ تم تغيير الرمز بنجاح!
+            </motion.p>
+          )}
+        </motion.div>
 
         {/* Reward Section */}
         <motion.div
@@ -101,13 +180,15 @@ export default function ParentDashboard() {
           <div className="space-y-3">
             {children.map((child, i) => {
               const progress = getChildProgress(child.id);
+              const rewardData = getReward();
+              const achieved = progress.total >= rewardData.goal;
               return (
                 <motion.div
                   key={child.id}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-card rounded-2xl p-4 border border-border flex items-center gap-4"
+                  className={`bg-card rounded-2xl p-4 border ${achieved ? 'border-primary glow-gold' : 'border-border'} flex items-center gap-4`}
                 >
                   <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-12 h-12 rounded-full object-cover" />
                   <div className="flex-1 min-w-0">
@@ -116,13 +197,31 @@ export default function ParentDashboard() {
                       <span className="text-muted-foreground">اليوم: <span className="text-gold font-bold">{progress.today}/٥</span></span>
                       <span className="text-muted-foreground">المجموع: <span className="text-star font-bold">⭐ {progress.total}</span></span>
                     </div>
+                    {achieved && <p className="text-gold text-xs font-bold mt-1">🏆 حقق الهدف!</p>}
+                    {/* Progress bar */}
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                      <div
+                        className="h-full gradient-gold rounded-full transition-all"
+                        style={{ width: `${Math.min((progress.total / rewardData.goal) * 100, 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <button
-                    onClick={() => { removeChild(child.id); refresh(); }}
-                    className="text-destructive/60 hover:text-destructive p-2"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => setResetTarget(child)}
+                      className="text-muted-foreground hover:text-gold p-1.5"
+                      title="إعادة تعيين النجوم"
+                    >
+                      <RotateCcw size={16} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(child)}
+                      className="text-destructive/60 hover:text-destructive p-1.5"
+                      title="حذف الطفل"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
@@ -131,6 +230,25 @@ export default function ParentDashboard() {
       </div>
 
       <AddChildDialog open={addOpen} onClose={() => setAddOpen(false)} onAdded={refresh} />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="حذف الطفل"
+        message={`هل أنت متأكد من حذف "${deleteTarget?.name}"؟ سيتم حذف جميع بياناته.`}
+        confirmText="حذف"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        destructive
+      />
+
+      <ConfirmDialog
+        open={!!resetTarget}
+        title="إعادة تعيين النجوم"
+        message={`هل تريد إعادة نجوم "${resetTarget?.name}" إلى صفر؟`}
+        confirmText="إعادة تعيين"
+        onConfirm={handleReset}
+        onCancel={() => setResetTarget(null)}
+      />
     </div>
   );
 }

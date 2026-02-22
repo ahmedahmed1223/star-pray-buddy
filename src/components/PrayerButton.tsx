@@ -28,7 +28,7 @@ export default function PrayerButton({ label, emoji, done, onToggle }: Props) {
       <span className={`text-xl font-bold ${done ? 'text-gold' : 'text-foreground'}`}>
         {label}
       </span>
-      <div className="ml-auto">
+      <div className="me-0 ms-auto">
         {done ? (
           <motion.span
             initial={{ scale: 0 }}
