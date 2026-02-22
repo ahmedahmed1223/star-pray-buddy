@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChild, getReward, AVATAR_IMAGES } from '@/lib/store';
+import { getChild, getReward, getWeeklyLogs, AVATAR_IMAGES } from '@/lib/store';
 import { ArrowLeft, Star } from 'lucide-react';
 
 export default function RewardsScreen() {
@@ -19,6 +19,8 @@ export default function RewardsScreen() {
 
   const progress = Math.min((child.totalStars / reward.goal) * 100, 100);
   const achieved = child.totalStars >= reward.goal;
+  const weekly = getWeeklyLogs(child.id);
+  const totalWeekPrayers = weekly.reduce((sum, d) => sum + d.count, 0);
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-8">
@@ -47,6 +49,30 @@ export default function RewardsScreen() {
           <div className="inline-flex items-center gap-2 text-star">
             <Star size={28} fill="currentColor" />
             <span className="text-4xl font-extrabold">{child.totalStars}</span>
+          </div>
+        </motion.div>
+
+        {/* Weekly Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-card rounded-2xl p-5 border border-border mb-6"
+        >
+          <h3 className="font-bold text-foreground mb-3">📊 ملخص الأسبوع</h3>
+          <div className="flex justify-around text-center">
+            <div>
+              <p className="text-3xl font-extrabold text-gold">{totalWeekPrayers}</p>
+              <p className="text-muted-foreground text-sm">صلاة</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold text-star">{weekly.filter(d => d.count === 5).length}</p>
+              <p className="text-muted-foreground text-sm">يوم كامل</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold text-secondary">{Math.round((totalWeekPrayers / 35) * 100)}%</p>
+              <p className="text-muted-foreground text-sm">نسبة الإنجاز</p>
+            </div>
           </div>
         </motion.div>
 
