@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChildren, getChildProgress, getReward, setReward, removeChild, resetChildStars, setPin, AVATAR_IMAGES, type Child } from '@/lib/store';
+import { getChildren, getChildProgress, getReward, setReward, removeChild, resetChildStars, setPin, getMoneyReward, setMoneyReward, getChildMoney, AVATAR_IMAGES, type Child, type MoneyReward } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { ArrowLeft, Plus, Trash2, Gift, Star, KeyRound, RotateCcw } from 'lucide-react';
+import MonthlyChart from '@/components/MonthlyChart';
+import ReminderSettings from '@/components/ReminderSettings';
+import { ArrowLeft, Plus, Trash2, Gift, Star, KeyRound, RotateCcw, Coins, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -19,6 +21,9 @@ export default function ParentDashboard() {
   const [changingPin, setChangingPin] = useState(false);
   const [newPin, setNewPin] = useState('');
   const [pinSaved, setPinSaved] = useState(false);
+  const [moneyReward, setMoneyRewardState] = useState<MoneyReward>(getMoneyReward());
+  const [editingMoney, setEditingMoney] = useState(false);
+  const [showChart, setShowChart] = useState(true);
 
   const refresh = () => setChildren(getChildren());
   useEffect(refresh, []);
@@ -54,6 +59,11 @@ export default function ParentDashboard() {
       setPinSaved(true);
       setTimeout(() => setPinSaved(false), 2000);
     }
+  };
+
+  const saveMoneyReward = () => {
+    setMoneyReward(moneyReward);
+    setEditingMoney(false);
   };
 
   return (
@@ -118,7 +128,7 @@ export default function ParentDashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-2xl p-5 border border-border mb-6"
+          className="bg-card rounded-2xl p-5 border border-border mb-4"
         >
           <div className="flex items-center gap-2 mb-3">
             <Gift size={20} className="text-lantern" />
@@ -160,6 +170,85 @@ export default function ParentDashboard() {
           )}
         </motion.div>
 
+        {/* Money Reward Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card rounded-2xl p-5 border border-border mb-4"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Coins size={20} className="text-secondary" />
+            <span className="font-bold text-lg text-foreground">المكافأة المالية</span>
+          </div>
+
+          {editingMoney ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <label className="text-foreground text-sm font-medium whitespace-nowrap">تفعيل:</label>
+                <button
+                  onClick={() => setMoneyRewardState(prev => ({ ...prev, enabled: !prev.enabled }))}
+                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors ${
+                    moneyReward.enabled ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {moneyReward.enabled ? 'مفعّل ✅' : 'معطّل'}
+                </button>
+              </div>
+              {moneyReward.enabled && (
+                <>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-foreground text-sm">كل</span>
+                    <input
+                      value={moneyReward.prayersNeeded}
+                      onChange={e => setMoneyRewardState(prev => ({ ...prev, prayersNeeded: parseInt(e.target.value) || 5 }))}
+                      type="number"
+                      className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary text-center"
+                      dir="ltr"
+                    />
+                    <span className="text-foreground text-sm">صلاة =</span>
+                    <input
+                      value={moneyReward.amountPerPrayers}
+                      onChange={e => setMoneyRewardState(prev => ({ ...prev, amountPerPrayers: parseInt(e.target.value) || 10 }))}
+                      type="number"
+                      className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary text-center"
+                      dir="ltr"
+                    />
+                    <input
+                      value={moneyReward.currency}
+                      onChange={e => setMoneyRewardState(prev => ({ ...prev, currency: e.target.value }))}
+                      className="w-20 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </>
+              )}
+              <button onClick={saveMoneyReward} className="gradient-gold text-primary-foreground font-bold px-6 py-2 rounded-xl">
+                حفظ
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                {moneyReward.enabled ? (
+                  <>
+                    <p className="text-foreground font-medium">كل {moneyReward.prayersNeeded} صلوات = {moneyReward.amountPerPrayers} {moneyReward.currency}</p>
+                    <p className="text-muted-foreground text-sm">💰 المكافأة المالية مفعّلة</p>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground text-sm">المكافأة المالية معطّلة</p>
+                )}
+              </div>
+              <button onClick={() => setEditingMoney(true)} className="text-gold text-sm font-medium underline">
+                تعديل
+              </button>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Reminder Settings */}
+        <div className="mb-4">
+          <ReminderSettings />
+        </div>
+
         {/* Children */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-foreground">الأطفال</h2>
@@ -172,16 +261,17 @@ export default function ParentDashboard() {
         </div>
 
         {children.length === 0 ? (
-          <div className="bg-card rounded-2xl p-8 text-center border border-border">
+          <div className="bg-card rounded-2xl p-8 text-center border border-border mb-4">
             <p className="text-5xl mb-3">👶</p>
             <p className="text-muted-foreground font-medium">لم يتم إضافة أطفال بعد</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 mb-4">
             {children.map((child, i) => {
               const progress = getChildProgress(child.id);
               const rewardData = getReward();
               const achieved = progress.total >= rewardData.goal;
+              const money = getChildMoney(child.id);
               return (
                 <motion.div
                   key={child.id}
@@ -193,12 +283,14 @@ export default function ParentDashboard() {
                   <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-12 h-12 rounded-full object-cover" />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-foreground text-lg truncate">{child.name}</p>
-                    <div className="flex gap-3 text-sm">
+                    <div className="flex gap-3 text-sm flex-wrap">
                       <span className="text-muted-foreground">اليوم: <span className="text-gold font-bold">{progress.today}/٥</span></span>
                       <span className="text-muted-foreground">المجموع: <span className="text-star font-bold">⭐ {progress.total}</span></span>
+                      {moneyReward.enabled && money > 0 && (
+                        <span className="text-muted-foreground">💰 <span className="text-secondary font-bold">{money} {moneyReward.currency}</span></span>
+                      )}
                     </div>
                     {achieved && <p className="text-gold text-xs font-bold mt-1">🏆 حقق الهدف!</p>}
-                    {/* Progress bar */}
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
                       <div
                         className="h-full gradient-gold rounded-full transition-all"
@@ -225,6 +317,20 @@ export default function ParentDashboard() {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* Monthly Chart */}
+        {children.length > 0 && (
+          <div className="mb-4">
+            <button
+              onClick={() => setShowChart(!showChart)}
+              className="flex items-center gap-2 text-gold font-bold text-sm mb-3"
+            >
+              📆 المخطط الشهري
+              {showChart ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            {showChart && <MonthlyChart children={children} />}
           </div>
         )}
       </div>

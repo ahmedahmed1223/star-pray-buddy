@@ -1,13 +1,14 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChild, getReward, getWeeklyLogs, AVATAR_IMAGES } from '@/lib/store';
-import { ArrowLeft, Star } from 'lucide-react';
+import { getChild, getReward, getWeeklyLogs, getMoneyReward, getChildMoney, AVATAR_IMAGES } from '@/lib/store';
+import { ArrowLeft, Star, Coins } from 'lucide-react';
 
 export default function RewardsScreen() {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const child = getChild(childId!);
   const reward = getReward();
+  const moneyReward = getMoneyReward();
 
   if (!child) {
     return (
@@ -21,6 +22,7 @@ export default function RewardsScreen() {
   const achieved = child.totalStars >= reward.goal;
   const weekly = getWeeklyLogs(child.id);
   const totalWeekPrayers = weekly.reduce((sum, d) => sum + d.count, 0);
+  const childMoney = getChildMoney(child.id);
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-8">
@@ -36,7 +38,7 @@ export default function RewardsScreen() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="text-center mb-6"
         >
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
@@ -45,12 +47,50 @@ export default function RewardsScreen() {
           >
             <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-24 h-24 rounded-full object-cover mx-auto" />
           </motion.div>
-          <h2 className="text-2xl font-bold text-foreground mb-1">{child.name}</h2>
-          <div className="inline-flex items-center gap-2 text-star">
-            <Star size={28} fill="currentColor" />
-            <span className="text-4xl font-extrabold">{child.totalStars}</span>
+          <h2 className="text-2xl font-bold text-foreground mb-2">{child.name}</h2>
+          <div className="flex justify-center gap-6">
+            <div className="inline-flex items-center gap-2 text-star">
+              <Star size={24} fill="currentColor" />
+              <span className="text-3xl font-extrabold">{child.totalStars}</span>
+            </div>
+            {moneyReward.enabled && (
+              <div className="inline-flex items-center gap-2 text-secondary">
+                <Coins size={24} />
+                <span className="text-3xl font-extrabold">{childMoney}</span>
+                <span className="text-lg font-medium">{moneyReward.currency}</span>
+              </div>
+            )}
           </div>
         </motion.div>
+
+        {/* Money Card */}
+        {moneyReward.enabled && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-card rounded-2xl p-5 border border-secondary/30 mb-6"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Coins size={20} className="text-secondary" />
+              <h3 className="font-bold text-foreground">المكافأة المالية</h3>
+            </div>
+            <div className="flex justify-around text-center">
+              <div>
+                <p className="text-3xl font-extrabold text-secondary">{childMoney}</p>
+                <p className="text-muted-foreground text-sm">{moneyReward.currency} مكتسبة</p>
+              </div>
+              <div>
+                <p className="text-lg text-muted-foreground">
+                  كل <span className="text-gold font-bold">{moneyReward.prayersNeeded}</span> صلوات
+                </p>
+                <p className="text-lg text-muted-foreground">
+                  = <span className="text-secondary font-bold">{moneyReward.amountPerPrayers}</span> {moneyReward.currency}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Weekly Summary */}
         <motion.div
