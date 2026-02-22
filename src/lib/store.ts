@@ -22,12 +22,20 @@ export interface PrayerLog {
   isha: boolean;
 }
 
+export interface MoneyReward {
+  enabled: boolean;
+  amountPerPrayers: number; // e.g. 10 dirhams
+  prayersNeeded: number; // e.g. per 5 prayers
+  currency: string; // e.g. "درهم"
+}
+
 export interface AppData {
   pin: string;
   children: Child[];
   prayerLogs: PrayerLog[];
   rewardText: string;
   rewardGoal: number;
+  moneyReward: MoneyReward;
 }
 
 const STORAGE_KEY = 'salat-tracker-data';
@@ -38,12 +46,23 @@ const defaultData: AppData = {
   prayerLogs: [],
   rewardText: 'آيس كريم عند 50 نجمة! 🍦',
   rewardGoal: 50,
+  moneyReward: {
+    enabled: false,
+    amountPerPrayers: 10,
+    prayersNeeded: 5,
+    currency: 'درهم',
+  },
 };
 
 export function getData(): AppData {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return { ...defaultData };
-  return JSON.parse(raw);
+  const data = JSON.parse(raw);
+  // Migration: add moneyReward if missing
+  if (!data.moneyReward) {
+    data.moneyReward = { ...defaultData.moneyReward };
+  }
+  return data;
 }
 
 function saveData(data: AppData) {
@@ -143,6 +162,23 @@ export function getReward(): { text: string; goal: number } {
   return { text: data.rewardText, goal: data.rewardGoal };
 }
 
+export function setMoneyReward(moneyReward: MoneyReward) {
+  const data = getData();
+  data.moneyReward = moneyReward;
+  saveData(data);
+}
+
+export function getMoneyReward(): MoneyReward {
+  return getData().moneyReward;
+}
+
+export function getChildMoney(childId: string): number {
+  const data = getData();
+  const child = data.children.find(c => c.id === childId);
+  if (!child || !data.moneyReward.enabled) return 0;
+  return Math.floor(child.totalStars / data.moneyReward.prayersNeeded) * data.moneyReward.amountPerPrayers;
+}
+
 export function resetChildStars(childId: string) {
   const data = getData();
   const child = data.children.find(c => c.id === childId);
@@ -162,6 +198,24 @@ export function getWeeklyLogs(childId: string): { date: string; count: number; l
     const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr) || null;
     const count = log ? [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha].filter(Boolean).length : 0;
     result.push({ date: dateStr, count, log });
+  }
+  return result;
+}
+
+export function getMonthlyLogs(childId: string): { date: string; count: number }[] {
+  const data = getData();
+  const result: { date: string; count: number }[] = [];
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = new Date(year, month, day);
+    const dateStr = d.toISOString().split('T')[0];
+    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
+    const count = log ? [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha].filter(Boolean).length : 0;
+    result.push({ date: dateStr, count });
   }
   return result;
 }

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getChild, getTodayLog, togglePrayer, getChildProgress, isTodayComplete, getRandomMotivation, AVATAR_IMAGES, PRAYER_NAMES, type PrayerLog, type PrayerName } from '@/lib/store';
+import { getChild, getTodayLog, togglePrayer, getChildProgress, isTodayComplete, getRandomMotivation, getMoneyReward, getChildMoney, AVATAR_IMAGES, PRAYER_NAMES, type PrayerLog, type PrayerName } from '@/lib/store';
+import { playPrayerSound, playUndoSound, playAllCompleteSound } from '@/lib/sounds';
 import PrayerButton from '@/components/PrayerButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -15,6 +16,7 @@ export default function KidTracker() {
   const [celebration, setCelebration] = useState(false);
   const [allDoneCelebration, setAllDoneCelebration] = useState(false);
   const [motivation, setMotivation] = useState('');
+  const moneyReward = getMoneyReward();
 
   useEffect(() => {
     if (!child) return;
@@ -30,11 +32,14 @@ export default function KidTracker() {
     );
   }
 
+  const childMoney = getChildMoney(child.id);
+
   const handleToggle = (prayer: PrayerName) => {
     const nowDone = togglePrayer(child.id, prayer);
     setLog(getTodayLog(child.id));
     setProgress(getChildProgress(child.id));
     if (nowDone) {
+      playPrayerSound();
       setMotivation(getRandomMotivation());
       setCelebration(true);
       setTimeout(() => {
@@ -42,13 +47,15 @@ export default function KidTracker() {
         setMotivation('');
       }, 1500);
 
-      // Check if all 5 prayers are complete
       if (isTodayComplete(child.id)) {
         setTimeout(() => {
+          playAllCompleteSound();
           setAllDoneCelebration(true);
           setTimeout(() => setAllDoneCelebration(false), 3000);
         }, 500);
       }
+    } else {
+      playUndoSound();
     }
   };
 
@@ -161,15 +168,27 @@ export default function KidTracker() {
           </button>
         </div>
 
-        {/* Star count */}
+        {/* Star & Money count */}
         <motion.div
           animate={{ scale: celebration ? [1, 1.1, 1] : 1 }}
           className="text-center my-5"
         >
-          <div className="inline-flex items-center gap-2 bg-card px-6 py-3 rounded-2xl border border-border">
-            <span className="text-star text-2xl">⭐</span>
-            <span className="text-3xl font-extrabold text-gold">{progress.total}</span>
-            <span className="text-muted-foreground font-medium">نجمة</span>
+          <div className="inline-flex items-center gap-4 bg-card px-6 py-3 rounded-2xl border border-border">
+            <div className="flex items-center gap-1.5">
+              <span className="text-star text-2xl">⭐</span>
+              <span className="text-3xl font-extrabold text-gold">{progress.total}</span>
+              <span className="text-muted-foreground font-medium text-sm">نجمة</span>
+            </div>
+            {moneyReward.enabled && (
+              <>
+                <div className="w-px h-8 bg-border" />
+                <div className="flex items-center gap-1.5">
+                  <Coins size={20} className="text-secondary" />
+                  <span className="text-2xl font-extrabold text-secondary">{childMoney}</span>
+                  <span className="text-muted-foreground font-medium text-sm">{moneyReward.currency}</span>
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
 
