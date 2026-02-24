@@ -13,6 +13,7 @@ import PrayerButton from '@/components/PrayerButton';
 import ActivityButton from '@/components/ActivityButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 import DateNavigator from '@/components/DateNavigator';
+import LanternProgress from '@/components/LanternProgress';
 import { ArrowLeft, Trophy, Coins } from 'lucide-react';
 
 export default function KidTracker() {
@@ -59,6 +60,8 @@ export default function KidTracker() {
   const handleToggle = (prayer: PrayerName) => {
     const nowDone = togglePrayerForDate(child.id, prayer, dateStr);
     refreshState();
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate(nowDone ? 50 : 30);
     if (nowDone) {
       playPrayerSound();
       setMotivation(getRandomMotivation());
@@ -68,6 +71,7 @@ export default function KidTracker() {
       if (isDateComplete(child.id, dateStr)) {
         setTimeout(() => {
           playAllCompleteSound();
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
           setAllDoneCelebration(true);
           setTimeout(() => setAllDoneCelebration(false), 3000);
         }, 500);
@@ -84,6 +88,7 @@ export default function KidTracker() {
 
   const handleActivityToggle = (activityId: string) => {
     toggleActivity(child.id, activityId, dateStr);
+    if (navigator.vibrate) navigator.vibrate(40);
     refreshState();
   };
 
@@ -95,20 +100,20 @@ export default function KidTracker() {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
         >
-          {[...Array(12)].map((_, i) => (
+          {[...Array(15)].map((_, i) => (
             <motion.span key={i}
               initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
-              animate={{ opacity: 0, scale: 1.5, x: (Math.random() - 0.5) * 300, y: (Math.random() - 0.5) * 400 }}
-              transition={{ duration: 1, ease: 'easeOut' }}
+              animate={{ opacity: 0, scale: 1.5, x: (Math.random() - 0.5) * 350, y: (Math.random() - 0.5) * 450 }}
+              transition={{ duration: 1.2, ease: 'easeOut' }}
               className="absolute text-3xl"
             >
-              {['⭐', '🌙', '✨', '🏮'][i % 4]}
+              {['⭐', '🌙', '✨', '🏮', '💫'][i % 5]}
             </motion.span>
           ))}
           {motivation && (
             <motion.div
               initial={{ opacity: 0, scale: 0.5, y: 20 }} animate={{ opacity: 1, scale: 1, y: -50 }} exit={{ opacity: 0 }}
-              className="absolute bg-card/90 backdrop-blur-sm px-6 py-3 rounded-2xl border border-primary shadow-lg"
+              className="absolute bg-card/95 backdrop-blur-sm px-6 py-3 rounded-2xl border border-primary shadow-lg glow-gold"
             >
               <p className="text-gold font-bold text-lg">{motivation}</p>
             </motion.div>
@@ -133,14 +138,14 @@ export default function KidTracker() {
               <p className="text-foreground font-bold text-lg mb-1">أتممت صلوات اليوم كلها!</p>
               <p className="text-muted-foreground">بارك الله فيك يا {child.name} 🤲</p>
             </motion.div>
-            {[...Array(20)].map((_, i) => (
+            {[...Array(25)].map((_, i) => (
               <motion.span key={i}
                 initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
                 animate={{ opacity: 0, scale: 2, x: (Math.random() - 0.5) * 500, y: (Math.random() - 0.5) * 600 }}
                 transition={{ duration: 2, delay: Math.random() * 0.5, ease: 'easeOut' }}
                 className="absolute text-4xl"
               >
-                {['⭐', '🌙', '✨', '🏮', '🎉', '🏆', '🤲'][i % 7]}
+                {['⭐', '🌙', '✨', '🏮', '🎉', '🏆', '🤲', '💫'][i % 8]}
               </motion.span>
             ))}
           </motion.div>
@@ -154,14 +159,25 @@ export default function KidTracker() {
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-10 h-10 rounded-full object-cover" />
+            <motion.img
+              src={AVATAR_IMAGES[child.avatarIndex]}
+              alt={child.name}
+              className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/30"
+              whileTap={{ scale: 1.1 }}
+            />
             <div>
               <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
             </div>
           </div>
-          <button onClick={() => navigate(`/rewards/${child.id}`)} className="bg-primary/15 text-gold p-3 rounded-xl glow-gold">
+          <motion.button
+            onClick={() => navigate(`/rewards/${child.id}`)}
+            className="bg-primary/15 text-gold p-3 rounded-xl glow-gold"
+            whileTap={{ scale: 0.9 }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+          >
             <Trophy size={22} />
-          </button>
+          </motion.button>
         </div>
 
         {/* Date Navigator with Hijri */}
@@ -176,7 +192,13 @@ export default function KidTracker() {
         <motion.div animate={{ scale: celebration ? [1, 1.1, 1] : 1 }} className="text-center my-4">
           <div className="inline-flex items-center gap-4 bg-card px-6 py-3 rounded-2xl border border-border">
             <div className="flex items-center gap-1.5">
-              <span className="text-star text-2xl">⭐</span>
+              <motion.span
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+                className="text-star text-2xl"
+              >
+                ⭐
+              </motion.span>
               <span className="text-3xl font-extrabold text-gold">{progress.total}</span>
               <span className="text-muted-foreground font-medium text-sm">نجمة</span>
             </div>
@@ -193,27 +215,21 @@ export default function KidTracker() {
           </div>
         </motion.div>
 
-        {/* Progress bar */}
-        <div className="mb-5">
-          <div className="flex justify-between text-sm mb-2">
+        {/* Lantern Progress instead of progress bar */}
+        <div className="mb-4">
+          <div className="flex justify-between text-sm mb-1 px-2">
             <span className="text-muted-foreground font-medium">{isToday ? 'تقدّم اليوم' : 'تقدّم هذا اليوم'}</span>
             <span className="text-gold font-bold">{dateProgress}/٥</span>
           </div>
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <motion.div
-              animate={{ width: `${(dateProgress / 5) * 100}%` }}
-              transition={{ type: 'spring', stiffness: 100 }}
-              className="h-full gradient-gold rounded-full"
-            />
-          </div>
+          <LanternProgress count={dateProgress} />
           {dateProgress === 5 && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-gold font-bold text-sm mt-2">
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-gold font-bold text-sm mt-1">
               🎉 أتممت جميع الصلوات!
             </motion.p>
           )}
         </div>
 
-        {/* Prayer buttons */}
+        {/* Prayer buttons with unique gradients */}
         <div className="space-y-3 mb-5">
           {PRAYER_NAMES.map((prayer, i) => (
             <motion.div key={prayer.key} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
@@ -221,6 +237,7 @@ export default function KidTracker() {
                 label={prayer.label}
                 emoji={prayer.emoji}
                 colorClass={prayer.color}
+                prayerKey={prayer.key}
                 done={log?.[prayer.key] ?? false}
                 onToggle={() => handleToggle(prayer.key)}
                 jamaahEnabled={settings.jamaahEnabled}
