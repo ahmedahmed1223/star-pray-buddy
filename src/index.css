@@ -57,6 +57,18 @@
     --prayer-done: 160 60% 45%;
     --prayer-pending: 230 30% 28%;
 
+    /* Prayer time gradients */
+    --fajr-from: 220 60% 55%;
+    --fajr-to: 260 50% 50%;
+    --dhuhr-from: 42 100% 55%;
+    --dhuhr-to: 30 90% 50%;
+    --asr-from: 35 90% 55%;
+    --asr-to: 45 95% 50%;
+    --maghrib-from: 350 70% 55%;
+    --maghrib-to: 20 80% 50%;
+    --isha-from: 240 55% 45%;
+    --isha-to: 260 60% 35%;
+
     font-family: 'Cairo', sans-serif;
   }
 }
@@ -127,5 +139,25 @@
 
   .gradient-night {
     background: linear-gradient(180deg, hsl(230 45% 8%), hsl(230 45% 16%));
+  }
+
+  .gradient-fajr {
+    background: linear-gradient(135deg, hsl(var(--fajr-from)), hsl(var(--fajr-to)));
+  }
+
+  .gradient-dhuhr {
+    background: linear-gradient(135deg, hsl(var(--dhuhr-from)), hsl(var(--dhuhr-to)));
+  }
+
+  .gradient-asr {
+    background: linear-gradient(135deg, hsl(var(--asr-from)), hsl(var(--asr-to)));
+  }
+
+  .gradient-maghrib {
+    background: linear-gradient(135deg, hsl(var(--maghrib-from)), hsl(var(--maghrib-to)));
+  }
+
+  .gradient-isha {
+    background: linear-gradient(135deg, hsl(var(--isha-from)), hsl(var(--isha-to)));
   }
 }

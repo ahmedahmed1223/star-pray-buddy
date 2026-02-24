@@ -38,8 +38,17 @@ export default function RewardsScreen() {
 
         {/* Avatar & Stars */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
-          <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="inline-block mb-3">
-            <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-24 h-24 rounded-full object-cover mx-auto" />
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 3 }}
+            className="inline-block mb-3 relative"
+          >
+            <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-24 h-24 rounded-full object-cover mx-auto ring-3 ring-primary/30" />
+            <motion.div
+              className="absolute -inset-2 rounded-full border-2 border-gold/30"
+              animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            />
           </motion.div>
           <h2 className="text-2xl font-bold text-foreground mb-2">{child.name}</h2>
           <div className="flex justify-center gap-6 flex-wrap">
@@ -101,29 +110,60 @@ export default function RewardsScreen() {
           </div>
         </motion.div>
 
-        {/* Gift Tiers */}
+        {/* Gift Tiers - Reward Path */}
         {giftTiers.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             className="bg-card rounded-2xl p-5 border border-border mb-6">
-            <h3 className="font-bold text-foreground mb-3">🎁 الهدايا</h3>
-            <div className="space-y-3">
-              {giftTiers.map(tier => {
-                const tierAchieved = child.totalStars >= tier.starsRequired;
-                const tierProgress = Math.min((child.totalStars / tier.starsRequired) * 100, 100);
-                return (
-                  <div key={tier.id} className={`rounded-xl p-3 border ${tierAchieved ? 'border-primary bg-primary/10 glow-gold' : 'border-border bg-muted'}`}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-2xl">{tier.emoji}</span>
-                      <span className={`font-bold ${tierAchieved ? 'text-gold' : 'text-foreground'}`}>{tier.name}</span>
-                      {tierAchieved && <span className="text-sm">🏆</span>}
-                      <span className="ms-auto text-xs text-muted-foreground">⭐ {tier.starsRequired}</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <motion.div animate={{ width: `${tierProgress}%` }} className="h-full gradient-gold rounded-full" />
-                    </div>
-                  </div>
-                );
-              })}
+            <h3 className="font-bold text-foreground mb-4">🎁 طريق المكافآت</h3>
+            <div className="relative">
+              {/* Path line */}
+              <div className="absolute right-6 top-0 bottom-0 w-0.5 bg-border" />
+              <div className="space-y-4">
+                {giftTiers.map((tier, i) => {
+                  const tierAchieved = child.totalStars >= tier.starsRequired;
+                  const tierProgress = Math.min((child.totalStars / tier.starsRequired) * 100, 100);
+                  return (
+                    <motion.div
+                      key={tier.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + i * 0.1 }}
+                      className="relative flex items-center gap-4 pe-8"
+                    >
+                      {/* Node on path */}
+                      <div className={`absolute right-4 w-5 h-5 rounded-full border-2 z-10 ${
+                        tierAchieved ? 'bg-primary border-primary glow-gold' : 'bg-card border-border'
+                      }`}>
+                        {tierAchieved && <span className="absolute -top-0.5 -right-0.5 text-xs">✓</span>}
+                      </div>
+                      <div className={`flex-1 rounded-xl p-3 border transition-all ms-4 ${
+                        tierAchieved ? 'border-primary bg-primary/10 glow-gold' : 'border-border bg-muted'
+                      }`}>
+                        <div className="flex items-center gap-3 mb-2">
+                          <motion.span
+                            className="text-2xl"
+                            animate={tierAchieved ? { scale: [1, 1.2, 1] } : {}}
+                            transition={{ repeat: Infinity, duration: 2 }}
+                          >
+                            {tier.emoji}
+                          </motion.span>
+                          <span className={`font-bold ${tierAchieved ? 'text-gold' : 'text-foreground'}`}>{tier.name}</span>
+                          {tierAchieved && <span className="text-sm">🏆</span>}
+                          <span className="ms-auto text-xs text-muted-foreground">⭐ {tier.starsRequired}</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${tierProgress}%` }}
+                            transition={{ duration: 1, delay: 0.3 + i * 0.1 }}
+                            className="h-full gradient-gold rounded-full"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           </motion.div>
         )}
@@ -149,6 +189,14 @@ export default function RewardsScreen() {
                 <span className="text-2xl font-extrabold text-gold">{Math.round(progress)}%</span>
                 <span className="text-xs text-muted-foreground">{child.totalStars}/{reward.goal}</span>
               </div>
+              {/* Glow effect near completion */}
+              {progress > 75 && !achieved && (
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{ boxShadow: ['0 0 10px hsl(42 100% 55% / 0.2)', '0 0 25px hsl(42 100% 55% / 0.5)', '0 0 10px hsl(42 100% 55% / 0.2)'] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              )}
             </div>
           </div>
           {achieved && (
