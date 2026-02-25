@@ -65,6 +65,14 @@ export interface AppSettings {
   allowChildPastEdit: boolean;
 }
 
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  condition: (data: AppData, childId: string) => boolean;
+}
+
 export interface AppData {
   pin: string;
   children: Child[];
@@ -106,7 +114,6 @@ export function getData(): AppData {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return { ...defaultData };
   const data = JSON.parse(raw);
-  // Migrations
   if (!data.moneyReward) data.moneyReward = { ...defaultData.moneyReward };
   if (!data.settings) data.settings = { ...defaultData.settings };
   if (!data.customActivities) data.customActivities = [];
@@ -202,7 +209,6 @@ export function togglePrayerForDate(childId: string, prayer: PrayerName, date: s
   const child = data.children.find(c => c.id === childId);
   if (child) {
     child.totalStars += log[prayer] ? 1 : -1;
-    // If unchecking prayer, also uncheck jamaah
     if (!log[prayer]) {
       const jamaahKey = `${prayer}Jamaah` as JamaahKey;
       log[jamaahKey] = false;
@@ -223,7 +229,6 @@ export function toggleJamaah(childId: string, prayer: PrayerName, date: string):
   if (!log) return false;
   
   const jamaahKey = `${prayer}Jamaah` as JamaahKey;
-  // Can only set jamaah if prayer is done
   if (!log[prayer]) return false;
   
   log[jamaahKey] = !log[jamaahKey];
@@ -259,6 +264,119 @@ export function getJamaahCount(childId: string): number {
   return count;
 }
 
+// === STREAK ===
+export function getStreak(childId: string): { current: number; best: number } {
+  const data = getData();
+  const today = new Date();
+  let current = 0;
+  let best = 0;
+  let streak = 0;
+
+  // Check backwards from today
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
+    const complete = log ? (log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha) : false;
+
+    if (complete) {
+      streak++;
+      if (i === 0 || (i > 0 && streak > 0)) {
+        // continue streak
+      }
+    } else {
+      if (i === 0) {
+        // Today not complete yet, check from yesterday
+        streak = 0;
+      } else {
+        break;
+      }
+    }
+  }
+  current = streak;
+
+  // Calculate best streak
+  streak = 0;
+  const allDates = data.prayerLogs
+    .filter(l => l.childId === childId)
+    .map(l => l.date)
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort();
+
+  for (const dateStr of allDates) {
+    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
+    const complete = log ? (log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha) : false;
+    if (complete) {
+      streak++;
+      best = Math.max(best, streak);
+    } else {
+      streak = 0;
+    }
+  }
+
+  return { current, best };
+}
+
+// === BADGES ===
+export const BADGES: Badge[] = [
+  {
+    id: 'first_day',
+    name: 'أول يوم كامل',
+    description: 'أتممت جميع الصلوات في يوم واحد',
+    icon: '🌟',
+    condition: (data, childId) => {
+      return data.prayerLogs.some(l => l.childId === childId && l.fajr && l.dhuhr && l.asr && l.maghrib && l.isha);
+    },
+  },
+  {
+    id: 'week_streak',
+    name: 'أسبوع متواصل',
+    description: '7 أيام متتالية من الصلوات الكاملة',
+    icon: '🔥',
+    condition: (_data, childId) => getStreak(childId).best >= 7,
+  },
+  {
+    id: 'month_streak',
+    name: 'شهر كامل',
+    description: '30 يوم متتالي من الصلوات الكاملة',
+    icon: '🏆',
+    condition: (_data, childId) => getStreak(childId).best >= 30,
+  },
+  {
+    id: 'jamaah_10',
+    name: '10 صلوات جماعة',
+    description: 'صليت 10 صلوات في الجماعة',
+    icon: '🕌',
+    condition: (_data, childId) => getJamaahCount(childId) >= 10,
+  },
+  {
+    id: 'star_50',
+    name: '50 نجمة',
+    description: 'جمعت 50 نجمة',
+    icon: '⭐',
+    condition: (data, childId) => {
+      const child = data.children.find(c => c.id === childId);
+      return (child?.totalStars ?? 0) >= 50;
+    },
+  },
+  {
+    id: 'star_100',
+    name: '100 نجمة',
+    description: 'جمعت 100 نجمة',
+    icon: '💎',
+    condition: (data, childId) => {
+      const child = data.children.find(c => c.id === childId);
+      return (child?.totalStars ?? 0) >= 100;
+    },
+  },
+];
+
+export function getEarnedBadges(childId: string): Badge[] {
+  const data = getData();
+  return BADGES.filter(b => b.condition(data, childId));
+}
+
 // === REWARDS ===
 export function setReward(text: string, goal: number) {
   const data = getData();
@@ -287,7 +405,6 @@ export function getChildMoney(childId: string): number {
   const child = data.children.find(c => c.id === childId);
   if (!child || !data.moneyReward.enabled) return 0;
   let total = Math.floor(child.totalStars / data.moneyReward.prayersNeeded) * data.moneyReward.amountPerPrayers;
-  // Add jamaah money
   if (data.settings.jamaahEnabled) {
     total += getJamaahCount(childId) * data.settings.jamaahRewardAmount;
   }
