@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { getChild, getReward, getWeeklyLogs, getMoneyReward, getChildMoney, getGiftTiers, getJamaahCount, AVATAR_IMAGES } from '@/lib/store';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getChild, getReward, getWeeklyLogs, getMoneyReward, getChildMoney, getGiftTiers, getJamaahCount, getStreak, getEarnedBadges, BADGES, AVATAR_IMAGES } from '@/lib/store';
+import BottomNav from '@/components/BottomNav';
 import { ArrowLeft, Star, Coins } from 'lucide-react';
 
 export default function RewardsScreen() {
@@ -10,6 +12,7 @@ export default function RewardsScreen() {
   const reward = getReward();
   const moneyReward = getMoneyReward();
   const giftTiers = getGiftTiers();
+  const [unboxingTier, setUnboxingTier] = useState<string | null>(null);
 
   if (!child) {
     return (
@@ -25,9 +28,11 @@ export default function RewardsScreen() {
   const totalWeekPrayers = weekly.reduce((sum, d) => sum + d.count, 0);
   const childMoney = getChildMoney(child.id);
   const jamaahCount = getJamaahCount(child.id);
+  const streak = getStreak(child.id);
+  const earnedBadges = getEarnedBadges(child.id);
 
   return (
-    <div className="min-h-screen gradient-night p-4 pb-8">
+    <div className="min-h-screen gradient-night p-4 pb-24">
       <div className="max-w-md mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate(`/tracker/${child.id}`)} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
@@ -56,6 +61,13 @@ export default function RewardsScreen() {
               <Star size={24} fill="currentColor" />
               <span className="text-3xl font-extrabold">{child.totalStars}</span>
             </div>
+            {streak.current > 0 && (
+              <div className="inline-flex items-center gap-1 text-destructive">
+                <span className="text-xl">🔥</span>
+                <span className="text-3xl font-extrabold">{streak.current}</span>
+                <span className="text-sm font-medium text-muted-foreground">يوم</span>
+              </div>
+            )}
             {moneyReward.enabled && (
               <div className="inline-flex items-center gap-2 text-secondary">
                 <Coins size={24} />
@@ -69,9 +81,40 @@ export default function RewardsScreen() {
           )}
         </motion.div>
 
+        {/* Badges */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          className="bg-card rounded-2xl p-5 border border-border mb-6">
+          <h3 className="font-bold text-foreground mb-4">🏅 الشارات</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {BADGES.map(badge => {
+              const earned = earnedBadges.some(b => b.id === badge.id);
+              return (
+                <motion.div
+                  key={badge.id}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-all ${
+                    earned ? 'border-primary bg-primary/10' : 'border-border bg-muted opacity-40'
+                  }`}
+                  animate={earned ? { scale: [1, 1.05, 1] } : {}}
+                  transition={{ duration: 2, repeat: earned ? Infinity : 0 }}
+                >
+                  <span className={`text-3xl ${earned ? '' : 'grayscale'}`}>{badge.icon}</span>
+                  <span className="text-[10px] font-bold text-foreground text-center leading-tight">{badge.name}</span>
+                  {earned && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="text-xs text-secondary font-bold"
+                    >✓</motion.span>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
         {/* Money Card */}
         {moneyReward.enabled && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="bg-card rounded-2xl p-5 border border-secondary/30 mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Coins size={20} className="text-secondary" />
@@ -91,7 +134,7 @@ export default function RewardsScreen() {
         )}
 
         {/* Weekly Summary */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
           className="bg-card rounded-2xl p-5 border border-border mb-6">
           <h3 className="font-bold text-foreground mb-3">📊 ملخص الأسبوع</h3>
           <div className="flex justify-around text-center">
@@ -110,39 +153,46 @@ export default function RewardsScreen() {
           </div>
         </motion.div>
 
-        {/* Gift Tiers - Reward Path */}
+        {/* Gift Tiers - Game Map Style */}
         {giftTiers.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             className="bg-card rounded-2xl p-5 border border-border mb-6">
-            <h3 className="font-bold text-foreground mb-4">🎁 طريق المكافآت</h3>
+            <h3 className="font-bold text-foreground mb-4">🗺️ خريطة المكافآت</h3>
             <div className="relative">
-              {/* Path line */}
-              <div className="absolute right-6 top-0 bottom-0 w-0.5 bg-border" />
-              <div className="space-y-4">
+              {/* Winding path */}
+              <div className="absolute right-6 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/30 via-gold/30 to-border rounded-full" />
+              <div className="space-y-5">
                 {giftTiers.map((tier, i) => {
                   const tierAchieved = child.totalStars >= tier.starsRequired;
                   const tierProgress = Math.min((child.totalStars / tier.starsRequired) * 100, 100);
+                  const isNext = !tierAchieved && (i === 0 || child.totalStars >= giftTiers[i - 1].starsRequired);
                   return (
                     <motion.div
                       key={tier.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 + i * 0.1 }}
+                      transition={{ delay: 0.25 + i * 0.1 }}
                       className="relative flex items-center gap-4 pe-8"
                     >
-                      {/* Node on path */}
-                      <div className={`absolute right-4 w-5 h-5 rounded-full border-2 z-10 ${
-                        tierAchieved ? 'bg-primary border-primary glow-gold' : 'bg-card border-border'
-                      }`}>
-                        {tierAchieved && <span className="absolute -top-0.5 -right-0.5 text-xs">✓</span>}
-                      </div>
-                      <div className={`flex-1 rounded-xl p-3 border transition-all ms-4 ${
-                        tierAchieved ? 'border-primary bg-primary/10 glow-gold' : 'border-border bg-muted'
+                      {/* Map node */}
+                      <motion.div
+                        className={`absolute right-3 w-7 h-7 rounded-full border-2 z-10 flex items-center justify-center text-xs ${
+                          tierAchieved ? 'bg-primary border-primary glow-gold' : isNext ? 'bg-card border-gold animate-glow-pulse' : 'bg-card border-border'
+                        }`}
+                        animate={tierAchieved ? { scale: [1, 1.1, 1] } : {}}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        onClick={() => tierAchieved && setUnboxingTier(tier.id)}
+                      >
+                        {tierAchieved ? '✓' : i + 1}
+                      </motion.div>
+                      
+                      <div className={`flex-1 rounded-xl p-4 border transition-all ms-4 ${
+                        tierAchieved ? 'border-primary bg-primary/10 glow-gold' : isNext ? 'border-gold/50 bg-card' : 'border-border bg-muted'
                       }`}>
                         <div className="flex items-center gap-3 mb-2">
                           <motion.span
                             className="text-2xl"
-                            animate={tierAchieved ? { scale: [1, 1.2, 1] } : {}}
+                            animate={tierAchieved ? { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] } : {}}
                             transition={{ repeat: Infinity, duration: 2 }}
                           >
                             {tier.emoji}
@@ -168,8 +218,49 @@ export default function RewardsScreen() {
           </motion.div>
         )}
 
+        {/* Unboxing animation */}
+        <AnimatePresence>
+          {unboxingTier && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setUnboxingTier(null)}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-md"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -30 }}
+                animate={{ scale: [0, 1.3, 1], rotate: [0, 15, -15, 0] }}
+                exit={{ scale: 0 }}
+                className="text-center"
+              >
+                <motion.span
+                  className="text-8xl block mb-4"
+                  animate={{ y: [0, -20, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  {giftTiers.find(t => t.id === unboxingTier)?.emoji}
+                </motion.span>
+                <p className="text-gold font-extrabold text-2xl">🎉 مبروك! 🎉</p>
+                <p className="text-foreground font-bold text-lg mt-2">{giftTiers.find(t => t.id === unboxingTier)?.name}</p>
+                <p className="text-muted-foreground text-sm mt-2">اضغط للإغلاق</p>
+              </motion.div>
+              {[...Array(20)].map((_, i) => (
+                <motion.span key={i}
+                  initial={{ opacity: 1, scale: 0 }}
+                  animate={{ opacity: 0, scale: 2, x: (Math.random() - 0.5) * 400, y: (Math.random() - 0.5) * 400 }}
+                  transition={{ duration: 1.5, delay: Math.random() * 0.3 }}
+                  className="absolute text-3xl"
+                >
+                  {['⭐', '🌙', '✨', '🎁', '🎉'][i % 5]}
+                </motion.span>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Main Reward Goal */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
           className={`bg-card rounded-3xl p-6 border-2 ${achieved ? 'border-primary glow-gold' : 'border-border'}`}>
           <div className="text-center mb-4">
             <p className="text-lg text-muted-foreground font-medium mb-1">هدف المكافأة الرئيسي</p>
@@ -178,8 +269,8 @@ export default function RewardsScreen() {
           <div className="flex justify-center mb-4">
             <div className="relative w-36 h-36">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="hsl(230 30% 25%)" strokeWidth="10" />
-                <motion.circle cx="60" cy="60" r="52" fill="none" stroke="hsl(42 100% 55%)" strokeWidth="10" strokeLinecap="round"
+                <circle cx="60" cy="60" r="52" fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
+                <motion.circle cx="60" cy="60" r="52" fill="none" stroke="hsl(var(--gold))" strokeWidth="10" strokeLinecap="round"
                   strokeDasharray={2 * Math.PI * 52}
                   initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
                   animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - progress / 100) }}
@@ -189,11 +280,10 @@ export default function RewardsScreen() {
                 <span className="text-2xl font-extrabold text-gold">{Math.round(progress)}%</span>
                 <span className="text-xs text-muted-foreground">{child.totalStars}/{reward.goal}</span>
               </div>
-              {/* Glow effect near completion */}
               {progress > 75 && !achieved && (
                 <motion.div
                   className="absolute inset-0 rounded-full"
-                  animate={{ boxShadow: ['0 0 10px hsl(42 100% 55% / 0.2)', '0 0 25px hsl(42 100% 55% / 0.5)', '0 0 10px hsl(42 100% 55% / 0.2)'] }}
+                  animate={{ boxShadow: ['0 0 10px hsl(var(--gold) / 0.2)', '0 0 25px hsl(var(--gold) / 0.5)', '0 0 10px hsl(var(--gold) / 0.2)'] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               )}
@@ -208,6 +298,8 @@ export default function RewardsScreen() {
           )}
         </motion.div>
       </div>
+
+      <BottomNav childId={child.id} />
     </div>
   );
 }

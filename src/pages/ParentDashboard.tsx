@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   getChildren, getChildProgress, getReward, setReward, removeChild, resetChildStars, setPin,
-  getMoneyReward, setMoneyReward, getChildMoney, getSettings, updateSettings,
+  getMoneyReward, setMoneyReward, getChildMoney, getSettings, updateSettings, getStreak,
   getCustomActivities, addCustomActivity, removeCustomActivity,
   getGiftTiers, addGiftTier, removeGiftTier,
   getDateLog, togglePrayerForDate, toggleJamaah,
@@ -125,6 +125,12 @@ export default function ParentDashboard() {
   const bestChild = children.length > 0
     ? children.reduce((best, c) => (c.totalStars > best.totalStars ? c : best), children[0])
     : null;
+  const bestStreak = children.length > 0
+    ? children.reduce((best, c) => {
+        const s = getStreak(c.id);
+        return s.current > best.streak ? { name: c.name, streak: s.current } : best;
+      }, { name: '', streak: 0 })
+    : null;
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-8">
@@ -143,7 +149,7 @@ export default function ParentDashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-card rounded-2xl p-4 border border-border mb-4"
         >
-          <div className="grid grid-cols-3 gap-3 text-center">
+          <div className="grid grid-cols-4 gap-2 text-center">
             <div>
               <p className="text-2xl font-extrabold text-gold">{children.length}</p>
               <p className="text-muted-foreground text-xs">أطفال</p>
@@ -151,6 +157,19 @@ export default function ParentDashboard() {
             <div>
               <p className="text-2xl font-extrabold text-secondary">{totalTodayPrayers}</p>
               <p className="text-muted-foreground text-xs">صلاة اليوم</p>
+            </div>
+            <div>
+              {bestStreak && bestStreak.streak > 0 ? (
+                <>
+                  <p className="text-2xl font-extrabold text-destructive">🔥{bestStreak.streak}</p>
+                  <p className="text-muted-foreground text-xs truncate">{bestStreak.name}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-extrabold text-muted-foreground">-</p>
+                  <p className="text-muted-foreground text-xs">أفضل streak</p>
+                </>
+              )}
             </div>
             <div>
               {bestChild ? (
