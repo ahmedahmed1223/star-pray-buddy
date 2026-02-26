@@ -6,6 +6,13 @@ interface Props {
 }
 
 const DAY_NAMES = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+const PRAYER_COLORS = [
+  'hsl(var(--fajr-from))',
+  'hsl(var(--dhuhr-from))',
+  'hsl(var(--asr-from))',
+  'hsl(var(--maghrib-from))',
+  'hsl(var(--isha-from))',
+];
 
 export default function WeeklyCalendar({ childId }: Props) {
   const weekly = getWeeklyLogs(childId);
@@ -19,6 +26,9 @@ export default function WeeklyCalendar({ childId }: Props) {
           const dayName = DAY_NAMES[d.getDay()];
           const isToday = i === 6;
           const full = day.count === 5;
+          const log = day.log;
+          const prayers = log ? [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha] : [false, false, false, false, false];
+          
           return (
             <motion.div
               key={day.date}
@@ -29,8 +39,8 @@ export default function WeeklyCalendar({ childId }: Props) {
                 isToday ? 'bg-primary/15 border border-primary' : ''
               }`}
             >
-              <span className="text-muted-foreground text-[10px] font-medium">{dayName}</span>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+              <span className="text-muted-foreground text-xs font-medium">{dayName}</span>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
                 full
                   ? 'bg-primary text-primary-foreground'
                   : day.count > 0
@@ -39,11 +49,25 @@ export default function WeeklyCalendar({ childId }: Props) {
               }`}>
                 {day.count > 0 ? (full ? '⭐' : day.count) : '·'}
               </div>
-              <span className="text-[10px] text-muted-foreground">{d.getDate()}</span>
+              {/* Prayer dots */}
+              <div className="flex gap-[2px]">
+                {prayers.map((done, pi) => (
+                  <div
+                    key={pi}
+                    className="w-[5px] h-[5px] rounded-full transition-colors"
+                    style={{ backgroundColor: done ? PRAYER_COLORS[pi] : 'hsl(var(--muted))' }}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">{d.getDate()}</span>
             </motion.div>
           );
         })}
       </div>
+      {/* Streak line for consecutive full days */}
+      {weekly.filter(d => d.count === 5).length >= 2 && (
+        <div className="mt-2 h-1 rounded-full gradient-gold opacity-60" />
+      )}
     </div>
   );
 }
