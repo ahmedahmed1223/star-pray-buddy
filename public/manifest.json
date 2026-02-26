@@ -1,0 +1,19 @@
+{
+  "name": "متابع الصلاة",
+  "short_name": "متابع الصلاة",
+  "description": "تطبيق لتتبع صلوات الأطفال وتحفيزهم",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141a2e",
+  "theme_color": "#d4a017",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

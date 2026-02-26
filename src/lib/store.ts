@@ -110,20 +110,35 @@ const defaultData: AppData = {
   giftTiers: [],
 };
 
+// === CACHE LAYER ===
+let _cachedData: AppData | null = null;
+let _cacheVersion = 0;
+
 export function getData(): AppData {
+  if (_cachedData) return _cachedData;
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return { ...defaultData };
+  if (!raw) {
+    _cachedData = { ...defaultData };
+    return _cachedData;
+  }
   const data = JSON.parse(raw);
   if (!data.moneyReward) data.moneyReward = { ...defaultData.moneyReward };
   if (!data.settings) data.settings = { ...defaultData.settings };
   if (!data.customActivities) data.customActivities = [];
   if (!data.activityLogs) data.activityLogs = [];
   if (!data.giftTiers) data.giftTiers = [];
+  _cachedData = data;
   return data;
 }
 
 function saveData(data: AppData) {
+  _cachedData = data;
+  _cacheVersion++;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function invalidateCache() {
+  _cachedData = null;
 }
 
 // === PIN ===
@@ -152,6 +167,16 @@ export function removeChild(id: string) {
   data.prayerLogs = data.prayerLogs.filter(l => l.childId !== id);
   data.activityLogs = data.activityLogs.filter(l => l.childId !== id);
   saveData(data);
+}
+
+export function updateChild(id: string, updates: Partial<Pick<Child, 'name' | 'avatarIndex'>>) {
+  const data = getData();
+  const child = data.children.find(c => c.id === id);
+  if (child) {
+    if (updates.name !== undefined) child.name = updates.name;
+    if (updates.avatarIndex !== undefined) child.avatarIndex = updates.avatarIndex;
+    saveData(data);
+  }
 }
 
 export function getChildren(): Child[] {
@@ -264,55 +289,60 @@ export function getJamaahCount(childId: string): number {
   return count;
 }
 
-// === STREAK ===
+// === STREAK (FIXED) ===
+function dateToKey(d: Date): string {
+  return d.toISOString().split('T')[0];
+}
+
+function isLogComplete(log: PrayerLog | undefined): boolean {
+  if (!log) return false;
+  return log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha;
+}
+
 export function getStreak(childId: string): { current: number; best: number } {
   const data = getData();
   const today = new Date();
-  let current = 0;
-  let best = 0;
-  let streak = 0;
+  today.setHours(0, 0, 0, 0);
 
-  // Check backwards from today
-  for (let i = 0; i < 365; i++) {
+  // Current streak: start from today or yesterday if today incomplete
+  let current = 0;
+  const todayLog = data.prayerLogs.find(l => l.childId === childId && l.date === dateToKey(today));
+  const todayComplete = isLogComplete(todayLog);
+
+  const startOffset = todayComplete ? 0 : 1;
+  for (let i = startOffset; i < 365; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
-    const complete = log ? (log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha) : false;
-
-    if (complete) {
-      streak++;
-      if (i === 0 || (i > 0 && streak > 0)) {
-        // continue streak
-      }
+    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateToKey(d));
+    if (isLogComplete(log)) {
+      current++;
     } else {
-      if (i === 0) {
-        // Today not complete yet, check from yesterday
-        streak = 0;
-      } else {
-        break;
-      }
+      break;
     }
   }
-  current = streak;
 
-  // Calculate best streak
-  streak = 0;
-  const allDates = data.prayerLogs
-    .filter(l => l.childId === childId)
+  // Best streak: check actual day gaps
+  let best = current;
+  const completeDates = data.prayerLogs
+    .filter(l => l.childId === childId && isLogComplete(l))
     .map(l => l.date)
-    .filter((v, i, a) => a.indexOf(v) === i)
     .sort();
 
-  for (const dateStr of allDates) {
-    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
-    const complete = log ? (log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha) : false;
-    if (complete) {
-      streak++;
-      best = Math.max(best, streak);
-    } else {
-      streak = 0;
+  if (completeDates.length > 0) {
+    let streak = 1;
+    for (let i = 1; i < completeDates.length; i++) {
+      const prev = new Date(completeDates[i - 1]);
+      const curr = new Date(completeDates[i]);
+      const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) {
+        streak++;
+      } else if (diffDays > 1) {
+        best = Math.max(best, streak);
+        streak = 1;
+      }
+      // diffDays === 0 means duplicate, skip
     }
+    best = Math.max(best, streak);
   }
 
   return { current, best };
@@ -330,11 +360,25 @@ export const BADGES: Badge[] = [
     },
   },
   {
+    id: 'three_days',
+    name: '3 أيام متتالية',
+    description: '3 أيام متتالية من الصلوات الكاملة',
+    icon: '✨',
+    condition: (_data, childId) => getStreak(childId).best >= 3,
+  },
+  {
     id: 'week_streak',
     name: 'أسبوع متواصل',
     description: '7 أيام متتالية من الصلوات الكاملة',
     icon: '🔥',
     condition: (_data, childId) => getStreak(childId).best >= 7,
+  },
+  {
+    id: 'two_weeks',
+    name: 'أسبوعان متواصلان',
+    description: '14 يوم متتالي من الصلوات الكاملة',
+    icon: '💪',
+    condition: (_data, childId) => getStreak(childId).best >= 14,
   },
   {
     id: 'month_streak',
@@ -349,6 +393,13 @@ export const BADGES: Badge[] = [
     description: 'صليت 10 صلوات في الجماعة',
     icon: '🕌',
     condition: (_data, childId) => getJamaahCount(childId) >= 10,
+  },
+  {
+    id: 'jamaah_50',
+    name: '50 صلاة جماعة',
+    description: 'صليت 50 صلاة في الجماعة',
+    icon: '🤲',
+    condition: (_data, childId) => getJamaahCount(childId) >= 50,
   },
   {
     id: 'star_50',
@@ -368,6 +419,16 @@ export const BADGES: Badge[] = [
     condition: (data, childId) => {
       const child = data.children.find(c => c.id === childId);
       return (child?.totalStars ?? 0) >= 100;
+    },
+  },
+  {
+    id: 'star_200',
+    name: '200 نجمة',
+    description: 'جمعت 200 نجمة',
+    icon: '👑',
+    condition: (data, childId) => {
+      const child = data.children.find(c => c.id === childId);
+      return (child?.totalStars ?? 0) >= 200;
     },
   },
 ];
@@ -534,6 +595,23 @@ export function isDateComplete(childId: string, date: string): boolean {
 
 export function isTodayComplete(childId: string): boolean {
   return isDateComplete(childId, todayStr());
+}
+
+// === EXPORT / IMPORT ===
+export function exportData(): string {
+  return localStorage.getItem(STORAGE_KEY) || JSON.stringify(defaultData);
+}
+
+export function importData(jsonStr: string): boolean {
+  try {
+    const data = JSON.parse(jsonStr);
+    if (!data.children || !Array.isArray(data.children)) return false;
+    localStorage.setItem(STORAGE_KEY, jsonStr);
+    invalidateCache();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // === AVATARS ===

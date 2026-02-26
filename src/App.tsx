@@ -10,6 +10,7 @@ import ParentDashboard from "./pages/ParentDashboard";
 import KidSelection from "./pages/KidSelection";
 import KidTracker from "./pages/KidTracker";
 import RewardsScreen from "./pages/RewardsScreen";
+import AchievementsScreen from "./pages/AchievementsScreen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => {
             <Route path="/kids" element={<KidSelection />} />
             <Route path="/tracker/:childId" element={<KidTracker />} />
             <Route path="/rewards/:childId" element={<RewardsScreen />} />
+            <Route path="/achievements/:childId" element={<AchievementsScreen />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

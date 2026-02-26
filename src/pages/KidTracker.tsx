@@ -15,6 +15,7 @@ import WeeklyCalendar from '@/components/WeeklyCalendar';
 import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import BottomNav from '@/components/BottomNav';
+import Confetti from '@/components/Confetti';
 import { ArrowLeft, Trophy, Coins, Flame } from 'lucide-react';
 
 export default function KidTracker() {
@@ -33,6 +34,7 @@ export default function KidTracker() {
   const [motivation, setMotivation] = useState('');
   const [activityStates, setActivityStates] = useState<Record<string, boolean>>({});
   const [streak, setStreakState] = useState({ current: 0, best: 0 });
+  const [confettiActive, setConfettiActive] = useState(false);
 
   const dateStr = selectedDate.toISOString().split('T')[0];
   const isToday = dateStr === new Date().toISOString().split('T')[0];
@@ -75,7 +77,11 @@ export default function KidTracker() {
           playAllCompleteSound();
           if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
           setAllDoneCelebration(true);
-          setTimeout(() => setAllDoneCelebration(false), 3500);
+          setConfettiActive(true);
+          setTimeout(() => {
+            setAllDoneCelebration(false);
+            setConfettiActive(false);
+          }, 3500);
         }, 500);
       }
     } else {
@@ -96,32 +102,27 @@ export default function KidTracker() {
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden">
+      {/* SVG Confetti */}
+      <Confetti active={confettiActive} count={45} />
+
       {/* Single prayer celebration */}
-      {celebration && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
-        >
-          {[...Array(20)].map((_, i) => (
-            <motion.span key={i}
-              initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
-              animate={{ opacity: 0, scale: 1.5, x: (Math.random() - 0.5) * 400, y: (Math.random() - 0.5) * 500 }}
-              transition={{ duration: 1.2, ease: 'easeOut' }}
-              className="absolute text-3xl"
-            >
-              {['⭐', '🌙', '✨', '💫', '🌟'][i % 5]}
-            </motion.span>
-          ))}
-          {motivation && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5, y: 20 }} animate={{ opacity: 1, scale: 1, y: -50 }} exit={{ opacity: 0 }}
-              className="absolute bg-card/95 backdrop-blur-sm px-6 py-3 rounded-2xl border border-primary shadow-lg glow-gold"
-            >
-              <p className="text-gold font-bold text-lg">{motivation}</p>
-            </motion.div>
-          )}
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {celebration && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+          >
+            {motivation && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5, y: 20 }} animate={{ opacity: 1, scale: 1, y: -50 }} exit={{ opacity: 0 }}
+                className="absolute bg-card/95 backdrop-blur-sm px-6 py-3 rounded-2xl border border-primary shadow-lg glow-gold"
+              >
+                <p className="text-gold font-bold text-lg">{motivation}</p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* All 5 prayers complete celebration */}
       <AnimatePresence>
@@ -135,7 +136,21 @@ export default function KidTracker() {
               transition={{ duration: 0.7, type: 'spring' }}
               className="bg-card rounded-3xl p-8 border-2 border-primary glow-gold text-center shadow-2xl max-w-xs"
             >
-              <motion.p animate={{ rotate: [0, -10, 10, -10, 0], scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: 2 }} className="text-6xl mb-3">🏆</motion.p>
+              <motion.div animate={{ rotate: [0, -10, 10, -10, 0], scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: 2 }}>
+                <svg width="64" height="64" viewBox="0 0 64 64" className="mx-auto mb-3">
+                  <defs>
+                    <linearGradient id="trophyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: 'hsl(42, 100%, 65%)', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(42, 100%, 45%)', stopOpacity: 1 }} />
+                    </linearGradient>
+                  </defs>
+                  <path d="M16 8h32v4c0 12-8 24-16 28-8-4-16-16-16-28V8z" fill="url(#trophyGrad)" />
+                  <rect x="24" y="40" width="16" height="4" rx="2" fill="hsl(42, 100%, 50%)" />
+                  <rect x="20" y="44" width="24" height="6" rx="3" fill="hsl(42, 100%, 55%)" />
+                  <path d="M16 8C16 8, 4 10, 4 20C4 28, 12 28, 16 24" fill="hsl(42, 100%, 60%)" opacity="0.5" />
+                  <path d="M48 8C48 8, 60 10, 60 20C60 28, 52 28, 48 24" fill="hsl(42, 100%, 60%)" opacity="0.5" />
+                </svg>
+              </motion.div>
               <p className="text-gold font-extrabold text-2xl mb-1">ماشاء الله!</p>
               <p className="text-foreground font-bold text-lg mb-1">أتممت صلوات اليوم كلها!</p>
               <p className="text-muted-foreground mb-3">بارك الله فيك يا {child.name} 🤲</p>
@@ -146,22 +161,12 @@ export default function KidTracker() {
                   transition={{ delay: 0.5 }}
                   className="inline-flex items-center gap-2 bg-destructive/15 px-4 py-2 rounded-xl"
                 >
-                  <span className="text-xl">🔥</span>
+                  <Flame size={18} className="text-destructive" />
                   <span className="text-destructive font-extrabold text-lg">{streak.current}</span>
                   <span className="text-foreground text-sm font-medium">يوم متتالي!</span>
                 </motion.div>
               )}
             </motion.div>
-            {[...Array(30)].map((_, i) => (
-              <motion.span key={i}
-                initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
-                animate={{ opacity: 0, scale: 2, x: (Math.random() - 0.5) * 500, y: (Math.random() - 0.5) * 600 }}
-                transition={{ duration: 2, delay: Math.random() * 0.5, ease: 'easeOut' }}
-                className="absolute text-4xl"
-              >
-                {['⭐', '🌙', '✨', '🎉', '🏆', '💫', '🌟', '🔥'][i % 8]}
-              </motion.span>
-            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -169,7 +174,7 @@ export default function KidTracker() {
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => navigate('/kids')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
+          <button onClick={() => navigate('/kids')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <div className="flex items-center gap-3 flex-1">
@@ -196,7 +201,7 @@ export default function KidTracker() {
           )}
           <motion.button
             onClick={() => navigate(`/rewards/${child.id}`)}
-            className="bg-primary/15 text-gold p-3 rounded-xl glow-gold"
+            className="bg-primary/15 text-gold p-3 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center"
             whileTap={{ scale: 0.9 }}
           >
             <Trophy size={22} />

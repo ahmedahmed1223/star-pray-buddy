@@ -95,6 +95,19 @@ export default {
           "0%": { transform: "translateX(-100%) skewX(-12deg)" },
           "100%": { transform: "translateX(200%) skewX(-12deg)" },
         },
+        "badge-unlock": {
+          "0%": { transform: "scale(0) rotate(-180deg)", opacity: "0" },
+          "60%": { transform: "scale(1.3) rotate(10deg)", opacity: "1" },
+          "100%": { transform: "scale(1) rotate(0deg)", opacity: "1" },
+        },
+        "confetti-fall": {
+          "0%": { transform: "translateY(-100vh) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translateY(100vh) rotate(720deg)", opacity: "0" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -104,6 +117,9 @@ export default {
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "lantern-swing": "lantern-swing 3s ease-in-out infinite",
         "shine-sweep": "shine-sweep 2s ease-in-out infinite",
+        "badge-unlock": "badge-unlock 0.6s ease-out",
+        "confetti-fall": "confetti-fall 3s ease-in-out",
+        shimmer: "shimmer 2s linear infinite",
       },
     },
   },

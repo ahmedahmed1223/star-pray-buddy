@@ -81,6 +81,13 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Cairo', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ensure minimum touch targets */
+  button, a, [role="button"] {
+    min-height: 36px;
   }
 }
 

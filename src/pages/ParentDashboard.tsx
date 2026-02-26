@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -6,10 +6,11 @@ import {
   getMoneyReward, setMoneyReward, getChildMoney, getSettings, updateSettings, getStreak,
   getCustomActivities, addCustomActivity, removeCustomActivity,
   getGiftTiers, addGiftTier, removeGiftTier,
-  getDateLog, togglePrayerForDate, toggleJamaah,
+  getDateLog, togglePrayerForDate, toggleJamaah, exportData, importData,
   AVATAR_IMAGES, PRAYER_NAMES, type Child, type MoneyReward, type PrayerName
 } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
+import EditChildDialog from '@/components/EditChildDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import MonthlyChart from '@/components/MonthlyChart';
 import ReminderSettings from '@/components/ReminderSettings';
@@ -19,13 +20,14 @@ import PrayerButton from '@/components/PrayerButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   ArrowLeft, Plus, Trash2, Gift, Star, KeyRound, RotateCcw, Coins,
-  Settings2, Target, BookOpen, BarChart3, CalendarDays, Users
+  Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil
 } from 'lucide-react';
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
   const [addOpen, setAddOpen] = useState(false);
+  const [editChild, setEditChildState] = useState<Child | null>(null);
   const [reward, setRewardState] = useState(getReward());
   const [editingReward, setEditingReward] = useState(false);
   const [rewardText, setRewardText] = useState(reward.text);
@@ -38,6 +40,8 @@ export default function ParentDashboard() {
   const [moneyReward, setMoneyRewardState] = useState<MoneyReward>(getMoneyReward());
   const [editingMoney, setEditingMoney] = useState(false);
   const [settings, setSettingsState] = useState(getSettings());
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Activities
   const [activities, setActivities] = useState(getCustomActivities());
@@ -53,7 +57,7 @@ export default function ParentDashboard() {
 
   // Edit day
   const [editDate, setEditDate] = useState(new Date());
-  const [editChild, setEditChild] = useState('');
+  const [editChildId, setEditChildId] = useState('');
 
   const refresh = () => {
     setChildren(getChildren());
@@ -102,22 +106,49 @@ export default function ParentDashboard() {
   };
 
   const editDateStr = editDate.toISOString().split('T')[0];
-  const editLog = editChild ? getDateLog(editChild, editDateStr) : null;
+  const editLog = editChildId ? getDateLog(editChildId, editDateStr) : null;
 
   const handleEditPrayer = (prayer: PrayerName) => {
-    if (!editChild) return;
-    togglePrayerForDate(editChild, prayer, editDateStr);
+    if (!editChildId) return;
+    togglePrayerForDate(editChildId, prayer, editDateStr);
     refresh();
   };
 
   const handleEditJamaah = (prayer: PrayerName) => {
-    if (!editChild) return;
-    toggleJamaah(editChild, prayer, editDateStr);
+    if (!editChildId) return;
+    toggleJamaah(editChildId, prayer, editDateStr);
     refresh();
   };
 
+  // Export
+  const handleExport = () => {
+    const data = exportData();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `salat-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const success = importData(text);
+      setImportStatus(success ? 'success' : 'error');
+      if (success) refresh();
+      setTimeout(() => setImportStatus('idle'), 3000);
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   // Quick summary stats
-  const todayStr = new Date().toISOString().split('T')[0];
   const totalTodayPrayers = children.reduce((sum, c) => {
     const p = getChildProgress(c.id);
     return sum + p.today;
@@ -137,7 +168,7 @@ export default function ParentDashboard() {
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
+          <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <h1 className="text-2xl font-bold text-gold">لوحة الوالدين</h1>
@@ -208,7 +239,7 @@ export default function ParentDashboard() {
           <TabsContent value="children" className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground">الأطفال</h2>
-              <button onClick={() => setAddOpen(true)} className="flex items-center gap-1 bg-primary text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm active:scale-95 transition-transform">
+              <button onClick={() => setAddOpen(true)} className="flex items-center gap-1 bg-primary text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm active:scale-95 transition-transform min-h-[44px]">
                 <Plus size={16} /> إضافة
               </button>
             </div>
@@ -232,7 +263,6 @@ export default function ParentDashboard() {
                       <div className="flex items-center gap-4">
                         <div className="relative">
                           <img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/20" />
-                          {/* Circular progress ring */}
                           <svg className="absolute -inset-1 w-16 h-16 -rotate-90" viewBox="0 0 48 48">
                             <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--muted))" strokeWidth="2" />
                             <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round"
@@ -251,10 +281,13 @@ export default function ParentDashboard() {
                           {achieved && <p className="text-gold text-xs font-bold mt-1">🏆 حقق الهدف!</p>}
                         </div>
                         <div className="flex flex-col gap-1">
-                          <button onClick={() => setResetTarget(child)} className="text-muted-foreground hover:text-gold p-1.5" title="إعادة تعيين">
+                          <button onClick={() => setEditChildState(child)} className="text-muted-foreground hover:text-gold p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center" title="تعديل">
+                            <Pencil size={16} />
+                          </button>
+                          <button onClick={() => setResetTarget(child)} className="text-muted-foreground hover:text-gold p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center" title="إعادة تعيين">
                             <RotateCcw size={16} />
                           </button>
-                          <button onClick={() => setDeleteTarget(child)} className="text-destructive/60 hover:text-destructive p-1.5" title="حذف">
+                          <button onClick={() => setDeleteTarget(child)} className="text-destructive/60 hover:text-destructive p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center" title="حذف">
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -273,16 +306,16 @@ export default function ParentDashboard() {
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {children.map(c => (
-                    <button key={c.id} onClick={() => setEditChild(c.id)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                        editChild === c.id ? 'bg-primary/20 border border-primary text-gold' : 'bg-muted text-muted-foreground'
+                    <button key={c.id} onClick={() => setEditChildId(c.id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${
+                        editChildId === c.id ? 'bg-primary/20 border border-primary text-gold' : 'bg-muted text-muted-foreground'
                       }`}>
                       <img src={AVATAR_IMAGES[c.avatarIndex]} alt={c.name} className="w-6 h-6 rounded-full object-cover" />
                       {c.name}
                     </button>
                   ))}
                 </div>
-                {editChild && (
+                {editChildId && (
                   <>
                     <DateNavigator date={editDate} onDateChange={setEditDate} allowPast allowFuture />
                     <div className="space-y-2">
@@ -319,14 +352,14 @@ export default function ParentDashboard() {
                 <div className="flex gap-2 items-center">
                   <input value={newPin} onChange={e => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     placeholder="رمز جديد (4 أرقام)" type="tel" maxLength={4}
-                    className="flex-1 bg-muted border border-border rounded-xl px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary text-center text-lg tracking-widest" dir="ltr" />
-                  <button onClick={handleChangePin} disabled={newPin.length !== 4} className="gradient-gold text-primary-foreground font-bold px-5 py-2 rounded-xl disabled:opacity-50">حفظ</button>
-                  <button onClick={() => { setChangingPin(false); setNewPin(''); }} className="text-muted-foreground px-3 py-2">إلغاء</button>
+                    className="flex-1 bg-muted border border-border rounded-xl px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary text-center text-lg tracking-widest min-h-[48px]" dir="ltr" />
+                  <button onClick={handleChangePin} disabled={newPin.length !== 4} className="gradient-gold text-primary-foreground font-bold px-5 py-2 rounded-xl disabled:opacity-50 min-h-[48px]">حفظ</button>
+                  <button onClick={() => { setChangingPin(false); setNewPin(''); }} className="text-muted-foreground px-3 py-2 min-h-[48px]">إلغاء</button>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
                   <p className="text-muted-foreground text-sm">يمكنك تغيير رمز الدخول</p>
-                  <button onClick={() => setChangingPin(true)} className="text-gold text-sm font-medium underline">تغيير</button>
+                  <button onClick={() => setChangingPin(true)} className="text-gold text-sm font-medium underline min-h-[44px] px-2">تغيير</button>
                 </div>
               )}
               {pinSaved && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-secondary text-sm mt-2 font-medium">✅ تم تغيير الرمز!</motion.p>}
@@ -341,7 +374,7 @@ export default function ParentDashboard() {
               <div className="flex items-center justify-between">
                 <span className="text-foreground text-sm font-medium">🕌 إظهار خيار الجماعة</span>
                 <button onClick={() => handleSaveSetting('jamaahEnabled', !settings.jamaahEnabled)}
-                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors ${settings.jamaahEnabled ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'}`}>
+                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${settings.jamaahEnabled ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'}`}>
                   {settings.jamaahEnabled ? 'مفعّل ✅' : 'معطّل'}
                 </button>
               </div>
@@ -349,14 +382,14 @@ export default function ParentDashboard() {
                 <div className="flex gap-2 items-center">
                   <span className="text-foreground text-sm">مكافأة الجماعة:</span>
                   <input value={settings.jamaahRewardAmount} onChange={e => handleSaveSetting('jamaahRewardAmount', parseInt(e.target.value) || 0)}
-                    type="number" className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none text-center" dir="ltr" />
+                    type="number" className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none text-center min-h-[44px]" dir="ltr" />
                   <span className="text-muted-foreground text-sm">{moneyReward.currency} لكل صلاة</span>
                 </div>
               )}
               <div className="flex items-center justify-between">
                 <span className="text-foreground text-sm font-medium">📅 السماح للطفل بتعديل أيام سابقة</span>
                 <button onClick={() => handleSaveSetting('allowChildPastEdit', !settings.allowChildPastEdit)}
-                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors ${settings.allowChildPastEdit ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'}`}>
+                  className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${settings.allowChildPastEdit ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'}`}>
                   {settings.allowChildPastEdit ? 'مسموح ✅' : 'غير مسموح'}
                 </button>
               </div>
@@ -376,21 +409,40 @@ export default function ParentDashboard() {
                     <p className="text-foreground font-medium text-sm">{a.name}</p>
                     <p className="text-muted-foreground text-xs">+{a.starsPerCompletion} ⭐</p>
                   </div>
-                  <button onClick={() => { removeCustomActivity(a.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1">
+                  <button onClick={() => { removeCustomActivity(a.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
               <div className="flex gap-2 flex-wrap">
-                <input value={newActivityEmoji} onChange={e => setNewActivityEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg" maxLength={2} />
+                <input value={newActivityEmoji} onChange={e => setNewActivityEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg min-h-[44px]" maxLength={2} />
                 <input value={newActivityName} onChange={e => setNewActivityName(e.target.value)} placeholder="اسم النشاط..."
-                  className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none" />
+                  className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none min-h-[44px]" />
                 <input value={newActivityStars} onChange={e => setNewActivityStars(e.target.value)} type="number" placeholder="نجوم"
-                  className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm" dir="ltr" />
-                <button onClick={handleAddActivity} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm">
+                  className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm min-h-[44px]" dir="ltr" />
+                <button onClick={handleAddActivity} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm min-h-[44px]">
                   <Plus size={16} />
                 </button>
               </div>
+            </div>
+
+            {/* Backup */}
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Download size={20} className="text-gold" />
+                <span className="font-bold text-lg text-foreground">النسخ الاحتياطي</span>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={handleExport} className="flex-1 flex items-center justify-center gap-2 bg-primary/15 text-gold font-bold py-3 rounded-xl min-h-[48px]">
+                  <Download size={16} /> تصدير البيانات
+                </button>
+                <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 bg-muted text-muted-foreground font-bold py-3 rounded-xl min-h-[48px]">
+                  <Upload size={16} /> استيراد
+                </button>
+                <input ref={fileInputRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+              </div>
+              {importStatus === 'success' && <p className="text-secondary text-sm mt-2 font-medium">✅ تم استيراد البيانات بنجاح!</p>}
+              {importStatus === 'error' && <p className="text-destructive text-sm mt-2 font-medium">❌ فشل الاستيراد - ملف غير صالح</p>}
             </div>
 
             <ReminderSettings />
@@ -421,14 +473,14 @@ export default function ParentDashboard() {
               {editingReward ? (
                 <div className="space-y-3">
                   <input value={rewardText} onChange={e => setRewardText(e.target.value)} placeholder="وصف المكافأة..."
-                    className="w-full bg-muted border border-border rounded-xl px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary" />
+                    className="w-full bg-muted border border-border rounded-xl px-4 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary min-h-[48px]" />
                   <div className="flex gap-2 items-center">
                     <Star size={16} className="text-star" />
                     <input value={rewardGoal} onChange={e => setRewardGoal(e.target.value)} type="number"
-                      className="w-24 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none" dir="ltr" />
+                      className="w-24 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none min-h-[44px]" dir="ltr" />
                     <span className="text-muted-foreground text-sm">نجمة</span>
                   </div>
-                  <button onClick={saveReward} className="gradient-gold text-primary-foreground font-bold px-6 py-2 rounded-xl">حفظ</button>
+                  <button onClick={saveReward} className="gradient-gold text-primary-foreground font-bold px-6 py-2 rounded-xl min-h-[48px]">حفظ</button>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
@@ -436,7 +488,7 @@ export default function ParentDashboard() {
                     <p className="text-foreground font-medium">{reward.text}</p>
                     <p className="text-muted-foreground text-sm">🌟 {reward.goal} نجمة</p>
                   </div>
-                  <button onClick={() => setEditingReward(true)} className="text-gold text-sm font-medium underline">تعديل</button>
+                  <button onClick={() => setEditingReward(true)} className="text-gold text-sm font-medium underline min-h-[44px] px-2">تعديل</button>
                 </div>
               )}
             </div>
@@ -454,18 +506,18 @@ export default function ParentDashboard() {
                     <p className="text-foreground font-medium text-sm">{tier.name}</p>
                     <p className="text-muted-foreground text-xs">⭐ {tier.starsRequired} نجمة</p>
                   </div>
-                  <button onClick={() => { removeGiftTier(tier.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1">
+                  <button onClick={() => { removeGiftTier(tier.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
               <div className="flex gap-2 flex-wrap">
-                <input value={newGiftEmoji} onChange={e => setNewGiftEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg" maxLength={2} />
+                <input value={newGiftEmoji} onChange={e => setNewGiftEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg min-h-[44px]" maxLength={2} />
                 <input value={newGiftName} onChange={e => setNewGiftName(e.target.value)} placeholder="اسم الهدية..."
-                  className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none" />
+                  className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none min-h-[44px]" />
                 <input value={newGiftStars} onChange={e => setNewGiftStars(e.target.value)} type="number" placeholder="نجوم"
-                  className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm" dir="ltr" />
-                <button onClick={handleAddGift} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm">
+                  className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm min-h-[44px]" dir="ltr" />
+                <button onClick={handleAddGift} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm min-h-[44px]">
                   <Plus size={16} />
                 </button>
               </div>
@@ -482,7 +534,7 @@ export default function ParentDashboard() {
                   <div className="flex items-center gap-2">
                     <label className="text-foreground text-sm font-medium whitespace-nowrap">تفعيل:</label>
                     <button onClick={() => setMoneyRewardState(prev => ({ ...prev, enabled: !prev.enabled }))}
-                      className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors ${moneyReward.enabled ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'}`}>
+                      className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-colors min-h-[44px] ${moneyReward.enabled ? 'bg-secondary/20 text-secondary border border-secondary' : 'bg-muted text-muted-foreground'}`}>
                       {moneyReward.enabled ? 'مفعّل ✅' : 'معطّل'}
                     </button>
                   </div>
@@ -490,15 +542,15 @@ export default function ParentDashboard() {
                     <div className="flex gap-2 items-center flex-wrap">
                       <span className="text-foreground text-sm">كل</span>
                       <input value={moneyReward.prayersNeeded} onChange={e => setMoneyRewardState(prev => ({ ...prev, prayersNeeded: parseInt(e.target.value) || 5 }))}
-                        type="number" className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none text-center" dir="ltr" />
+                        type="number" className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none text-center min-h-[44px]" dir="ltr" />
                       <span className="text-foreground text-sm">صلاة =</span>
                       <input value={moneyReward.amountPerPrayers} onChange={e => setMoneyRewardState(prev => ({ ...prev, amountPerPrayers: parseInt(e.target.value) || 10 }))}
-                        type="number" className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none text-center" dir="ltr" />
+                        type="number" className="w-16 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none text-center min-h-[44px]" dir="ltr" />
                       <input value={moneyReward.currency} onChange={e => setMoneyRewardState(prev => ({ ...prev, currency: e.target.value }))}
-                        className="w-20 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none" />
+                        className="w-20 bg-muted border border-border rounded-xl px-3 py-2 text-foreground outline-none min-h-[44px]" />
                     </div>
                   )}
-                  <button onClick={saveMoneyReward} className="gradient-gold text-primary-foreground font-bold px-6 py-2 rounded-xl">حفظ</button>
+                  <button onClick={saveMoneyReward} className="gradient-gold text-primary-foreground font-bold px-6 py-2 rounded-xl min-h-[48px]">حفظ</button>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
@@ -508,7 +560,7 @@ export default function ParentDashboard() {
                         <p className="text-muted-foreground text-sm">💰 مفعّلة</p></>
                     ) : <p className="text-muted-foreground text-sm">معطّلة</p>}
                   </div>
-                  <button onClick={() => setEditingMoney(true)} className="text-gold text-sm font-medium underline">تعديل</button>
+                  <button onClick={() => setEditingMoney(true)} className="text-gold text-sm font-medium underline min-h-[44px] px-2">تعديل</button>
                 </div>
               )}
             </div>
@@ -517,6 +569,7 @@ export default function ParentDashboard() {
       </div>
 
       <AddChildDialog open={addOpen} onClose={() => setAddOpen(false)} onAdded={refresh} />
+      <EditChildDialog open={!!editChild} child={editChild} onClose={() => setEditChildState(null)} onSaved={refresh} />
       <ConfirmDialog open={!!deleteTarget} title="حذف الطفل" message={`هل أنت متأكد من حذف "${deleteTarget?.name}"؟`}
         confirmText="حذف" onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} destructive />
       <ConfirmDialog open={!!resetTarget} title="إعادة تعيين النجوم" message={`إعادة نجوم "${resetTarget?.name}" إلى صفر؟`}
