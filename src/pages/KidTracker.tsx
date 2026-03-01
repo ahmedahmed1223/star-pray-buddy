@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   getChild, getDateLog, togglePrayerForDate, toggleJamaah, getChildProgress, getDateProgress,
   isDateComplete, getRandomMotivation, getMoneyReward, getChildMoney, getSettings, getStreak,
-  getCustomActivities, toggleActivity, getActivityLog,
+  getCustomActivities, toggleActivity, getActivityLog, getEarnedBadges, getChildLevel, LEVELS,
   AVATAR_IMAGES, PRAYER_NAMES, type PrayerLog, type PrayerName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
-import { playPrayerSound, playUndoSound, playAllCompleteSound } from '@/lib/sounds';
+import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound } from '@/lib/sounds';
 import PrayerButton from '@/components/PrayerButton';
 import ActivityButton from '@/components/ActivityButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
@@ -16,7 +16,7 @@ import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
-import { ArrowLeft, Trophy, Coins, Flame } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins, Flame, Award } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -35,6 +35,11 @@ export default function KidTracker() {
   const [activityStates, setActivityStates] = useState<Record<string, boolean>>({});
   const [streak, setStreakState] = useState({ current: 0, best: 0 });
   const [confettiActive, setConfettiActive] = useState(false);
+  const [badgePopup, setBadgePopup] = useState<{ name: string; icon: string } | null>(null);
+  const [levelUpPopup, setLevelUpPopup] = useState<{ name: string; icon: string } | null>(null);
+  
+  const prevBadgeCount = useRef(0);
+  const prevLevelId = useRef(0);
 
   const dateStr = selectedDate.toISOString().split('T')[0];
   const isToday = dateStr === new Date().toISOString().split('T')[0];
@@ -49,7 +54,12 @@ export default function KidTracker() {
     setActivityStates(states);
   };
 
-  useEffect(() => { refreshState(); }, [child, dateStr]);
+  useEffect(() => {
+    if (!child) return;
+    refreshState();
+    prevBadgeCount.current = getEarnedBadges(child.id).length;
+    prevLevelId.current = getChildLevel(child.id).level.id;
+  }, [child, dateStr]);
 
   if (!child) {
     return (
@@ -61,6 +71,29 @@ export default function KidTracker() {
 
   const childMoney = getChildMoney(child.id);
   const dateProgress = getDateProgress(child.id, dateStr);
+  const levelInfo = getChildLevel(child.id);
+
+  const checkBadgesAndLevel = () => {
+    const newBadges = getEarnedBadges(child.id);
+    if (newBadges.length > prevBadgeCount.current) {
+      const newBadge = newBadges[newBadges.length - 1];
+      playBadgeUnlockSound();
+      setBadgePopup({ name: newBadge.name, icon: newBadge.icon });
+      setTimeout(() => setBadgePopup(null), 3000);
+    }
+    prevBadgeCount.current = newBadges.length;
+
+    const newLevel = getChildLevel(child.id);
+    if (newLevel.level.id > prevLevelId.current) {
+      setTimeout(() => {
+        playLevelUpSound();
+        setLevelUpPopup({ name: newLevel.level.name, icon: newLevel.level.icon });
+        setConfettiActive(true);
+        setTimeout(() => { setLevelUpPopup(null); setConfettiActive(false); }, 4000);
+      }, badgePopup ? 3200 : 500);
+    }
+    prevLevelId.current = newLevel.level.id;
+  };
 
   const handleToggle = (prayer: PrayerName) => {
     const nowDone = togglePrayerForDate(child.id, prayer, dateStr);
@@ -81,8 +114,11 @@ export default function KidTracker() {
           setTimeout(() => {
             setAllDoneCelebration(false);
             setConfettiActive(false);
+            checkBadgesAndLevel();
           }, 3500);
         }, 500);
+      } else {
+        checkBadgesAndLevel();
       }
     } else {
       playUndoSound();
@@ -98,12 +134,62 @@ export default function KidTracker() {
     toggleActivity(child.id, activityId, dateStr);
     if (navigator.vibrate) navigator.vibrate(40);
     refreshState();
+    checkBadgesAndLevel();
   };
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden">
       {/* SVG Confetti */}
       <Confetti active={confettiActive} count={45} />
+
+      {/* Badge unlock popup */}
+      <AnimatePresence>
+        {badgePopup && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3, y: -100 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: -50 }}
+            className="fixed top-8 left-1/2 -translate-x-1/2 z-[70] bg-card border-2 border-primary rounded-2xl px-6 py-4 glow-gold shadow-2xl text-center"
+          >
+            <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] }} transition={{ duration: 0.6 }}>
+              <Award size={32} className="text-gold mx-auto mb-2" />
+            </motion.div>
+            <p className="text-gold font-extrabold text-lg">شارة جديدة! 🎉</p>
+            <p className="text-foreground font-bold">{badgePopup.icon} {badgePopup.name}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Level up popup */}
+      <AnimatePresence>
+        {levelUpPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-background/70 backdrop-blur-md pointer-events-none"
+          >
+            <motion.div
+              initial={{ scale: 0, rotateZ: -10 }}
+              animate={{ scale: [0, 1.2, 1], rotateZ: 0 }}
+              exit={{ scale: 0 }}
+              transition={{ duration: 0.7, type: 'spring' }}
+              className="bg-card rounded-3xl p-8 border-2 border-accent glow-gold text-center shadow-2xl max-w-xs"
+            >
+              <motion.div
+                animate={{ y: [0, -15, 0], scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: 2 }}
+                className="text-6xl mb-4"
+              >
+                {levelUpPopup.icon}
+              </motion.div>
+              <p className="text-accent font-extrabold text-2xl mb-1">ترقية! 🎊</p>
+              <p className="text-gold font-bold text-xl mb-2">مستوى: {levelUpPopup.name}</p>
+              <p className="text-muted-foreground">استمر في الصلاة للوصول للمستوى التالي!</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Single prayer celebration */}
       <AnimatePresence>
@@ -178,14 +264,33 @@ export default function KidTracker() {
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            <motion.img
-              src={AVATAR_IMAGES[child.avatarIndex]}
-              alt={child.name}
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/30"
-              whileTap={{ scale: 1.1 }}
-            />
-            <div>
+            <motion.div className="relative">
+              <motion.img
+                src={AVATAR_IMAGES[child.avatarIndex]}
+                alt={child.name}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/30"
+                whileTap={{ scale: 1.1 }}
+              />
+              <span className="absolute -bottom-1 -right-1 text-sm bg-card rounded-full px-1 border border-border">{levelInfo.level.icon}</span>
+            </motion.div>
+            <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
+              {/* Level progress bar */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold" style={{ color: levelInfo.level.color }}>{levelInfo.level.name}</span>
+                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: levelInfo.level.color }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${levelInfo.progress}%` }}
+                    transition={{ duration: 0.8 }}
+                  />
+                </div>
+                {levelInfo.nextLevel && (
+                  <span className="text-xs text-muted-foreground">{levelInfo.starsToNext}⭐</span>
+                )}
+              </div>
             </div>
           </div>
           {/* Streak badge */}

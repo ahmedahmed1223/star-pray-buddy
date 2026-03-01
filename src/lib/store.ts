@@ -84,6 +84,93 @@ export interface AppData {
   customActivities: CustomActivity[];
   activityLogs: ActivityLog[];
   giftTiers: GiftTier[];
+  onboardingDone?: boolean;
+}
+
+// === LEVELING SYSTEM ===
+export interface Level {
+  id: number;
+  name: string;
+  icon: string;
+  minStars: number;
+  color: string;
+}
+
+export const LEVELS: Level[] = [
+  { id: 0, name: 'مبتدئ', icon: '🌱', minStars: 0, color: 'hsl(var(--muted-foreground))' },
+  { id: 1, name: 'متعلم', icon: '📖', minStars: 25, color: 'hsl(var(--secondary))' },
+  { id: 2, name: 'منتظم', icon: '⭐', minStars: 75, color: 'hsl(42, 100%, 55%)' },
+  { id: 3, name: 'متميز', icon: '💎', minStars: 150, color: 'hsl(var(--accent))' },
+  { id: 4, name: 'بطل الصلاة', icon: '👑', minStars: 300, color: 'hsl(42, 100%, 65%)' },
+];
+
+export function getChildLevel(childId: string): { level: Level; nextLevel: Level | null; progress: number; starsToNext: number } {
+  const child = getChild(childId);
+  const stars = child?.totalStars ?? 0;
+  
+  let currentLevel = LEVELS[0];
+  for (const level of LEVELS) {
+    if (stars >= level.minStars) currentLevel = level;
+  }
+  
+  const nextLevel = LEVELS[currentLevel.id + 1] ?? null;
+  const starsInLevel = stars - currentLevel.minStars;
+  const starsNeeded = nextLevel ? nextLevel.minStars - currentLevel.minStars : 1;
+  const progress = nextLevel ? Math.min((starsInLevel / starsNeeded) * 100, 100) : 100;
+  const starsToNext = nextLevel ? nextLevel.minStars - stars : 0;
+  
+  return { level: currentLevel, nextLevel, progress, starsToNext };
+}
+
+// === PRAYER ANALYSIS ===
+export interface PrayerAnalysis {
+  fajr: number;
+  dhuhr: number;
+  asr: number;
+  maghrib: number;
+  isha: number;
+  strongest: PrayerName;
+  weakest: PrayerName;
+  totalDays: number;
+}
+
+export function getPrayerAnalysis(childId: string): PrayerAnalysis {
+  const data = getData();
+  const logs = data.prayerLogs.filter(l => l.childId === childId);
+  const totalDays = logs.length || 1;
+  
+  const counts = {
+    fajr: logs.filter(l => l.fajr).length,
+    dhuhr: logs.filter(l => l.dhuhr).length,
+    asr: logs.filter(l => l.asr).length,
+    maghrib: logs.filter(l => l.maghrib).length,
+    isha: logs.filter(l => l.isha).length,
+  };
+  
+  const percentages = {
+    fajr: Math.round((counts.fajr / totalDays) * 100),
+    dhuhr: Math.round((counts.dhuhr / totalDays) * 100),
+    asr: Math.round((counts.asr / totalDays) * 100),
+    maghrib: Math.round((counts.maghrib / totalDays) * 100),
+    isha: Math.round((counts.isha / totalDays) * 100),
+  };
+  
+  const prayers: PrayerName[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+  const strongest = prayers.reduce((a, b) => percentages[a] >= percentages[b] ? a : b);
+  const weakest = prayers.reduce((a, b) => percentages[a] <= percentages[b] ? a : b);
+  
+  return { ...percentages, strongest, weakest, totalDays: logs.length };
+}
+
+// === ONBOARDING ===
+export function isOnboardingDone(): boolean {
+  return getData().onboardingDone === true;
+}
+
+export function setOnboardingDone() {
+  const data = getData();
+  data.onboardingDone = true;
+  saveData(data);
 }
 
 const STORAGE_KEY = 'salat-tracker-data';
@@ -108,6 +195,7 @@ const defaultData: AppData = {
   customActivities: [],
   activityLogs: [],
   giftTiers: [],
+  onboardingDone: false,
 };
 
 // === CACHE LAYER ===
@@ -304,7 +392,6 @@ export function getStreak(childId: string): { current: number; best: number } {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Current streak: start from today or yesterday if today incomplete
   let current = 0;
   const todayLog = data.prayerLogs.find(l => l.childId === childId && l.date === dateToKey(today));
   const todayComplete = isLogComplete(todayLog);
@@ -321,7 +408,6 @@ export function getStreak(childId: string): { current: number; best: number } {
     }
   }
 
-  // Best streak: check actual day gaps
   let best = current;
   const completeDates = data.prayerLogs
     .filter(l => l.childId === childId && isLogComplete(l))
@@ -340,7 +426,6 @@ export function getStreak(childId: string): { current: number; best: number } {
         best = Math.max(best, streak);
         streak = 1;
       }
-      // diffDays === 0 means duplicate, skip
     }
     best = Math.max(best, streak);
   }

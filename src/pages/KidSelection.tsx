@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChildren, getStreak, getChildProgress, AVATAR_IMAGES, type Child } from '@/lib/store';
+import { getChildren, getStreak, getChildProgress, getChildLevel, AVATAR_IMAGES, type Child } from '@/lib/store';
 import StarParticles from '@/components/StarParticles';
 import { ArrowLeft } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export default function KidSelection() {
       <StarParticles />
       <div className="max-w-md mx-auto relative z-10">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted">
+          <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <h1 className="text-2xl font-bold text-gold">من يصلّي؟ 🤲</h1>
@@ -61,6 +61,7 @@ export default function KidSelection() {
             {children.map((child, i) => {
               const streak = getStreak(child.id);
               const progress = getChildProgress(child.id);
+              const levelInfo = getChildLevel(child.id);
               const isTopPerformer = progress.today === 5;
               return (
                 <motion.button
@@ -72,7 +73,7 @@ export default function KidSelection() {
                   whileTap={{ scale: 0.92 }}
                   onClick={() => navigate(`/tracker/${child.id}`)}
                   style={{ perspective: 600 }}
-                  className={`bg-card border-2 ${isTopPerformer ? 'border-primary glow-gold' : cardColors[i % cardColors.length]} rounded-3xl p-6 flex flex-col items-center gap-3 transition-all relative overflow-hidden`}
+                  className={`bg-card border-2 ${isTopPerformer ? 'border-primary glow-gold' : cardColors[i % cardColors.length]} rounded-3xl p-5 flex flex-col items-center gap-2 transition-all relative overflow-hidden`}
                 >
                   {/* Shimmer on top performer */}
                   {isTopPerformer && (
@@ -97,6 +98,10 @@ export default function KidSelection() {
                       className="w-22 h-22 rounded-full object-cover ring-3 ring-primary/30"
                       style={{ width: 88, height: 88 }}
                     />
+                    {/* Level icon badge */}
+                    <span className="absolute -bottom-1 -right-1 text-lg bg-card rounded-full px-1 border border-border">
+                      {levelInfo.level.icon}
+                    </span>
                     {/* Golden ring animation */}
                     <motion.div
                       className="absolute -inset-1 rounded-full border-2 border-gold/40"
@@ -106,6 +111,22 @@ export default function KidSelection() {
                   </motion.div>
                   
                   <span className="text-foreground font-bold text-lg relative z-10">{child.name}</span>
+                  
+                  {/* Level name */}
+                  <span className="text-xs font-bold relative z-10" style={{ color: levelInfo.level.color }}>
+                    {levelInfo.level.icon} {levelInfo.level.name}
+                  </span>
+
+                  {/* Level progress bar */}
+                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden relative z-10">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: levelInfo.level.color }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${levelInfo.progress}%` }}
+                      transition={{ duration: 1, delay: i * 0.15 }}
+                    />
+                  </div>
                   
                   <div className="flex items-center gap-3 relative z-10">
                     <motion.div

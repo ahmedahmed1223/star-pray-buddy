@@ -1,14 +1,15 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { BookOpen, Gift, Award } from 'lucide-react';
 
 interface Props {
   childId: string;
 }
 
 const tabs = [
-  { path: 'tracker', label: 'الصلوات', icon: '🕌' },
-  { path: 'rewards', label: 'المكافآت', icon: '🏆' },
-  { path: 'achievements', label: 'الإنجازات', icon: '🏅' },
+  { path: 'tracker', label: 'الصلوات', Icon: BookOpen },
+  { path: 'rewards', label: 'المكافآت', Icon: Gift },
+  { path: 'achievements', label: 'الإنجازات', Icon: Award },
 ];
 
 export default function BottomNav({ childId }: Props) {
@@ -48,13 +49,13 @@ export default function BottomNav({ childId }: Props) {
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
-                <motion.span
-                  className="text-xl relative z-10"
+                <motion.div
+                  className="relative z-10"
                   animate={active ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : {}}
                   transition={{ duration: 0.4 }}
                 >
-                  {tab.icon}
-                </motion.span>
+                  <tab.Icon size={22} />
+                </motion.div>
                 <span className="text-xs font-bold relative z-10">{tab.label}</span>
               </motion.button>
             );

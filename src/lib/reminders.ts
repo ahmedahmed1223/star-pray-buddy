@@ -1,8 +1,10 @@
-import { PRAYER_NAMES } from './store';
+import { PRAYER_NAMES, getChildren, isDateComplete } from './store';
 
 export interface ReminderSettings {
   enabled: boolean;
   times: Record<string, string>; // prayer key -> HH:MM
+  smartReminders?: boolean; // remind if prayer not logged after delay
+  streakAlert?: boolean; // alert if streak at risk before end of day
 }
 
 const REMINDER_KEY = 'salat-reminder-settings';
@@ -15,10 +17,24 @@ const defaultTimes: Record<string, string> = {
   isha: '19:45',
 };
 
+const MOTIVATIONAL_NOTIFICATIONS = [
+  'هيا نصلي! صلاتك نور يوم القيامة 🌟',
+  'حان وقت الصلاة! لا تفوّت أجرها 🤲',
+  'الصلاة خير من النوم! قم وصلِّ ⭐',
+  'حافظ على سلسلتك! لا تكسر الـ Streak 🔥',
+  'بارك الله فيك! حان وقت الصلاة 🕌',
+];
+
 export function getReminderSettings(): ReminderSettings {
   const raw = localStorage.getItem(REMINDER_KEY);
-  if (!raw) return { enabled: false, times: { ...defaultTimes } };
-  return JSON.parse(raw);
+  if (!raw) return { enabled: false, times: { ...defaultTimes }, smartReminders: false, streakAlert: false };
+  const parsed = JSON.parse(raw);
+  return {
+    enabled: parsed.enabled ?? false,
+    times: parsed.times ?? { ...defaultTimes },
+    smartReminders: parsed.smartReminders ?? false,
+    streakAlert: parsed.streakAlert ?? false,
+  };
 }
 
 export function saveReminderSettings(settings: ReminderSettings) {
@@ -39,6 +55,10 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return result === 'granted';
 }
 
+function getRandomMotivation(): string {
+  return MOTIVATIONAL_NOTIFICATIONS[Math.floor(Math.random() * MOTIVATIONAL_NOTIFICATIONS.length)];
+}
+
 function scheduleReminders(settings: ReminderSettings) {
   clearAllReminders();
   
@@ -46,13 +66,30 @@ function scheduleReminders(settings: ReminderSettings) {
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     
+    // Regular prayer time reminders
     for (const prayer of PRAYER_NAMES) {
       if (settings.times[prayer.key] === currentTime) {
         if (Notification.permission === 'granted') {
           new Notification(`حان وقت صلاة ${prayer.label} ${prayer.emoji}`, {
-            body: 'هيا نصلي! 🤲',
+            body: getRandomMotivation(),
             icon: '/favicon.ico',
           });
+        }
+      }
+    }
+
+    // Streak at risk alert - at 9 PM if prayers not complete
+    if (settings.streakAlert && currentTime === '21:00') {
+      const children = getChildren();
+      const today = new Date().toISOString().split('T')[0];
+      for (const child of children) {
+        if (!isDateComplete(child.id, today)) {
+          if (Notification.permission === 'granted') {
+            new Notification(`⚠️ سلسلة ${child.name} في خطر!`, {
+              body: `لم تكتمل صلوات اليوم بعد - أكملها قبل منتصف الليل! 🔥`,
+              icon: '/favicon.ico',
+            });
+          }
         }
       }
     }
