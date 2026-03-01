@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import PinDialog from '@/components/PinDialog';
 import StarParticles from '@/components/StarParticles';
 import ramadanBg from '@/assets/ramadan-bg.jpg';
+import { isOnboardingDone, setOnboardingDone, getChildren } from '@/lib/store';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -33,10 +34,114 @@ function SVGLantern({ delay = 0, x = 0 }: { delay?: number; x?: number }) {
   );
 }
 
+const onboardingSlides = [
+  {
+    icon: '👨‍👩‍👧‍👦',
+    title: 'أضف أطفالك',
+    description: 'سجّل أطفالك مع صور أفاتار مميزة لكل واحد',
+    bg: 'from-primary/20 to-secondary/20',
+  },
+  {
+    icon: '🕌',
+    title: 'سجّل الصلوات يومياً',
+    description: 'تابع أداء كل صلاة مع تأثيرات ممتعة ومحفزة',
+    bg: 'from-secondary/20 to-accent/20',
+  },
+  {
+    icon: '⭐',
+    title: 'اجمع النجوم والمكافآت',
+    description: 'احصل على نجوم وشارات وترقيات مستوى مع كل صلاة',
+    bg: 'from-accent/20 to-primary/20',
+  },
+];
+
 export default function Index() {
   const navigate = useNavigate();
   const [pinOpen, setPinOpen] = useState(false);
   const greeting = useMemo(getGreeting, []);
+  const children = getChildren();
+  const needsOnboarding = !isOnboardingDone() && children.length === 0;
+  const [showOnboarding, setShowOnboarding] = useState(needsOnboarding);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const handleFinishOnboarding = () => {
+    setOnboardingDone();
+    setShowOnboarding(false);
+    navigate('/parent');
+  };
+
+  if (showOnboarding) {
+    return (
+      <div className="min-h-screen gradient-night flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <StarParticles />
+        <div className="relative z-10 w-full max-w-sm">
+          {/* Progress dots */}
+          <div className="flex justify-center gap-2 mb-8">
+            {onboardingSlides.map((_, i) => (
+              <motion.div
+                key={i}
+                className={`h-2 rounded-full transition-all ${i === currentSlide ? 'w-8 bg-primary' : 'w-2 bg-muted'}`}
+                layout
+              />
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
+              className="text-center"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], y: [0, -10, 0] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+                className="text-7xl mb-6"
+              >
+                {onboardingSlides[currentSlide].icon}
+              </motion.div>
+              <h2 className="text-3xl font-extrabold text-gold mb-3">
+                {onboardingSlides[currentSlide].title}
+              </h2>
+              <p className="text-foreground/80 text-lg leading-relaxed mb-10">
+                {onboardingSlides[currentSlide].description}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="flex gap-3">
+            {currentSlide < onboardingSlides.length - 1 ? (
+              <>
+                <button
+                  onClick={handleFinishOnboarding}
+                  className="flex-1 py-4 rounded-2xl text-muted-foreground font-bold text-lg bg-muted"
+                >
+                  تخطي
+                </button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setCurrentSlide(currentSlide + 1)}
+                  className="flex-[2] py-4 rounded-2xl gradient-gold text-primary-foreground font-bold text-lg glow-gold"
+                >
+                  التالي ←
+                </motion.button>
+              </>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleFinishOnboarding}
+                className="w-full py-5 rounded-2xl gradient-gold text-primary-foreground font-extrabold text-xl glow-gold"
+              >
+                🚀 ابدأ الآن!
+              </motion.button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
