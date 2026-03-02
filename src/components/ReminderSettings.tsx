@@ -92,6 +92,30 @@ export default function ReminderSettings() {
             </h4>
             
             <button
+              onClick={toggleSmartReminders}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors mb-2 min-h-[48px] ${
+                settings.smartReminders
+                  ? 'border-gold/50 bg-primary/10'
+                  : 'border-border bg-muted/50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Bell size={16} className={settings.smartReminders ? 'text-gold' : 'text-muted-foreground'} />
+                <span className={`text-sm font-medium ${settings.smartReminders ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  تذكير عند نسيان صلاة
+                </span>
+              </div>
+              <span className={`text-xs font-bold px-2 py-1 rounded-lg ${
+                settings.smartReminders ? 'bg-primary/20 text-gold' : 'bg-muted text-muted-foreground'
+              }`}>
+                {settings.smartReminders ? 'مفعّل' : 'معطّل'}
+              </span>
+            </button>
+            <p className="text-muted-foreground text-xs mb-3">
+              سيتم إرسال تذكير بعد ساعتين من وقت الصلاة إذا لم تُسجَل
+            </p>
+
+            <button
               onClick={toggleStreakAlert}
               className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors mb-2 min-h-[48px] ${
                 settings.streakAlert
