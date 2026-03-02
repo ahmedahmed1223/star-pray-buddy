@@ -1,20 +1,26 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BookOpen, Gift, Award } from 'lucide-react';
+import { getEarnedBadges, BADGES } from '@/lib/store';
 
 interface Props {
   childId: string;
 }
 
-const tabs = [
-  { path: 'tracker', label: 'الصلوات', Icon: BookOpen },
-  { path: 'rewards', label: 'المكافآت', Icon: Gift },
-  { path: 'achievements', label: 'الإنجازات', Icon: Award },
-];
-
 export default function BottomNav({ childId }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const earnedBadges = getEarnedBadges(childId);
+  const unreadBadges = earnedBadges.length;
+  const totalBadges = BADGES.length;
+  const hasNewBadges = unreadBadges > 0 && unreadBadges < totalBadges;
+
+  const tabs = [
+    { path: 'tracker', label: 'الصلوات', Icon: BookOpen, badge: 0 },
+    { path: 'rewards', label: 'المكافآت', Icon: Gift, badge: 0 },
+    { path: 'achievements', label: 'الإنجازات', Icon: Award, badge: hasNewBadges ? unreadBadges : 0 },
+  ];
 
   const currentTab = location.pathname.includes('/achievements')
     ? 'achievements'
@@ -55,6 +61,15 @@ export default function BottomNav({ childId }: Props) {
                   transition={{ duration: 0.4 }}
                 >
                   <tab.Icon size={22} />
+                  {tab.badge > 0 && !active && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1.5 -right-2.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+                    >
+                      {tab.badge}
+                    </motion.span>
+                  )}
                 </motion.div>
                 <span className="text-xs font-bold relative z-10">{tab.label}</span>
               </motion.button>

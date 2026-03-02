@@ -78,6 +78,31 @@ function scheduleReminders(settings: ReminderSettings) {
       }
     }
 
+    // Smart reminders - remind 2 hours after prayer time if not logged
+    if (settings.smartReminders) {
+      for (const prayer of PRAYER_NAMES) {
+        const prayerTime = settings.times[prayer.key];
+        if (!prayerTime) continue;
+        const [ph, pm] = prayerTime.split(':').map(Number);
+        const reminderHour = ph + 2;
+        const reminderTime = `${String(reminderHour).padStart(2, '0')}:${String(pm).padStart(2, '0')}`;
+        if (currentTime === reminderTime) {
+          const children = getChildren();
+          const today = new Date().toISOString().split('T')[0];
+          for (const child of children) {
+            if (!isDateComplete(child.id, today)) {
+              if (Notification.permission === 'granted') {
+                new Notification(`⏰ هل صليت ${prayer.label}؟`, {
+                  body: `${child.name} - لا تنسَ صلاة ${prayer.label}! ${getRandomMotivation()}`,
+                  icon: '/favicon.ico',
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
     // Streak at risk alert - at 9 PM if prayers not complete
     if (settings.streakAlert && currentTime === '21:00') {
       const children = getChildren();
