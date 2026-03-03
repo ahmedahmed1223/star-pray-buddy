@@ -29,7 +29,7 @@ export default function BottomNav({ childId }: Props) {
     : 'tracker';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50">
+    <div className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="max-w-md mx-auto">
         <div className="bg-card/95 backdrop-blur-xl border-t border-border px-2 py-2 flex justify-around items-center rounded-t-2xl shadow-lg">
           {tabs.map(tab => {
