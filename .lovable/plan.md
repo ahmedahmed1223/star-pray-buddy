@@ -1,121 +1,61 @@
 
 
-# خطة التطوير المحدّثة - التركيز على الميزات الجديدة والـ UI/UX
+# تحويل التطبيق لتطبيق Native باستخدام Capacitor + تحسين UI/UX
 
-## ملخص المراجعة
+## 1. إعداد Capacitor
 
-التطبيق وصل لمرحلة متقدمة تشمل: فوانيس SVG، نظام Streak وBadges، شريط تنقل سفلي بـ3 تبويبات، أزرار صلاة بتأثيرات ripple و3D، تقارير بمقارنة بين الأطفال، تصدير/استيراد بيانات، واحتفالات SVG Confetti.
+- تثبيت `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`
+- تهيئة `capacitor.config.ts` مع:
+  - `appId: "app.lovable.0206c376d9e840e08b31355a2abed913"`
+  - `appName: "star-pray-buddy"`
+  - إعداد server URL للـ hot-reload من الـ sandbox
+- إضافة Capacitor plugins مفيدة: `@capacitor/haptics` (بدل `navigator.vibrate`), `@capacitor/status-bar`, `@capacitor/splash-screen`
 
-المجالات التالية هي الأهم للارتقاء بالتطبيق للمستوى التالي:
+## 2. تحسينات UI/UX للتجربة Native
 
----
+### 2.1 Safe Area و Status Bar
+- إضافة safe-area padding في `index.css` لدعم الأجهزة ذات النوتش (iPhone)
+- ضبط ارتفاعات الـ BottomNav والـ headers لتتوافق مع الـ safe areas
+- إضافة `viewport-fit=cover` في meta tag
 
-## 1. نظام المستويات والتقدم (Leveling System)
+### 2.2 تحسين الـ Haptics
+- استبدال `navigator.vibrate` بـ Capacitor Haptics API للحصول على ردود فعل لمسية أفضل على iOS
+- إضافة haptic feedback مخصص لكل نوع تفاعل (نقر خفيف للصلاة، متوسط للشارة، قوي للترقية)
 
-اضافة نظام مستويات يعطي الطفل شعور بالتقدم المستمر:
-- **5 مستويات:** مبتدئ (0) ← متعلم (25) ← منتظم (75) ← متميز (150) ← بطل الصلاة (300)
-- شريط تقدم للمستوى التالي يظهر في header الـ KidTracker
-- أيقونة المستوى تظهر بجانب اسم الطفل في كل مكان
-- احتفال خاص عند الترقية لمستوى جديد (مع صوت مميز)
-- عرض المستوى في KidSelection بجانب الأفاتار
+### 2.3 تحسين Status Bar
+- ضبط لون الـ Status Bar ليتوافق مع خلفية التطبيق الداكنة
+- إخفاء الـ Status Bar أو جعله شفافاً في الشاشة الرئيسية
 
-**الملفات:** `src/lib/store.ts` (دوال المستويات), `src/pages/KidTracker.tsx`, `src/pages/KidSelection.tsx`, `src/pages/AchievementsScreen.tsx`
+### 2.4 Splash Screen
+- تكوين splash screen مع شعار التطبيق وخلفية ليلية
 
----
+### 2.5 تحسينات بصرية إضافية
+- تكبير أزرار العودة والتنقل لتكون 48px minimum
+- إضافة smooth scrolling و overscroll behavior مناسب للـ native
+- تحسين الانتقالات بين الصفحات لتشبه تطبيقات iOS/Android
+- إزالة أي tap highlight colors
+- تعطيل text selection على العناصر غير النصية
 
-## 2. شاشة Onboarding للمستخدم الجديد
-
-عند فتح التطبيق لأول مرة (لا يوجد أطفال ولا بيانات):
-- 3 شرائح متحركة: "أضف طفلك" ← "سجّل الصلوات يومياً" ← "اجمع النجوم والمكافآت"
-- زر "ابدأ الآن" يوجه مباشرة لإضافة أول طفل
-- تخزين حالة `onboardingDone` في store لعرضها مرة واحدة فقط
-
-**الملفات:** `src/pages/Index.tsx`, `src/lib/store.ts`
-
----
-
-## 3. تحسين تجربة الاحتفالات والأصوات
-
-- إضافة `playBadgeUnlockSound()` و `playLevelUpSound()` في sounds.ts
-- عند كسب badge جديد أثناء تسجيل صلاة: يظهر popup "شارة جديدة!" مع اسم الشارة
-- عند الترقية لمستوى: احتفال خاص مختلف عن إتمام الصلوات (ألوان مختلفة + رسالة مختلفة)
-- تحسين صوت إتمام الصلوات الخمس ليكون أكثر موسيقية
-
-**الملفات:** `src/lib/sounds.ts`, `src/pages/KidTracker.tsx`
-
----
-
-## 4. مشاركة التقدم والإنجازات
-
-- زر "شارك عبر واتساب" في شاشة الإنجازات ينشئ نص مفصل بالإحصائيات
-- زر "شهادة إنجاز" ينشئ SVG قابل للتحميل كصورة (اسم الطفل + المستوى + عدد النجوم + الـ Streak)
-- إمكانية مشاركة الشهادة عبر Web Share API
-
-**الملفات:** `src/pages/AchievementsScreen.tsx` (جديد: قسم المشاركة)
-
----
-
-## 5. تحسين WeeklyCalendar بتجربة تفاعلية
-
-- الضغط على يوم يعرض تفاصيله (أي صلوات أُديت مع أوقاتها)
-- tooltip/popup صغير عند اللمس يعرض: "الفجر ✓ | الظهر ✓ | العصر ✗ | المغرب ✓ | العشاء ✗"
-- تمييز الأيام المتتالية الكاملة (streak) بخلفية ذهبية متصلة
-
-**الملف:** `src/components/WeeklyCalendar.tsx`
-
----
-
-## 6. تحسينات بصرية شاملة (UI Polish)
-
-- **Page Transitions:** إضافة AnimatePresence مع fade+slide بين الصفحات في App.tsx
-- **Skeleton Loading:** إضافة حالة تحميل في KidTracker وRewardsScreen بدل القفز المباشر
-- **تحسين BottomNav:** إضافة أيقونات SVG بدل الإيموجي، مع عداد صغير للإنجازات غير المقروءة
-- **تحسين بطاقات KidSelection:** إضافة شريط المستوى أسفل كل بطاقة مع لون يتناسب مع المستوى
-- **تحسين Header الـ KidTracker:** إضافة شريط مستوى صغير أسفل اسم الطفل
-
-**الملفات:** `src/App.tsx`, `src/components/BottomNav.tsx`, `src/pages/KidSelection.tsx`, `src/pages/KidTracker.tsx`
-
----
-
-## 7. إحصائيات "أفضل صلاة" و"أضعف صلاة"
-
-- تحليل بيانات الصلوات لمعرفة أي صلاة يؤديها الطفل بانتظام أكثر (مثلاً: المغرب 95%)
-- عرض "أقوى صلاة" و"أضعف صلاة" في شاشة الإنجازات
-- رسم بياني radar chart يوضح نسبة كل صلاة
-- نصيحة تحفيزية: "حاول تحسين صلاة الفجر هذا الأسبوع!"
-
-**الملفات:** `src/lib/store.ts` (دالة تحليل الصلوات), `src/pages/AchievementsScreen.tsx`
-
----
-
-## 8. تذكيرات ذكية محسّنة
-
-- تحسين `ReminderSettings` بإضافة خيار "تذكير عند نسيان صلاة" (إذا مرت ساعتان من وقت الصلاة ولم تُسجَل)
-- رسائل تحفيزية يومية عشوائية في الإشعارات
-- تنبيه "Streak في خطر!" قبل نهاية اليوم إذا لم تكتمل الصلوات
-
-**الملفات:** `src/lib/reminders.ts`, `src/components/ReminderSettings.tsx`
-
----
-
-## التفاصيل التقنية
+## 3. الملفات المتأثرة
 
 | الملف | التغيير |
 |-------|---------|
-| `src/lib/store.ts` | نظام المستويات + تحليل الصلوات + حالة onboarding |
-| `src/lib/sounds.ts` | أصوات badge وlevel up |
-| `src/lib/reminders.ts` | تذكيرات ذكية |
-| `src/pages/Index.tsx` | شاشة Onboarding |
-| `src/pages/KidTracker.tsx` | عرض المستوى + احتفال badge/level + skeleton |
-| `src/pages/KidSelection.tsx` | شريط المستوى في البطاقات |
-| `src/pages/AchievementsScreen.tsx` | مستويات + أفضل/أضعف صلاة + مشاركة + شهادة |
-| `src/components/WeeklyCalendar.tsx` | تفاصيل اليوم عند اللمس |
-| `src/components/BottomNav.tsx` | أيقونات SVG + عداد إنجازات |
-| `src/components/ReminderSettings.tsx` | تذكيرات ذكية |
-| `src/App.tsx` | Page transitions |
+| `package.json` | إضافة Capacitor dependencies |
+| `capacitor.config.ts` | ملف جديد - إعداد Capacitor |
+| `index.html` | viewport-fit=cover + safe area meta |
+| `src/index.css` | safe area padding + native polish |
+| `src/lib/haptics.ts` | ملف جديد - Haptics wrapper |
+| `src/pages/KidTracker.tsx` | استخدام haptics بدل vibrate |
+| `src/components/BottomNav.tsx` | safe area bottom padding |
+| `src/components/InstallPrompt.tsx` | إخفاء على native platforms |
 
-### النهج:
-- تنفيذ جميع الميزات دفعة واحدة
-- الحفاظ على جميع الوظائف الحالية
-- التركيز على التجربة التحفيزية للأطفال (المستويات والاحتفالات)
+## 4. خطوات المستخدم بعد التنفيذ
+
+بعد تنفيذ التغييرات:
+1. نقل المشروع لـ GitHub عبر "Export to Github"
+2. `git pull` ثم `npm install`
+3. `npx cap add ios` و/أو `npx cap add android`
+4. `npx cap update ios/android`
+5. `npm run build` ثم `npx cap sync`
+6. `npx cap run ios` (يحتاج Mac + Xcode) أو `npx cap run android` (يحتاج Android Studio)
 
