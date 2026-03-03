@@ -9,6 +9,7 @@ import {
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound } from '@/lib/sounds';
+import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import PrayerButton from '@/components/PrayerButton';
 import ActivityButton from '@/components/ActivityButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
@@ -98,7 +99,7 @@ export default function KidTracker() {
   const handleToggle = (prayer: PrayerName) => {
     const nowDone = togglePrayerForDate(child.id, prayer, dateStr);
     refreshState();
-    if (navigator.vibrate) navigator.vibrate(nowDone ? 50 : 30);
+    nowDone ? hapticMedium() : hapticLight();
     if (nowDone) {
       playPrayerSound();
       setMotivation(getRandomMotivation());
@@ -108,7 +109,7 @@ export default function KidTracker() {
       if (isDateComplete(child.id, dateStr)) {
         setTimeout(() => {
           playAllCompleteSound();
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+          hapticSuccess();
           setAllDoneCelebration(true);
           setConfettiActive(true);
           setTimeout(() => {
@@ -132,7 +133,7 @@ export default function KidTracker() {
 
   const handleActivityToggle = (activityId: string) => {
     toggleActivity(child.id, activityId, dateStr);
-    if (navigator.vibrate) navigator.vibrate(40);
+    hapticLight();
     refreshState();
     checkBadgesAndLevel();
   };
