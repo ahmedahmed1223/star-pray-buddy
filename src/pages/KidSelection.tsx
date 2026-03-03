@@ -54,7 +54,14 @@ export default function KidSelection() {
               </svg>
             </motion.div>
             <p className="text-foreground font-bold text-lg mb-2">لا يوجد أطفال!</p>
-            <p className="text-muted-foreground">اطلب من الوالدين إضافتك أولاً 💛</p>
+            <p className="text-muted-foreground mb-4">اطلب من الوالدين إضافتك أولاً 💛</p>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/')}
+              className="gradient-gold text-primary-foreground font-bold text-base px-6 py-3 rounded-xl glow-gold"
+            >
+              🔒 الذهاب لوضع الوالدين
+            </motion.button>
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 gap-4">

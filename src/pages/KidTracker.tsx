@@ -364,7 +364,7 @@ export default function KidTracker() {
         </div>
 
         {/* Prayer buttons */}
-        <div className="space-y-3 mb-5">
+        <div className="space-y-4 mb-5">
           {PRAYER_NAMES.map((prayer, i) => (
             <motion.div key={prayer.key} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
               <PrayerButton

@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BookOpen, Gift, Award } from 'lucide-react';
 import { getEarnedBadges, BADGES } from '@/lib/store';
+import { hapticLight } from '@/lib/haptics';
 
 interface Props {
   childId: string;
@@ -40,9 +41,9 @@ export default function BottomNav({ childId }: Props) {
               ? `/rewards/${childId}`
               : `/achievements/${childId}`;
             return (
-              <motion.button
+                <motion.button
                 key={tab.path}
-                onClick={() => navigate(targetPath)}
+                onClick={() => { hapticLight(); navigate(targetPath); }}
                 whileTap={{ scale: 0.9 }}
                 className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all relative min-w-[60px] min-h-[48px] ${
                   active ? 'text-gold' : 'text-muted-foreground'
@@ -60,7 +61,7 @@ export default function BottomNav({ childId }: Props) {
                   animate={active ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : {}}
                   transition={{ duration: 0.4 }}
                 >
-                  <tab.Icon size={22} />
+                  <tab.Icon size={24} />
                   {tab.badge > 0 && !active && (
                     <motion.span
                       initial={{ scale: 0 }}
