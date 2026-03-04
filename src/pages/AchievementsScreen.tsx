@@ -7,11 +7,14 @@ import {
 import BottomNav from '@/components/BottomNav';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 import { ArrowLeft, Flame, Target, TrendingUp, Share2, Download, MessageCircle } from 'lucide-react';
+import { useState } from 'react';
+import CertificateGenerator from '@/components/CertificateGenerator';
 
 export default function AchievementsScreen() {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const child = getChild(childId!);
+  const [showCertificate, setShowCertificate] = useState(false);
 
   if (!child) {
     return (
@@ -34,44 +37,6 @@ export default function AchievementsScreen() {
     fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء'
   };
 
-  const shareViaWhatsApp = () => {
-    const text = `🕌 تقرير ${child.name}\n⭐ النجوم: ${progress.total}\n🔥 الـ Streak: ${streak.current} يوم\n${levelInfo.level.icon} المستوى: ${levelInfo.level.name}\n🏅 الشارات: ${earnedBadges.length}/${BADGES.length}\n💪 أقوى صلاة: ${prayerLabels[analysis.strongest]} (${analysis[analysis.strongest]}%)\n📊 صلوات الأسبوع: ${totalWeekPrayers}/35\n\nماشاء الله! بارك الله فيه 🤲`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const downloadCertificate = () => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-      <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#1a1a3e"/>
-          <stop offset="100%" style="stop-color:#0d1b2a"/>
-        </linearGradient>
-        <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#d4a017"/>
-          <stop offset="100%" style="stop-color:#f0c040"/>
-        </linearGradient>
-      </defs>
-      <rect width="600" height="400" fill="url(#bg)" rx="20"/>
-      <rect x="15" y="15" width="570" height="370" fill="none" stroke="url(#gold)" stroke-width="2" rx="15" stroke-dasharray="8,4"/>
-      <text x="300" y="60" text-anchor="middle" fill="#f0c040" font-size="28" font-family="Cairo" font-weight="800">🏆 شهادة إنجاز 🏆</text>
-      <text x="300" y="110" text-anchor="middle" fill="#e8e8f0" font-size="22" font-family="Cairo" font-weight="700">يُمنح هذا التقدير لـ</text>
-      <text x="300" y="155" text-anchor="middle" fill="#f0c040" font-size="32" font-family="Cairo" font-weight="900">${child.name}</text>
-      <text x="300" y="200" text-anchor="middle" fill="#e8e8f0" font-size="18" font-family="Cairo">${levelInfo.level.icon} المستوى: ${levelInfo.level.name}</text>
-      <text x="200" y="250" text-anchor="middle" fill="#f0c040" font-size="20" font-family="Cairo">⭐ ${progress.total} نجمة</text>
-      <text x="400" y="250" text-anchor="middle" fill="#ff6b6b" font-size="20" font-family="Cairo">🔥 ${streak.best} يوم أفضل سلسلة</text>
-      <text x="300" y="295" text-anchor="middle" fill="#e8e8f0" font-size="16" font-family="Cairo">🏅 ${earnedBadges.length} شارة من أصل ${BADGES.length}</text>
-      <text x="300" y="340" text-anchor="middle" fill="#888" font-size="14" font-family="Cairo">متابع الصلاة - ${new Date().toLocaleDateString('ar-SA')}</text>
-      <text x="300" y="375" text-anchor="middle" fill="#555" font-size="12" font-family="Cairo">ماشاء الله! بارك الله فيك 🤲</text>
-    </svg>`;
-    
-    const blob = new Blob([svg], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `شهادة-${child.name}.svg`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const prayerAnalysisData = [
     { key: 'fajr', label: 'الفجر', pct: analysis.fajr },
@@ -306,25 +271,27 @@ export default function AchievementsScreen() {
           className="bg-card rounded-2xl p-5 border border-border mb-5"
         >
           <h3 className="font-bold text-foreground mb-4 text-lg">📤 شارك إنجازاتك</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={shareViaWhatsApp}
-              className="flex items-center justify-center gap-2 bg-secondary/20 text-secondary font-bold py-3 rounded-xl border border-secondary/30 min-h-[48px]"
-            >
-              <MessageCircle size={18} />
-              <span className="text-sm">واتساب</span>
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={downloadCertificate}
-              className="flex items-center justify-center gap-2 bg-primary/20 text-gold font-bold py-3 rounded-xl border border-primary/30 min-h-[48px]"
-            >
-              <Download size={18} />
-              <span className="text-sm">شهادة إنجاز</span>
-            </motion.button>
-          </div>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCertificate(true)}
+            className="w-full flex items-center justify-center gap-2 bg-primary/20 text-gold font-bold py-3 rounded-xl border border-primary/30 min-h-[48px]"
+          >
+            <Download size={18} />
+            <span className="text-sm">📜 إنشاء شهادة إنجاز</span>
+          </motion.button>
         </motion.div>
+
+        {showCertificate && (
+          <CertificateGenerator
+            child={child}
+            levelInfo={levelInfo}
+            streak={streak}
+            earnedBadgesCount={earnedBadges.length}
+            totalBadges={BADGES.length}
+            totalStars={progress.total}
+            onClose={() => setShowCertificate(false)}
+          />
+        )}
 
         {/* Weekly Calendar */}
         <WeeklyCalendar childId={child.id} />
