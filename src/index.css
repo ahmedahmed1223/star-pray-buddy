@@ -71,6 +71,67 @@
 
     font-family: 'Cairo', sans-serif;
   }
+
+  .light {
+    --background: 40 30% 96%;
+    --foreground: 230 30% 15%;
+
+    --card: 40 25% 100%;
+    --card-foreground: 230 30% 15%;
+
+    --popover: 40 25% 100%;
+    --popover-foreground: 230 30% 15%;
+
+    --primary: 42 90% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 160 55% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 40 20% 90%;
+    --muted-foreground: 230 15% 45%;
+
+    --accent: 280 45% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 15% 82%;
+    --input: 40 15% 82%;
+    --ring: 42 90% 48%;
+
+    --sidebar-background: 40 25% 98%;
+    --sidebar-foreground: 230 30% 15%;
+    --sidebar-primary: 42 90% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 20% 90%;
+    --sidebar-accent-foreground: 230 30% 15%;
+    --sidebar-border: 40 15% 82%;
+    --sidebar-ring: 42 90% 48%;
+
+    --gold: 42 90% 48%;
+    --gold-glow: 42 90% 58%;
+    --emerald: 160 55% 35%;
+    --night-sky: 40 30% 96%;
+    --night-card: 40 25% 100%;
+    --star-yellow: 45 90% 50%;
+    --lantern-orange: 25 85% 50%;
+    --lantern-glow: 25 85% 60%;
+    --prayer-done: 160 55% 40%;
+    --prayer-pending: 40 15% 85%;
+
+    --fajr-from: 220 50% 60%;
+    --fajr-to: 260 40% 55%;
+    --dhuhr-from: 42 90% 50%;
+    --dhuhr-to: 30 80% 48%;
+    --asr-from: 35 80% 52%;
+    --asr-to: 45 85% 48%;
+    --maghrib-from: 350 60% 55%;
+    --maghrib-to: 20 70% 50%;
+    --isha-from: 240 45% 50%;
+    --isha-to: 260 50% 40%;
+  }
 }
 
 @layer base {

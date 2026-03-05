@@ -17,6 +17,7 @@ import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
+import { ParticleBurst } from '@/components/SkeletonLoader';
 import { ArrowLeft, Trophy, Coins, Flame, Award } from 'lucide-react';
 
 export default function KidTracker() {
@@ -38,6 +39,7 @@ export default function KidTracker() {
   const [confettiActive, setConfettiActive] = useState(false);
   const [badgePopup, setBadgePopup] = useState<{ name: string; icon: string } | null>(null);
   const [levelUpPopup, setLevelUpPopup] = useState<{ name: string; icon: string } | null>(null);
+  const [particleBurst, setParticleBurst] = useState(false);
   
   const prevBadgeCount = useRef(0);
   const prevLevelId = useRef(0);
@@ -104,7 +106,8 @@ export default function KidTracker() {
       playPrayerSound();
       setMotivation(getRandomMotivation());
       setCelebration(true);
-      setTimeout(() => { setCelebration(false); setMotivation(''); }, 1500);
+      setParticleBurst(true);
+      setTimeout(() => { setCelebration(false); setMotivation(''); setParticleBurst(false); }, 1500);
 
       if (isDateComplete(child.id, dateStr)) {
         setTimeout(() => {
@@ -140,6 +143,9 @@ export default function KidTracker() {
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden">
+      {/* Particle Burst */}
+      <ParticleBurst active={particleBurst} x={50} y={60} />
+      
       {/* SVG Confetti */}
       <Confetti active={confettiActive} count={45} />
 

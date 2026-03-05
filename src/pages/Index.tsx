@@ -6,6 +6,7 @@ import StarParticles from '@/components/StarParticles';
 import ramadanBg from '@/assets/ramadan-bg.jpg';
 import { isOnboardingDone, setOnboardingDone, getChildren } from '@/lib/store';
 import { Users, Lock, ChevronLeft } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -224,6 +225,11 @@ export default function Index() {
       />
       <div className="absolute inset-0 gradient-night opacity-75" />
       <StarParticles />
+
+      {/* Theme Toggle */}
+      <div className="absolute top-4 left-4 z-20">
+        <ThemeToggle />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}

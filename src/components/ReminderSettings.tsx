@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { getReminderSettings, saveReminderSettings, requestNotificationPermission } from '@/lib/reminders';
+import { isNativePlatform } from '@/lib/notifications';
 import { PRAYER_NAMES } from '@/lib/store';
-import { Bell, BellOff, ShieldAlert, Flame } from 'lucide-react';
+import { Bell, BellOff, ShieldAlert, Flame, Smartphone } from 'lucide-react';
 
 export default function ReminderSettings() {
   const [settings, setSettings] = useState(getReminderSettings());
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const isNative = isNativePlatform();
 
   const toggleEnabled = async () => {
     if (!settings.enabled) {
@@ -69,6 +71,20 @@ export default function ReminderSettings() {
 
       {settings.enabled && (
         <div className="space-y-3">
+          {/* Native badge */}
+          {isNative && (
+            <div className="flex items-center gap-2 bg-secondary/15 rounded-xl px-3 py-2 mb-2">
+              <Smartphone size={14} className="text-secondary" />
+              <span className="text-secondary text-xs font-bold">إشعارات محلية - تعمل في الخلفية ✅</span>
+            </div>
+          )}
+          {!isNative && (
+            <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 mb-2">
+              <Bell size={14} className="text-gold" />
+              <span className="text-muted-foreground text-xs">إشعارات الويب - تتطلب بقاء التطبيق مفتوحاً</span>
+            </div>
+          )}
+
           {PRAYER_NAMES.map(prayer => (
             <div key={prayer.key} className="flex items-center justify-between">
               <span className="text-foreground font-medium">
@@ -141,9 +157,11 @@ export default function ReminderSettings() {
             </p>
           </div>
 
-          <p className="text-muted-foreground text-xs mt-2">
-            ⏰ سيتم إرسال إشعار في الوقت المحدد (يجب أن يكون التطبيق مفتوحاً)
-          </p>
+          {!isNative && (
+            <p className="text-muted-foreground text-xs mt-2">
+              ⏰ سيتم إرسال إشعار في الوقت المحدد (يجب أن يكون التطبيق مفتوحاً)
+            </p>
+          )}
         </div>
       )}
     </motion.div>

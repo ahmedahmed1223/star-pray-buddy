@@ -30,9 +30,9 @@ export default function BottomNav({ childId }: Props) {
     : 'tracker';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} aria-label="التنقل الرئيسي" role="navigation">
       <div className="max-w-md mx-auto">
-        <div className="bg-card/95 backdrop-blur-xl border-t border-border px-2 py-2 flex justify-around items-center rounded-t-2xl shadow-lg">
+        <div className="bg-card/95 backdrop-blur-xl border-t border-border px-2 py-2 flex justify-around items-center rounded-t-2xl shadow-lg" role="tablist">
           {tabs.map(tab => {
             const active = currentTab === tab.path;
             const targetPath = tab.path === 'tracker'
@@ -45,6 +45,9 @@ export default function BottomNav({ childId }: Props) {
                 key={tab.path}
                 onClick={() => { hapticLight(); navigate(targetPath); }}
                 whileTap={{ scale: 0.9 }}
+                role="tab"
+                aria-selected={active}
+                aria-label={tab.label}
                 className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all relative min-w-[60px] min-h-[48px] ${
                   active ? 'text-gold' : 'text-muted-foreground'
                 }`}
@@ -78,6 +81,6 @@ export default function BottomNav({ childId }: Props) {
           })}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
