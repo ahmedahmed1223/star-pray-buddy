@@ -15,6 +15,9 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import MonthlyChart from '@/components/MonthlyChart';
 import ReminderSettings from '@/components/ReminderSettings';
 import ReportView from '@/components/ReportView';
+import ComparisonChart from '@/components/ComparisonChart';
+import Leaderboard from '@/components/Leaderboard';
+import WeeklyChallenges from '@/components/WeeklyChallenges';
 import DateNavigator from '@/components/DateNavigator';
 import PrayerButton from '@/components/PrayerButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -22,6 +25,7 @@ import {
   ArrowLeft, Plus, Trash2, Gift, Star, KeyRound, RotateCcw, Coins,
   Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil
 } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -171,7 +175,8 @@ export default function ParentDashboard() {
           <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
-          <h1 className="text-2xl font-bold text-gold">لوحة الوالدين</h1>
+          <h1 className="text-2xl font-bold text-gold flex-1">لوحة الوالدين</h1>
+          <ThemeToggle />
         </div>
 
         {/* Quick Summary Card */}
@@ -452,6 +457,9 @@ export default function ParentDashboard() {
           <TabsContent value="reports" className="space-y-4">
             {children.length > 0 ? (
               <>
+                {children.length >= 2 && <ComparisonChart children={children} />}
+                {children.length >= 2 && <Leaderboard children={children} />}
+                <WeeklyChallenges children={children} />
                 <MonthlyChart children={children} />
                 <ReportView children={children} />
               </>

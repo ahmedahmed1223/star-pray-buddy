@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { initReminders } from "@/lib/reminders";
+import { applyTheme, getStoredTheme } from "@/components/ThemeToggle";
 import InstallPrompt from "@/components/InstallPrompt";
 import Index from "./pages/Index";
 import ParentDashboard from "./pages/ParentDashboard";
@@ -44,6 +45,7 @@ function AnimatedRoutes() {
 
 const App = () => {
   useEffect(() => {
+    applyTheme(getStoredTheme());
     initReminders();
   }, []);
 

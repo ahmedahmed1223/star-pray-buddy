@@ -1,10 +1,17 @@
 import { PRAYER_NAMES, getChildren, isDateComplete } from './store';
+import {
+  requestPermission,
+  scheduleNativeNotifications,
+  cancelAllNativeNotifications,
+  sendWebNotification,
+  isNativePlatform,
+} from './notifications';
 
 export interface ReminderSettings {
   enabled: boolean;
-  times: Record<string, string>; // prayer key -> HH:MM
-  smartReminders?: boolean; // remind if prayer not logged after delay
-  streakAlert?: boolean; // alert if streak at risk before end of day
+  times: Record<string, string>;
+  smartReminders?: boolean;
+  streakAlert?: boolean;
 }
 
 const REMINDER_KEY = 'salat-reminder-settings';
@@ -49,36 +56,39 @@ export function saveReminderSettings(settings: ReminderSettings) {
 let reminderIntervalId: ReturnType<typeof setInterval> | null = null;
 
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!('Notification' in window)) return false;
-  if (Notification.permission === 'granted') return true;
-  const result = await Notification.requestPermission();
-  return result === 'granted';
+  return requestPermission();
 }
 
 function getRandomMotivation(): string {
   return MOTIVATIONAL_NOTIFICATIONS[Math.floor(Math.random() * MOTIVATIONAL_NOTIFICATIONS.length)];
 }
 
-function scheduleReminders(settings: ReminderSettings) {
+async function scheduleReminders(settings: ReminderSettings) {
   clearAllReminders();
-  
+
+  // On native: use Capacitor Local Notifications
+  if (isNativePlatform()) {
+    await scheduleNativeNotifications(settings.times, {
+      smartReminders: settings.smartReminders,
+      streakAlert: settings.streakAlert,
+    });
+    return;
+  }
+
+  // Web fallback: setInterval
   reminderIntervalId = setInterval(() => {
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    
-    // Regular prayer time reminders
+
     for (const prayer of PRAYER_NAMES) {
       if (settings.times[prayer.key] === currentTime) {
-        if (Notification.permission === 'granted') {
-          new Notification(`حان وقت صلاة ${prayer.label} ${prayer.emoji}`, {
-            body: getRandomMotivation(),
-            icon: '/favicon.ico',
-          });
-        }
+        sendWebNotification(
+          `حان وقت صلاة ${prayer.label} ${prayer.emoji}`,
+          getRandomMotivation()
+        );
       }
     }
 
-    // Smart reminders - remind 2 hours after prayer time if not logged
     if (settings.smartReminders) {
       for (const prayer of PRAYER_NAMES) {
         const prayerTime = settings.times[prayer.key];
@@ -91,44 +101,41 @@ function scheduleReminders(settings: ReminderSettings) {
           const today = new Date().toISOString().split('T')[0];
           for (const child of children) {
             if (!isDateComplete(child.id, today)) {
-              if (Notification.permission === 'granted') {
-                new Notification(`⏰ هل صليت ${prayer.label}؟`, {
-                  body: `${child.name} - لا تنسَ صلاة ${prayer.label}! ${getRandomMotivation()}`,
-                  icon: '/favicon.ico',
-                });
-              }
+              sendWebNotification(
+                `⏰ هل صليت ${prayer.label}؟`,
+                `${child.name} - لا تنسَ صلاة ${prayer.label}! ${getRandomMotivation()}`
+              );
             }
           }
         }
       }
     }
 
-    // Streak at risk alert - at 9 PM if prayers not complete
     if (settings.streakAlert && currentTime === '21:00') {
       const children = getChildren();
       const today = new Date().toISOString().split('T')[0];
       for (const child of children) {
         if (!isDateComplete(child.id, today)) {
-          if (Notification.permission === 'granted') {
-            new Notification(`⚠️ سلسلة ${child.name} في خطر!`, {
-              body: `لم تكتمل صلوات اليوم بعد - أكملها قبل منتصف الليل! 🔥`,
-              icon: '/favicon.ico',
-            });
-          }
+          sendWebNotification(
+            `⚠️ سلسلة ${child.name} في خطر!`,
+            `لم تكتمل صلوات اليوم بعد - أكملها قبل منتصف الليل! 🔥`
+          );
         }
       }
     }
-  }, 60000); // Check every minute
+  }, 60000);
 }
 
-function clearAllReminders() {
+async function clearAllReminders() {
   if (reminderIntervalId) {
     clearInterval(reminderIntervalId);
     reminderIntervalId = null;
   }
+  if (isNativePlatform()) {
+    await cancelAllNativeNotifications();
+  }
 }
 
-// Auto-start reminders on load
 export function initReminders() {
   const settings = getReminderSettings();
   if (settings.enabled) {

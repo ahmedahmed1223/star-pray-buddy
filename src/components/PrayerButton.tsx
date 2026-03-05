@@ -48,6 +48,8 @@ export default function PrayerButton({ label, emoji, done, colorClass, prayerKey
         onClick={handleClick}
         whileTap={{ scale: 0.93, rotateX: 3 }}
         style={{ perspective: 800, transformStyle: 'preserve-3d' }}
+        aria-label={`${label} - ${done ? 'تم' : 'لم تُصلَّ'}`}
+        aria-pressed={done}
         className={`relative w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all overflow-hidden min-h-[64px] ${
           done
             ? 'border-primary shadow-lg shadow-primary/20'
