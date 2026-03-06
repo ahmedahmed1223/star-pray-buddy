@@ -49,19 +49,6 @@ export default function ParentDashboard() {
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!pinVerified) {
-    return (
-      <PinDialog
-        open={true}
-        onClose={() => navigate('/')}
-        onSuccess={() => {
-          sessionStorage.setItem('parent-pin-verified', 'true');
-          setPinVerified(true);
-        }}
-      />
-    );
-  }
-
   // Activities
   const [activities, setActivities] = useState(getCustomActivities());
   const [newActivityName, setNewActivityName] = useState('');
@@ -85,6 +72,19 @@ export default function ParentDashboard() {
     setSettingsState(getSettings());
   };
   useEffect(refresh, []);
+
+  if (!pinVerified) {
+    return (
+      <PinDialog
+        open={true}
+        onClose={() => navigate('/')}
+        onSuccess={() => {
+          sessionStorage.setItem('parent-pin-verified', 'true');
+          setPinVerified(true);
+        }}
+      />
+    );
+  }
 
   const saveReward = () => {
     const goal = parseInt(rewardGoal) || 50;
