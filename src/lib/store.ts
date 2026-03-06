@@ -687,7 +687,7 @@ export function exportData(): string {
   return localStorage.getItem(STORAGE_KEY) || JSON.stringify(defaultData);
 }
 
-export function importData(jsonStr: string): boolean {
+export async function importData(jsonStr: string): Promise<boolean> {
   try {
     const parsed = JSON.parse(jsonStr);
 

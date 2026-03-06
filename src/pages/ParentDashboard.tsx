@@ -26,29 +26,11 @@ import {
   Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import PinDialog from '@/components/PinDialog';
 
 export default function ParentDashboard() {
+  const navigate = useNavigate();
   const [pinVerified, setPinVerified] = useState(() => sessionStorage.getItem('parent-pin-verified') === 'true');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    return () => {
-      // Clear verification when component unmounts (navigating away)
-    };
-  }, []);
-
-  if (!pinVerified) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <PinDialogInline onSuccess={() => {
-          sessionStorage.setItem('parent-pin-verified', 'true');
-          setPinVerified(true);
-        }} onCancel={() => navigate('/')} />
-      </div>
-    );
-  }
-
-  const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [editChild, setEditChildState] = useState<Child | null>(null);
@@ -66,6 +48,19 @@ export default function ParentDashboard() {
   const [settings, setSettingsState] = useState(getSettings());
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!pinVerified) {
+    return (
+      <PinDialog
+        open={true}
+        onClose={() => navigate('/')}
+        onSuccess={() => {
+          sessionStorage.setItem('parent-pin-verified', 'true');
+          setPinVerified(true);
+        }}
+      />
+    );
+  }
 
   // Activities
   const [activities, setActivities] = useState(getCustomActivities());
