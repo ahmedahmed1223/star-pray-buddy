@@ -156,9 +156,9 @@ export default function ParentDashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const text = ev.target?.result as string;
-      const success = importData(text);
+      const success = await importData(text);
       setImportStatus(success ? 'success' : 'error');
       if (success) refresh();
       setTimeout(() => setImportStatus('idle'), 3000);
