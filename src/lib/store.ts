@@ -687,11 +687,85 @@ export function exportData(): string {
   return localStorage.getItem(STORAGE_KEY) || JSON.stringify(defaultData);
 }
 
-export function importData(jsonStr: string): boolean {
+export async function importData(jsonStr: string): Promise<boolean> {
   try {
-    const data = JSON.parse(jsonStr);
-    if (!data.children || !Array.isArray(data.children)) return false;
-    localStorage.setItem(STORAGE_KEY, jsonStr);
+    const parsed = JSON.parse(jsonStr);
+
+    // Prototype pollution check
+    if (parsed != null && typeof parsed === 'object') {
+      const dangerous = ['__proto__', 'constructor', 'prototype'];
+      const jsonCheck = JSON.stringify(parsed);
+      if (dangerous.some(k => jsonCheck.includes(`"${k}"`))) {
+        return false;
+      }
+    }
+
+    const { z } = await import('zod');
+
+    const childSchema = z.object({
+      id: z.string().min(1).max(100),
+      name: z.string().min(1).max(100),
+      avatarIndex: z.number().int().min(0).max(9),
+      totalStars: z.number().int().min(0).max(1000000),
+    });
+
+    const prayerLogSchema = z.object({
+      childId: z.string().min(1).max(100),
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      fajr: z.boolean(),
+      dhuhr: z.boolean(),
+      asr: z.boolean(),
+      maghrib: z.boolean(),
+      isha: z.boolean(),
+      fajrJamaah: z.boolean().optional(),
+      dhuhrJamaah: z.boolean().optional(),
+      asrJamaah: z.boolean().optional(),
+      maghribJamaah: z.boolean().optional(),
+      ishaJamaah: z.boolean().optional(),
+    });
+
+    const activityLogSchema = z.object({
+      childId: z.string().min(1).max(100),
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      activityId: z.string().min(1).max(100),
+      done: z.boolean(),
+    });
+
+    const appDataSchema = z.object({
+      pin: z.string().regex(/^\d{4}$/),
+      children: z.array(childSchema).max(50),
+      prayerLogs: z.array(prayerLogSchema).max(50000),
+      rewardText: z.string().max(500),
+      rewardGoal: z.number().int().min(1).max(100000),
+      moneyReward: z.object({
+        enabled: z.boolean(),
+        amountPerPrayers: z.number().min(0).max(100000),
+        prayersNeeded: z.number().int().min(1).max(1000),
+        currency: z.string().max(20),
+      }),
+      settings: z.object({
+        jamaahEnabled: z.boolean(),
+        jamaahRewardAmount: z.number().int().min(0).max(100),
+        allowChildPastEdit: z.boolean(),
+      }),
+      customActivities: z.array(z.object({
+        id: z.string().min(1).max(100),
+        name: z.string().min(1).max(100),
+        emoji: z.string().max(10),
+        starsPerCompletion: z.number().int().min(0).max(100),
+      })).max(50),
+      activityLogs: z.array(activityLogSchema).max(50000),
+      giftTiers: z.array(z.object({
+        id: z.string().min(1).max(100),
+        name: z.string().min(1).max(100),
+        starsRequired: z.number().int().min(0).max(100000),
+        emoji: z.string().max(10),
+      })).max(50),
+      onboardingDone: z.boolean().optional(),
+    });
+
+    const validated = appDataSchema.parse(parsed);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(validated));
     invalidateCache();
     return true;
   } catch {
