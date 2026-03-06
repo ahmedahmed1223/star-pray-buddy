@@ -28,6 +28,26 @@ import {
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function ParentDashboard() {
+  const [pinVerified, setPinVerified] = useState(() => sessionStorage.getItem('parent-pin-verified') === 'true');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    return () => {
+      // Clear verification when component unmounts (navigating away)
+    };
+  }, []);
+
+  if (!pinVerified) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <PinDialogInline onSuccess={() => {
+          sessionStorage.setItem('parent-pin-verified', 'true');
+          setPinVerified(true);
+        }} onCancel={() => navigate('/')} />
+      </div>
+    );
+  }
+
   const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
   const [addOpen, setAddOpen] = useState(false);

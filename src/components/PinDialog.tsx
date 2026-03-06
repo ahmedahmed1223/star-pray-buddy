@@ -102,7 +102,9 @@ export default function PinDialog({ open, onClose, onSuccess }: PinDialogProps) 
               ))}
             </div>
 
-            <p className="text-center text-muted-foreground text-xs mt-4" dir="rtl">الرمز الافتراضي: ١٢٣٤</p>
+            {verifyPin('1234') && (
+              <p className="text-center text-muted-foreground text-xs mt-4" dir="rtl">الرمز الافتراضي: ١٢٣٤ - يُنصح بتغييره</p>
+            )}
           </motion.div>
         </motion.div>
       )}
