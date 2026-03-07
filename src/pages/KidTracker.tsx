@@ -152,7 +152,17 @@ export default function KidTracker() {
   };
 
   return (
-    <div className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden">
+    <motion.div
+      className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden"
+      drag={allChildren.length > 1 ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
+      onDragEnd={(_, info) => {
+        if (Math.abs(info.offset.x) > 80) {
+          handleSwipe(info.offset.x > 0 ? -1 : 1);
+        }
+      }}
+    >
       {/* Particle Burst */}
       <ParticleBurst active={particleBurst} x={50} y={60} />
       
