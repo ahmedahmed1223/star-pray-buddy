@@ -424,7 +424,7 @@ export default function KidTracker() {
                   />
                 </motion.div>
               ))}
-    </motion.div>
+    </div>
           </div>
         )}
 
@@ -434,6 +434,6 @@ export default function KidTracker() {
 
       {/* Bottom Navigation */}
       <BottomNav childId={child.id} />
-    </div>
+    </motion.div>
   );
 }
