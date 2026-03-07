@@ -424,7 +424,7 @@ export default function KidTracker() {
                   />
                 </motion.div>
               ))}
-            </div>
+    </motion.div>
           </div>
         )}
 
