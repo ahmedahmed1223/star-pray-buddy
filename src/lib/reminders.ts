@@ -1,4 +1,4 @@
-import { PRAYER_NAMES, getChildren, isDateComplete } from './store';
+import { PRAYER_NAMES, getChildren, isDateComplete, localDateStr } from './store';
 import {
   requestPermission,
   scheduleNativeNotifications,
@@ -98,7 +98,7 @@ async function scheduleReminders(settings: ReminderSettings) {
         const reminderTime = `${String(reminderHour).padStart(2, '0')}:${String(pm).padStart(2, '0')}`;
         if (currentTime === reminderTime) {
           const children = getChildren();
-          const today = new Date().toISOString().split('T')[0];
+          const today = localDateStr();
           for (const child of children) {
             if (!isDateComplete(child.id, today)) {
               sendWebNotification(
@@ -113,7 +113,7 @@ async function scheduleReminders(settings: ReminderSettings) {
 
     if (settings.streakAlert && currentTime === '21:00') {
       const children = getChildren();
-      const today = new Date().toISOString().split('T')[0];
+      const today = localDateStr();
       for (const child of children) {
         if (!isDateComplete(child.id, today)) {
           sendWebNotification(

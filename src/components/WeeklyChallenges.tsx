@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getChildren, getStreak, getDateProgress, type Child } from '@/lib/store';
+import { getChildren, getStreak, getDateProgress, localDateStr, type Child } from '@/lib/store';
 import { Zap, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Challenge {
@@ -24,8 +24,7 @@ const WEEKLY_CHALLENGES: Challenge[] = [
       for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        if (getDateProgress(childId, dateStr) >= 1) count++;
+        if (getDateProgress(childId, localDateStr(d)) >= 1) count++;
       }
       return count;
     },
@@ -41,8 +40,7 @@ const WEEKLY_CHALLENGES: Challenge[] = [
       for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        if (getDateProgress(childId, dateStr) === 5) count++;
+        if (getDateProgress(childId, localDateStr(d)) === 5) count++;
       }
       return count;
     },
@@ -62,8 +60,7 @@ const WEEKLY_CHALLENGES: Challenge[] = [
     emoji: '💎',
     target: 5,
     check: (childId) => {
-      const today = new Date().toISOString().split('T')[0];
-      return getDateProgress(childId, today);
+      return getDateProgress(childId, localDateStr());
     },
   },
 ];

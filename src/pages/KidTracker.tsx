@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  getChild, getDateLog, togglePrayerForDate, toggleJamaah, getChildProgress, getDateProgress,
+  getChild, getChildren, getDateLog, togglePrayerForDate, toggleJamaah, getChildProgress, getDateProgress,
   isDateComplete, getRandomMotivation, getMoneyReward, getChildMoney, getSettings, getStreak,
   getCustomActivities, toggleActivity, getActivityLog, getEarnedBadges, getChildLevel, LEVELS,
-  AVATAR_IMAGES, PRAYER_NAMES, type PrayerLog, type PrayerName
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type PrayerLog, type PrayerName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound } from '@/lib/sounds';
@@ -44,8 +44,18 @@ export default function KidTracker() {
   const prevBadgeCount = useRef(0);
   const prevLevelId = useRef(0);
 
-  const dateStr = selectedDate.toISOString().split('T')[0];
-  const isToday = dateStr === new Date().toISOString().split('T')[0];
+  const dateStr = localDateStr(selectedDate);
+  const isToday = dateStr === localDateStr();
+
+  // Swipe between children
+  const allChildren = getChildren();
+  const currentIndex = allChildren.findIndex(c => c.id === childId);
+  const handleSwipe = (dir: number) => {
+    const nextIdx = currentIndex + dir;
+    if (nextIdx >= 0 && nextIdx < allChildren.length) {
+      navigate(`/tracker/${allChildren[nextIdx].id}`, { replace: true });
+    }
+  };
 
   const refreshState = () => {
     if (!child) return;
@@ -142,7 +152,17 @@ export default function KidTracker() {
   };
 
   return (
-    <div className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden">
+    <motion.div
+      className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden"
+      drag={allChildren.length > 1 ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
+      onDragEnd={(_, info) => {
+        if (Math.abs(info.offset.x) > 80) {
+          handleSwipe(info.offset.x > 0 ? -1 : 1);
+        }
+      }}
+    >
       {/* Particle Burst */}
       <ParticleBurst active={particleBurst} x={50} y={60} />
       
@@ -404,7 +424,7 @@ export default function KidTracker() {
                   />
                 </motion.div>
               ))}
-            </div>
+    </div>
           </div>
         )}
 
@@ -414,6 +434,6 @@ export default function KidTracker() {
 
       {/* Bottom Navigation */}
       <BottomNav childId={child.id} />
-    </div>
+    </motion.div>
   );
 }

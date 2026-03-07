@@ -286,9 +286,17 @@ export function updateSettings(settings: Partial<AppSettings>) {
   saveData(data);
 }
 
+// === DATE HELPER (LOCAL TIMEZONE) ===
+export function localDateStr(d: Date = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 // === PRAYER LOGS ===
 function todayStr(): string {
-  return new Date().toISOString().split('T')[0];
+  return localDateStr();
 }
 
 export function getDateLog(childId: string, date: string): PrayerLog {
@@ -379,7 +387,7 @@ export function getJamaahCount(childId: string): number {
 
 // === STREAK (FIXED) ===
 function dateToKey(d: Date): string {
-  return d.toISOString().split('T')[0];
+  return localDateStr(d);
 }
 
 function isLogComplete(log: PrayerLog | undefined): boolean {
@@ -645,7 +653,7 @@ export function getWeeklyLogs(childId: string): { date: string; count: number; l
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = localDateStr(d);
     const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr) || null;
     const count = log ? [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha].filter(Boolean).length : 0;
     result.push({ date: dateStr, count, log });
@@ -663,7 +671,7 @@ export function getMonthlyLogs(childId: string, year?: number, month?: number): 
 
   for (let day = 1; day <= daysInMonth; day++) {
     const d = new Date(y, m, day);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = localDateStr(d);
     const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
     const count = log ? [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha].filter(Boolean).length : 0;
     result.push({ date: dateStr, count });

@@ -7,7 +7,7 @@ import {
   getCustomActivities, addCustomActivity, removeCustomActivity,
   getGiftTiers, addGiftTier, removeGiftTier,
   getDateLog, togglePrayerForDate, toggleJamaah, exportData, importData,
-  AVATAR_IMAGES, PRAYER_NAMES, type Child, type MoneyReward, type PrayerName
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName
 } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
 import EditChildDialog from '@/components/EditChildDialog';
@@ -124,7 +124,7 @@ export default function ParentDashboard() {
     refresh();
   };
 
-  const editDateStr = editDate.toISOString().split('T')[0];
+  const editDateStr = localDateStr(editDate);
   const editLog = editChildId ? getDateLog(editChildId, editDateStr) : null;
 
   const handleEditPrayer = (prayer: PrayerName) => {
@@ -146,7 +146,7 @@ export default function ParentDashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `salat-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `salat-tracker-backup-${localDateStr()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
