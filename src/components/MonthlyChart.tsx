@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { getMonthlyLogs, getChildren, AVATAR_IMAGES, type Child } from '@/lib/store';
+import { getMonthlyLogs, getChildren, AVATAR_IMAGES, localDateStr, type Child } from '@/lib/store';
 
 const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 const DAY_HEADERS = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
@@ -16,7 +16,7 @@ export default function MonthlyChart({ children }: Props) {
   const year = now.getFullYear();
 
   const monthlyData = selectedChild ? getMonthlyLogs(selectedChild) : [];
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = localDateStr(now);
 
   // Calculate grid offset for first day of month
   const firstDayOfMonth = new Date(year, now.getMonth(), 1).getDay();
