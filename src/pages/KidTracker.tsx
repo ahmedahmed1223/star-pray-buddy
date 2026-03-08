@@ -8,7 +8,7 @@ import {
   AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type PrayerLog, type PrayerName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
-import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound } from '@/lib/sounds';
+import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import PrayerButton from '@/components/PrayerButton';
 import ActivityButton from '@/components/ActivityButton';
