@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getChildren, getStreak, getChildProgress, getChildLevel, AVATAR_IMAGES, type Child } from '@/lib/store';
+import { getGreeting, getSeasonalMessage } from '@/lib/greetings';
 import StarParticles from '@/components/StarParticles';
 import { ArrowLeft } from 'lucide-react';
 
@@ -16,26 +17,45 @@ const cardColors = [
 export default function KidSelection() {
   const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
+  const greeting = useMemo(() => getGreeting(), []);
+  const seasonal = useMemo(() => getSeasonalMessage(), []);
 
   useEffect(() => setChildren(getChildren()), []);
 
   return (
     <div className="min-h-screen gradient-night p-4 relative overflow-hidden">
       <StarParticles />
-      <div className="max-w-md mx-auto relative z-10">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="max-w-md mx-auto sm:max-w-lg relative z-10">
+        <div className="flex items-center gap-3 mb-2">
           <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <h1 className="text-2xl font-bold text-gold">من يصلّي؟ 🤲</h1>
         </div>
 
+        {/* Dynamic greeting + seasonal */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-4"
+        >
+          <p className="text-foreground/70 text-lg font-medium">
+            {greeting.text} {greeting.emoji}
+          </p>
+          {seasonal.isSpecial && (
+            <p className="text-gold/80 text-sm font-medium mt-1">
+              {seasonal.emoji} {seasonal.message}
+            </p>
+          )}
+        </motion.div>
+
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center text-foreground/70 text-lg mb-6 font-medium"
+          transition={{ delay: 0.1 }}
+          className="text-center text-foreground/70 text-base mb-6 font-medium"
         >
-          أهلاً! اختر اسمك 👇
+          اختر اسمك 👇
         </motion.p>
 
         {children.length === 0 ? (
@@ -64,7 +84,7 @@ export default function KidSelection() {
             </motion.button>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {children.map((child, i) => {
               const streak = getStreak(child.id);
               const progress = getChildProgress(child.id);
@@ -82,7 +102,6 @@ export default function KidSelection() {
                   style={{ perspective: 600 }}
                   className={`bg-card border-2 ${isTopPerformer ? 'border-primary glow-gold' : cardColors[i % cardColors.length]} rounded-3xl p-5 flex flex-col items-center gap-2 transition-all relative overflow-hidden`}
                 >
-                  {/* Shimmer on top performer */}
                   {isTopPerformer && (
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/10 to-transparent"
@@ -91,40 +110,25 @@ export default function KidSelection() {
                       style={{ skewX: '-12deg' }}
                     />
                   )}
-                  
-                  {/* Glow behind avatar */}
                   <div className="absolute top-4 w-24 h-24 rounded-full bg-primary/10 blur-xl" />
-                  
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                    className="relative"
-                  >
+                  <motion.div whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }} className="relative">
                     <img
                       src={AVATAR_IMAGES[child.avatarIndex]}
                       alt={child.name}
                       className="w-22 h-22 rounded-full object-cover ring-3 ring-primary/30"
                       style={{ width: 88, height: 88 }}
                     />
-                    {/* Level icon badge */}
-                    <span className="absolute -bottom-1 -right-1 text-lg bg-card rounded-full px-1 border border-border">
-                      {levelInfo.level.icon}
-                    </span>
-                    {/* Golden ring animation */}
+                    <span className="absolute -bottom-1 -right-1 text-lg bg-card rounded-full px-1 border border-border">{levelInfo.level.icon}</span>
                     <motion.div
                       className="absolute -inset-1 rounded-full border-2 border-gold/40"
                       animate={{ scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] }}
                       transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }}
                     />
                   </motion.div>
-                  
                   <span className="text-foreground font-bold text-lg relative z-10">{child.name}</span>
-                  
-                  {/* Level name */}
                   <span className="text-xs font-bold relative z-10" style={{ color: levelInfo.level.color }}>
                     {levelInfo.level.icon} {levelInfo.level.name}
                   </span>
-
-                  {/* Level progress bar */}
                   <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden relative z-10">
                     <motion.div
                       className="h-full rounded-full"
@@ -134,13 +138,8 @@ export default function KidSelection() {
                       transition={{ duration: 1, delay: i * 0.15 }}
                     />
                   </div>
-                  
                   <div className="flex items-center gap-3 relative z-10">
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }}
-                      className="flex items-center gap-1"
-                    >
+                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }} className="flex items-center gap-1">
                       <span className="text-star text-lg">⭐</span>
                       <span className="text-gold font-extrabold text-lg">{child.totalStars}</span>
                     </motion.div>
