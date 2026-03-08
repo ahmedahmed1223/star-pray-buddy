@@ -53,6 +53,7 @@ export default function KidTracker() {
   const handleSwipe = (dir: number) => {
     const nextIdx = currentIndex + dir;
     if (nextIdx >= 0 && nextIdx < allChildren.length) {
+      playSwipeSound();
       navigate(`/tracker/${allChildren[nextIdx].id}`, { replace: true });
     }
   };
