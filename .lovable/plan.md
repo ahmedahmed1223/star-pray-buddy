@@ -1,62 +1,39 @@
 
-# خطة تطوير شاملة - متابع الصلاة للأطفال
+# خطة تطوير شاملة - متابع الصلاة للأطفال v1.0.0
 
 ## ما تم إنجازه ✅
 
-### البنية التحتية
-- ✅ Capacitor setup + Haptics + Status Bar + Splash Screen
-- ✅ README.md احترافي
-- ✅ PWA support
+### المرحلة 1: رسائل ترحيب + موسمية ديناميكية ✅
+- ✅ إنشاء `src/lib/greetings.ts` مع `getGreeting()` (6 فترات) و `getSeasonalMessage()`
+- ✅ كشف تلقائي لرمضان، العيدين، ليلة القدر، عشر ذي الحجة، المولد النبوي
+- ✅ استبدال النص الثابت "إصدار رمضان ✨" بالرسائل الديناميكية في `Index.tsx`
+- ✅ إضافة الرسائل في `KidSelection.tsx`
 
-### واجهة المستخدم
-- ✅ تحسينات UI/UX (Onboarding, BottomNav, KidSelection, KidTracker)
-- ✅ تحسين تصميم الشهادات (3 قوالب + تصدير PNG)
-- ✅ وضع فاتح (Light Mode) مع زر تبديل شمس/قمر
-- ✅ Particle burst عند الصلاة
-- ✅ Skeleton loaders
-- ✅ Swipe بين الأطفال (Framer Motion drag)
+### المرحلة 2: تحسين UI/UX والتوافق ✅
+- ✅ responsive grid في `KidSelection` (2-3 أعمدة حسب الشاشة)
+- ✅ `max-w-sm sm:max-w-md` للشاشات الكبيرة
+- ✅ font scaling للشاشات الصغيرة (`@media max-width: 360px`)
+- ✅ تأثير صوتي للسحب بين الأطفال (`playSwipeSound`)
 
-### دقة التواريخ
-- ✅ إصلاح مشكلة UTC offset (localDateStr مركزي)
-- ✅ إصلاح التقويم الهجري (Intl.DateTimeFormat + أم القرى)
-- ✅ تحديث 14 موقع عبر 6 ملفات
+### المرحلة 3: أداء الهاتف والاستقرار ✅
+- ✅ `ErrorBoundary` عام في `App.tsx`
+- ✅ Lazy loading لجميع الصفحات (`React.lazy` + `Suspense`)
+- ✅ `PageLoader` مع animation أثناء التحميل
+- ✅ تقليل عدد الجسيمات تلقائياً حسب `navigator.hardwareConcurrency`
+- ✅ `will-change-transform` على الجسيمات المتحركة
+- ✅ `useMemo` لـ particles في `StarParticles`
 
-### الإشعارات
-- ✅ إشعارات Capacitor المحلية (تعمل في الخلفية على Native)
-- ✅ Web fallback notifications
-- ✅ تذكيرات ذكية (بعد ساعتين من الصلاة)
-- ✅ تنبيه "Streak في خطر" الساعة 9 مساءً
+### المرحلة 4: تنظيم المستودع والتوثيق ✅
+- ✅ `CHANGELOG.md` — سجل التغييرات
+- ✅ `CONTRIBUTING.md` — دليل المساهمة
+- ✅ Version bump: `0.0.0` → `1.0.0`
+- ✅ JSDoc comments على الدوال الجديدة
 
-### لوحة الوالدين
-- ✅ رسم بياني مقارنة أداء الأطفال
-- ✅ لوحة متصدرين عائلية
-- ✅ تحديات أسبوعية تلقائية
-- ✅ تصدير تقرير كصورة PNG
-- ✅ إحصائيات تفصيلية (أقوى/أضعف صلاة + Radar Chart)
-
-### إمكانية الوصول
-- ✅ aria-labels على العناصر الرئيسية
-- ✅ أحجام لمس مناسبة (44px minimum)
-- ✅ تباين ألوان محسّن في الوضع الفاتح
-- ✅ ARIA roles (tablist, tab, list, listitem)
-
-### الأمان
-- ✅ PIN route guard (session-based)
-- ✅ Zod schema validation للبيانات المستوردة
-- ✅ حماية من Prototype pollution
-
-## الملفات الرئيسية
-
-| الملف | الوصف |
-|-------|-------|
-| `src/lib/store.ts` | مخزن البيانات + `localDateStr()` المركزي |
-| `src/lib/hijri.ts` | تقويم هجري دقيق (Intl + أم القرى) |
-| `src/lib/notifications.ts` | Capacitor Local Notifications wrapper |
-| `src/lib/reminders.ts` | نظام التذكيرات (native + web fallback) |
-| `src/lib/sounds.ts` | تأثيرات صوتية (Web Audio API) |
-| `src/components/ThemeToggle.tsx` | زر تبديل الوضع الفاتح/الداكن |
-| `src/components/ReportView.tsx` | تقارير + تحليل أداء + تصدير PNG |
-| `src/components/ComparisonChart.tsx` | مقارنة أداء الأطفال |
-| `src/components/Leaderboard.tsx` | لوحة متصدرين |
-| `src/components/WeeklyChallenges.tsx` | تحديات أسبوعية |
-| `src/components/CertificateGenerator.tsx` | شهادات إنجاز محسّنة |
+### البنية التحتية (سابقاً) ✅
+- ✅ Capacitor + Haptics + Status Bar + Splash Screen
+- ✅ PWA support + README.md
+- ✅ إصلاح دقة التواريخ (`localDateStr` المركزي)
+- ✅ التقويم الهجري (Intl.DateTimeFormat + أم القرى)
+- ✅ إشعارات + تذكيرات ذكية
+- ✅ PIN route guard + Zod validation
+- ✅ وضع فاتح/داكن + أحجام لمس 44px + ARIA roles
