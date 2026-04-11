@@ -7,7 +7,9 @@ import {
   getCustomActivities, addCustomActivity, removeCustomActivity,
   getGiftTiers, addGiftTier, removeGiftTier,
   getDateLog, togglePrayerForDate, toggleJamaah, exportData, importData,
-  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName
+  getShopItems, addShopItem, removeShopItem,
+  getParentMessages, addParentMessage, removeParentMessage,
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName, type ShopItem
 } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
 import EditChildDialog from '@/components/EditChildDialog';
