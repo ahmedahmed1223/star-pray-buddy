@@ -16,6 +16,7 @@ const ParentDashboard = lazy(() => import("./pages/ParentDashboard"));
 const KidSelection = lazy(() => import("./pages/KidSelection"));
 const KidTracker = lazy(() => import("./pages/KidTracker"));
 const RewardsScreen = lazy(() => import("./pages/RewardsScreen"));
+const RewardShop = lazy(() => import("./pages/RewardShop"));
 const AchievementsScreen = lazy(() => import("./pages/AchievementsScreen"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -50,6 +51,7 @@ function AnimatedRoutes() {
             <Route path="/parent" element={<ParentDashboard />} />
             <Route path="/kids" element={<KidSelection />} />
             <Route path="/tracker/:childId" element={<KidTracker />} />
+            <Route path="/shop/:childId" element={<RewardShop />} />
             <Route path="/rewards/:childId" element={<RewardsScreen />} />
             <Route path="/achievements/:childId" element={<AchievementsScreen />} />
             <Route path="*" element={<NotFound />} />
