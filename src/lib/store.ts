@@ -270,6 +270,11 @@ export function getData(): AppData {
   if (!data.customActivities) data.customActivities = [];
   if (!data.activityLogs) data.activityLogs = [];
   if (!data.giftTiers) data.giftTiers = [];
+  if (!data.dailyGoalLogs) data.dailyGoalLogs = [];
+  if (!data.quranLogs) data.quranLogs = [];
+  if (!data.shopItems) data.shopItems = [];
+  if (!data.redemptionLogs) data.redemptionLogs = [];
+  if (!data.parentMessages) data.parentMessages = [];
   _cachedData = data;
   return data;
 }
