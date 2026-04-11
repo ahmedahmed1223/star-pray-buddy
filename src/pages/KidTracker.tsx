@@ -17,6 +17,10 @@ import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
+import Mascot from '@/components/Mascot';
+import DailyGoalCard from '@/components/DailyGoalCard';
+import QuranTracker from '@/components/QuranTracker';
+import AdventureMap from '@/components/AdventureMap';
 import { ParticleBurst } from '@/components/SkeletonLoader';
 import { ArrowLeft, Trophy, Coins, Flame, Award } from 'lucide-react';
 
@@ -390,6 +394,14 @@ export default function KidTracker() {
           )}
         </div>
 
+        {/* Mascot */}
+        <Mascot prayersDone={dateProgress} totalStars={progress.total} streak={streak.current} />
+
+        {/* Daily Goal */}
+        <div className="mb-4">
+          <DailyGoalCard childId={child.id} date={dateStr} onComplete={refreshState} />
+        </div>
+
         {/* Prayer buttons */}
         <div className="space-y-4 mb-5">
           {PRAYER_NAMES.map((prayer, i) => (
@@ -428,6 +440,14 @@ export default function KidTracker() {
     </div>
           </div>
         )}
+
+        {/* Quran Tracker */}
+        <div className="mb-5">
+          <QuranTracker childId={child.id} date={dateStr} onUpdate={refreshState} />
+        </div>
+
+        {/* Adventure Map */}
+        <AdventureMap totalStars={progress.total} />
 
         {/* Weekly calendar */}
         <WeeklyCalendar childId={child.id} />
