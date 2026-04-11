@@ -394,6 +394,20 @@ export default function KidTracker() {
             </motion.p>
           )}
         </div>
+        {/* Parent message */}
+        {(() => {
+          const parentMsg = getLatestParentMessage();
+          return parentMsg ? (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-accent/10 border border-accent/30 rounded-2xl px-4 py-3 mb-3 text-center"
+            >
+              <span className="text-lg mr-1">{parentMsg.emoji}</span>
+              <span className="text-foreground text-sm font-medium">{parentMsg.text}</span>
+            </motion.div>
+          ) : null;
+        })()}
 
         {/* Mascot */}
         <Mascot prayersDone={dateProgress} totalStars={progress.total} streak={streak.current} />
