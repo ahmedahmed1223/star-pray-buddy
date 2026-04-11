@@ -73,6 +73,56 @@ export interface Badge {
   condition: (data: AppData, childId: string) => boolean;
 }
 
+// === DAILY GOALS ===
+export interface DailyGoal {
+  id: string;
+  text: string;
+  emoji: string;
+  starsReward: number;
+}
+
+export interface DailyGoalLog {
+  childId: string;
+  date: string;
+  goalId: string;
+  completed: boolean;
+}
+
+// === QURAN TRACKER ===
+export interface QuranLog {
+  childId: string;
+  date: string;
+  pages: number;
+}
+
+// === SHOP ITEMS ===
+export interface ShopItem {
+  id: string;
+  name: string;
+  emoji: string;
+  cost: number;
+  type: 'reward' | 'coupon';
+  description?: string;
+}
+
+export interface RedemptionLog {
+  id: string;
+  childId: string;
+  itemId: string;
+  itemName: string;
+  cost: number;
+  date: string;
+  redeemed: boolean;
+}
+
+// === PARENT MESSAGES ===
+export interface ParentMessage {
+  id: string;
+  text: string;
+  emoji: string;
+  createdAt: string;
+}
+
 export interface AppData {
   pin: string;
   children: Child[];
@@ -85,6 +135,11 @@ export interface AppData {
   activityLogs: ActivityLog[];
   giftTiers: GiftTier[];
   onboardingDone?: boolean;
+  dailyGoalLogs?: DailyGoalLog[];
+  quranLogs?: QuranLog[];
+  shopItems?: ShopItem[];
+  redemptionLogs?: RedemptionLog[];
+  parentMessages?: ParentMessage[];
 }
 
 // === LEVELING SYSTEM ===
