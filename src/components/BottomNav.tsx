@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Gift, Award } from 'lucide-react';
+import { BookOpen, Gift, Award, ShoppingBag } from 'lucide-react';
 import { getEarnedBadges, BADGES } from '@/lib/store';
 import { hapticLight } from '@/lib/haptics';
 
@@ -19,6 +19,7 @@ export default function BottomNav({ childId }: Props) {
 
   const tabs = [
     { path: 'tracker', label: 'الصلوات', Icon: BookOpen, badge: 0 },
+    { path: 'shop', label: 'المتجر', Icon: ShoppingBag, badge: 0 },
     { path: 'rewards', label: 'المكافآت', Icon: Gift, badge: 0 },
     { path: 'achievements', label: 'الإنجازات', Icon: Award, badge: hasNewBadges ? unreadBadges : 0 },
   ];
@@ -27,6 +28,8 @@ export default function BottomNav({ childId }: Props) {
     ? 'achievements'
     : location.pathname.includes('/rewards')
     ? 'rewards'
+    : location.pathname.includes('/shop')
+    ? 'shop'
     : 'tracker';
 
   return (
@@ -37,6 +40,8 @@ export default function BottomNav({ childId }: Props) {
             const active = currentTab === tab.path;
             const targetPath = tab.path === 'tracker'
               ? `/tracker/${childId}`
+              : tab.path === 'shop'
+              ? `/shop/${childId}`
               : tab.path === 'rewards'
               ? `/rewards/${childId}`
               : `/achievements/${childId}`;
