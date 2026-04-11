@@ -63,6 +63,19 @@ export default function ParentDashboard() {
   const [newGiftStars, setNewGiftStars] = useState('50');
   const [newGiftEmoji, setNewGiftEmoji] = useState('🎁');
 
+  // Shop items
+  const [shopItems, setShopItemsState] = useState(getShopItems());
+  const [newShopName, setNewShopName] = useState('');
+  const [newShopEmoji, setNewShopEmoji] = useState('🎁');
+  const [newShopCost, setNewShopCost] = useState('20');
+  const [newShopType, setNewShopType] = useState<'reward' | 'coupon'>('reward');
+  const [newShopDesc, setNewShopDesc] = useState('');
+
+  // Parent messages
+  const [messages, setMessagesState] = useState(getParentMessages());
+  const [newMsgText, setNewMsgText] = useState('');
+  const [newMsgEmoji, setNewMsgEmoji] = useState('💪');
+
   // Edit day
   const [editDate, setEditDate] = useState(new Date());
   const [editChildId, setEditChildId] = useState('');
@@ -71,6 +84,8 @@ export default function ParentDashboard() {
     setChildren(getChildren());
     setActivities(getCustomActivities());
     setGiftTiersState(getGiftTiers());
+    setShopItemsState(getShopItems());
+    setMessagesState(getParentMessages());
     setSettingsState(getSettings());
   };
   useEffect(refresh, []);
