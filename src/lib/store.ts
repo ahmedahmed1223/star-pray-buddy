@@ -73,6 +73,56 @@ export interface Badge {
   condition: (data: AppData, childId: string) => boolean;
 }
 
+// === DAILY GOALS ===
+export interface DailyGoal {
+  id: string;
+  text: string;
+  emoji: string;
+  starsReward: number;
+}
+
+export interface DailyGoalLog {
+  childId: string;
+  date: string;
+  goalId: string;
+  completed: boolean;
+}
+
+// === QURAN TRACKER ===
+export interface QuranLog {
+  childId: string;
+  date: string;
+  pages: number;
+}
+
+// === SHOP ITEMS ===
+export interface ShopItem {
+  id: string;
+  name: string;
+  emoji: string;
+  cost: number;
+  type: 'reward' | 'coupon';
+  description?: string;
+}
+
+export interface RedemptionLog {
+  id: string;
+  childId: string;
+  itemId: string;
+  itemName: string;
+  cost: number;
+  date: string;
+  redeemed: boolean;
+}
+
+// === PARENT MESSAGES ===
+export interface ParentMessage {
+  id: string;
+  text: string;
+  emoji: string;
+  createdAt: string;
+}
+
 export interface AppData {
   pin: string;
   children: Child[];
@@ -85,6 +135,11 @@ export interface AppData {
   activityLogs: ActivityLog[];
   giftTiers: GiftTier[];
   onboardingDone?: boolean;
+  dailyGoalLogs?: DailyGoalLog[];
+  quranLogs?: QuranLog[];
+  shopItems?: ShopItem[];
+  redemptionLogs?: RedemptionLog[];
+  parentMessages?: ParentMessage[];
 }
 
 // === LEVELING SYSTEM ===
@@ -215,6 +270,11 @@ export function getData(): AppData {
   if (!data.customActivities) data.customActivities = [];
   if (!data.activityLogs) data.activityLogs = [];
   if (!data.giftTiers) data.giftTiers = [];
+  if (!data.dailyGoalLogs) data.dailyGoalLogs = [];
+  if (!data.quranLogs) data.quranLogs = [];
+  if (!data.shopItems) data.shopItems = [];
+  if (!data.redemptionLogs) data.redemptionLogs = [];
+  if (!data.parentMessages) data.parentMessages = [];
   _cachedData = data;
   return data;
 }
@@ -830,4 +890,142 @@ export function getYearlyStats(childId: string): { month: number; prayers: numbe
     result.push({ month: m, prayers, jamaah, activities });
   }
   return result;
+}
+
+// === DAILY GOALS SYSTEM ===
+const DAILY_GOALS: DailyGoal[] = [
+  { id: 'fajr_time', text: 'صلِّ الفجر في وقته', emoji: '🌅', starsReward: 3 },
+  { id: 'all_prayers', text: 'أتمم الصلوات الخمس', emoji: '🕌', starsReward: 5 },
+  { id: 'jamaah', text: 'صلِّ صلاة واحدة في الجماعة', emoji: '🤝', starsReward: 3 },
+  { id: 'quran_5', text: 'اقرأ 5 صفحات من القرآن', emoji: '📖', starsReward: 3 },
+  { id: 'dhikr', text: 'اذكر الله 100 مرة', emoji: '📿', starsReward: 2 },
+  { id: 'dua', text: 'ادعُ الله بعد كل صلاة', emoji: '🤲', starsReward: 2 },
+  { id: 'help_family', text: 'ساعد أهلك في شيء', emoji: '💪', starsReward: 2 },
+  { id: 'early_sleep', text: 'نم مبكراً للفجر', emoji: '😴', starsReward: 2 },
+  { id: 'no_miss', text: 'لا تفوّت أي صلاة اليوم', emoji: '🎯', starsReward: 4 },
+  { id: 'smile', text: 'ابتسم في وجه الجميع', emoji: '😊', starsReward: 1 },
+];
+
+export function getDailyGoal(date: string): DailyGoal {
+  // Deterministic daily goal based on date hash
+  const hash = date.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return DAILY_GOALS[hash % DAILY_GOALS.length];
+}
+
+export function isDailyGoalCompleted(childId: string, date: string): boolean {
+  const data = getData();
+  const logs = data.dailyGoalLogs ?? [];
+  return logs.some(l => l.childId === childId && l.date === date && l.completed);
+}
+
+export function completeDailyGoal(childId: string, date: string) {
+  const data = getData();
+  if (!data.dailyGoalLogs) data.dailyGoalLogs = [];
+  if (data.dailyGoalLogs.some(l => l.childId === childId && l.date === date && l.completed)) return;
+  const goal = getDailyGoal(date);
+  data.dailyGoalLogs.push({ childId, date, goalId: goal.id, completed: true });
+  const child = data.children.find(c => c.id === childId);
+  if (child) child.totalStars += goal.starsReward;
+  saveData(data);
+}
+
+// === QURAN TRACKER ===
+export function getQuranLog(childId: string, date: string): number {
+  const data = getData();
+  const logs = data.quranLogs ?? [];
+  const log = logs.find(l => l.childId === childId && l.date === date);
+  return log?.pages ?? 0;
+}
+
+export function setQuranPages(childId: string, date: string, pages: number) {
+  const data = getData();
+  if (!data.quranLogs) data.quranLogs = [];
+  let log = data.quranLogs.find(l => l.childId === childId && l.date === date);
+  if (log) {
+    log.pages = pages;
+  } else {
+    data.quranLogs.push({ childId, date, pages });
+  }
+  saveData(data);
+}
+
+export function getTotalQuranPages(childId: string): number {
+  const data = getData();
+  const logs = data.quranLogs ?? [];
+  return logs.filter(l => l.childId === childId).reduce((sum, l) => sum + l.pages, 0);
+}
+
+// === SHOP SYSTEM ===
+export function getShopItems(): ShopItem[] {
+  return getData().shopItems ?? [];
+}
+
+export function addShopItem(item: Omit<ShopItem, 'id'>): ShopItem {
+  const data = getData();
+  if (!data.shopItems) data.shopItems = [];
+  const newItem: ShopItem = { ...item, id: crypto.randomUUID() };
+  data.shopItems.push(newItem);
+  saveData(data);
+  return newItem;
+}
+
+export function removeShopItem(id: string) {
+  const data = getData();
+  if (!data.shopItems) return;
+  data.shopItems = data.shopItems.filter(i => i.id !== id);
+  saveData(data);
+}
+
+export function redeemItem(childId: string, item: ShopItem): boolean {
+  const data = getData();
+  const child = data.children.find(c => c.id === childId);
+  if (!child || child.totalStars < item.cost) return false;
+  child.totalStars -= item.cost;
+  if (!data.redemptionLogs) data.redemptionLogs = [];
+  data.redemptionLogs.push({
+    id: crypto.randomUUID(),
+    childId,
+    itemId: item.id,
+    itemName: item.name,
+    cost: item.cost,
+    date: localDateStr(),
+    redeemed: false,
+  });
+  saveData(data);
+  return true;
+}
+
+export function getRedemptionLogs(childId: string): RedemptionLog[] {
+  const data = getData();
+  return (data.redemptionLogs ?? []).filter(l => l.childId === childId);
+}
+
+export function markRedemptionUsed(id: string) {
+  const data = getData();
+  const log = (data.redemptionLogs ?? []).find(l => l.id === id);
+  if (log) { log.redeemed = true; saveData(data); }
+}
+
+// === PARENT MESSAGES ===
+export function getParentMessages(): ParentMessage[] {
+  return getData().parentMessages ?? [];
+}
+
+export function addParentMessage(text: string, emoji: string) {
+  const data = getData();
+  if (!data.parentMessages) data.parentMessages = [];
+  data.parentMessages.push({ id: crypto.randomUUID(), text, emoji, createdAt: localDateStr() });
+  saveData(data);
+}
+
+export function removeParentMessage(id: string) {
+  const data = getData();
+  if (!data.parentMessages) return;
+  data.parentMessages = data.parentMessages.filter(m => m.id !== id);
+  saveData(data);
+}
+
+export function getLatestParentMessage(): ParentMessage | null {
+  const msgs = getParentMessages();
+  return msgs.length > 0 ? msgs[msgs.length - 1] : null;
 }

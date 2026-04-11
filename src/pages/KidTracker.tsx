@@ -5,7 +5,8 @@ import {
   getChild, getChildren, getDateLog, togglePrayerForDate, toggleJamaah, getChildProgress, getDateProgress,
   isDateComplete, getRandomMotivation, getMoneyReward, getChildMoney, getSettings, getStreak,
   getCustomActivities, toggleActivity, getActivityLog, getEarnedBadges, getChildLevel, LEVELS,
-  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type PrayerLog, type PrayerName
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, getLatestParentMessage,
+  type PrayerLog, type PrayerName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
@@ -17,6 +18,10 @@ import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
+import Mascot from '@/components/Mascot';
+import DailyGoalCard from '@/components/DailyGoalCard';
+import QuranTracker from '@/components/QuranTracker';
+import AdventureMap from '@/components/AdventureMap';
 import { ParticleBurst } from '@/components/SkeletonLoader';
 import { ArrowLeft, Trophy, Coins, Flame, Award } from 'lucide-react';
 
@@ -389,6 +394,28 @@ export default function KidTracker() {
             </motion.p>
           )}
         </div>
+        {/* Parent message */}
+        {(() => {
+          const parentMsg = getLatestParentMessage();
+          return parentMsg ? (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-accent/10 border border-accent/30 rounded-2xl px-4 py-3 mb-3 text-center"
+            >
+              <span className="text-lg mr-1">{parentMsg.emoji}</span>
+              <span className="text-foreground text-sm font-medium">{parentMsg.text}</span>
+            </motion.div>
+          ) : null;
+        })()}
+
+        {/* Mascot */}
+        <Mascot prayersDone={dateProgress} totalStars={progress.total} streak={streak.current} />
+
+        {/* Daily Goal */}
+        <div className="mb-4">
+          <DailyGoalCard childId={child.id} date={dateStr} onComplete={refreshState} />
+        </div>
 
         {/* Prayer buttons */}
         <div className="space-y-4 mb-5">
@@ -428,6 +455,14 @@ export default function KidTracker() {
     </div>
           </div>
         )}
+
+        {/* Quran Tracker */}
+        <div className="mb-5">
+          <QuranTracker childId={child.id} date={dateStr} onUpdate={refreshState} />
+        </div>
+
+        {/* Adventure Map */}
+        <AdventureMap totalStars={progress.total} />
 
         {/* Weekly calendar */}
         <WeeklyCalendar childId={child.id} />

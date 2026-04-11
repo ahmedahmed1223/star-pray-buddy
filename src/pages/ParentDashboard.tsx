@@ -7,7 +7,9 @@ import {
   getCustomActivities, addCustomActivity, removeCustomActivity,
   getGiftTiers, addGiftTier, removeGiftTier,
   getDateLog, togglePrayerForDate, toggleJamaah, exportData, importData,
-  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName
+  getShopItems, addShopItem, removeShopItem,
+  getParentMessages, addParentMessage, removeParentMessage,
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName, type ShopItem
 } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
 import EditChildDialog from '@/components/EditChildDialog';
@@ -61,6 +63,19 @@ export default function ParentDashboard() {
   const [newGiftStars, setNewGiftStars] = useState('50');
   const [newGiftEmoji, setNewGiftEmoji] = useState('🎁');
 
+  // Shop items
+  const [shopItems, setShopItemsState] = useState(getShopItems());
+  const [newShopName, setNewShopName] = useState('');
+  const [newShopEmoji, setNewShopEmoji] = useState('🎁');
+  const [newShopCost, setNewShopCost] = useState('20');
+  const [newShopType, setNewShopType] = useState<'reward' | 'coupon'>('reward');
+  const [newShopDesc, setNewShopDesc] = useState('');
+
+  // Parent messages
+  const [messages, setMessagesState] = useState(getParentMessages());
+  const [newMsgText, setNewMsgText] = useState('');
+  const [newMsgEmoji, setNewMsgEmoji] = useState('💪');
+
   // Edit day
   const [editDate, setEditDate] = useState(new Date());
   const [editChildId, setEditChildId] = useState('');
@@ -69,6 +84,8 @@ export default function ParentDashboard() {
     setChildren(getChildren());
     setActivities(getCustomActivities());
     setGiftTiersState(getGiftTiers());
+    setShopItemsState(getShopItems());
+    setMessagesState(getParentMessages());
     setSettingsState(getSettings());
   };
   useEffect(refresh, []);
@@ -586,6 +603,76 @@ export default function ParentDashboard() {
                   <button onClick={() => setEditingMoney(true)} className="text-gold text-sm font-medium underline min-h-[44px] px-2">تعديل</button>
                 </div>
               )}
+            </div>
+
+            {/* Shop Items Management */}
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Gift size={20} className="text-accent" />
+                <span className="font-bold text-lg text-foreground">🛍️ متجر المكافآت</span>
+              </div>
+              <p className="text-muted-foreground text-xs mb-3">أضف مكافآت وكوبونات يمكن للطفل شراؤها بنجومه</p>
+              {shopItems.map(item => (
+                <div key={item.id} className="flex items-center gap-3 bg-muted rounded-xl p-3 mb-2">
+                  <span className="text-2xl">{item.emoji}</span>
+                  <div className="flex-1">
+                    <p className="text-foreground font-medium text-sm">{item.name}</p>
+                    <p className="text-muted-foreground text-xs">⭐ {item.cost} — {item.type === 'coupon' ? '🎫 كوبون' : '🎁 مكافأة'}</p>
+                  </div>
+                  <button onClick={() => { removeShopItem(item.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <div className="space-y-2 mt-2">
+                <div className="flex gap-2">
+                  <button onClick={() => setNewShopType('reward')} className={`flex-1 py-1.5 rounded-xl text-xs font-bold min-h-[36px] ${newShopType === 'reward' ? 'bg-primary/20 text-gold border border-primary' : 'bg-muted text-muted-foreground'}`}>🎁 مكافأة</button>
+                  <button onClick={() => setNewShopType('coupon')} className={`flex-1 py-1.5 rounded-xl text-xs font-bold min-h-[36px] ${newShopType === 'coupon' ? 'bg-accent/20 text-accent border border-accent' : 'bg-muted text-muted-foreground'}`}>🎫 كوبون</button>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <input value={newShopEmoji} onChange={e => setNewShopEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg min-h-[44px]" maxLength={2} />
+                  <input value={newShopName} onChange={e => setNewShopName(e.target.value)} placeholder="اسم العنصر..." className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none min-h-[44px]" />
+                  <input value={newShopCost} onChange={e => setNewShopCost(e.target.value)} type="number" placeholder="تكلفة" className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm min-h-[44px]" dir="ltr" />
+                  <button onClick={() => {
+                    if (!newShopName.trim()) return;
+                    addShopItem({ name: newShopName.trim(), emoji: newShopEmoji, cost: parseInt(newShopCost) || 20, type: newShopType, description: newShopDesc || undefined });
+                    setNewShopName(''); setNewShopEmoji('🎁'); setNewShopCost('20'); setNewShopDesc('');
+                    refresh();
+                  }} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm min-h-[44px]">
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Parent Messages */}
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Star size={20} className="text-gold" />
+                <span className="font-bold text-lg text-foreground">💬 رسائل تشجيعية</span>
+              </div>
+              <p className="text-muted-foreground text-xs mb-3">أرسل رسالة تشجيعية تظهر للطفل عند فتح التطبيق</p>
+              {messages.map(msg => (
+                <div key={msg.id} className="flex items-center gap-3 bg-muted rounded-xl p-3 mb-2">
+                  <span className="text-xl">{msg.emoji}</span>
+                  <p className="text-foreground text-sm flex-1">{msg.text}</p>
+                  <button onClick={() => { removeParentMessage(msg.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <div className="flex gap-2 flex-wrap">
+                <input value={newMsgEmoji} onChange={e => setNewMsgEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg min-h-[44px]" maxLength={2} />
+                <input value={newMsgText} onChange={e => setNewMsgText(e.target.value)} placeholder="اكتب رسالة تشجيعية..." className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none min-h-[44px]" />
+                <button onClick={() => {
+                  if (!newMsgText.trim()) return;
+                  addParentMessage(newMsgText.trim(), newMsgEmoji);
+                  setNewMsgText(''); setNewMsgEmoji('💪');
+                  refresh();
+                }} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm min-h-[44px]">
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
