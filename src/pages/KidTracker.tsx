@@ -5,7 +5,8 @@ import {
   getChild, getChildren, getDateLog, togglePrayerForDate, toggleJamaah, getChildProgress, getDateProgress,
   isDateComplete, getRandomMotivation, getMoneyReward, getChildMoney, getSettings, getStreak,
   getCustomActivities, toggleActivity, getActivityLog, getEarnedBadges, getChildLevel, LEVELS,
-  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type PrayerLog, type PrayerName
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, getLatestParentMessage,
+  type PrayerLog, type PrayerName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
