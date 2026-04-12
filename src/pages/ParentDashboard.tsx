@@ -711,6 +711,52 @@ export default function ParentDashboard() {
                 </button>
               </div>
             </div>
+
+            {/* Family Challenges */}
+            <div className="bg-card rounded-2xl p-5 border border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Users size={20} className="text-secondary" />
+                <span className="font-bold text-lg text-foreground">🏠 تحدي الأسرة</span>
+              </div>
+              <p className="text-muted-foreground text-xs mb-3">أنشئ تحدياً مشتركاً لجميع الأطفال</p>
+              {challenges.filter(c => c.active).map(ch => (
+                <div key={ch.id} className="flex items-center gap-3 bg-secondary/10 rounded-xl p-3 mb-2 border border-secondary/30">
+                  <span className="text-2xl">{ch.emoji}</span>
+                  <div className="flex-1">
+                    <p className="text-foreground font-medium text-sm">{ch.title}</p>
+                    <p className="text-muted-foreground text-xs">🎯 {ch.target} — {ch.startDate} إلى {ch.endDate}</p>
+                  </div>
+                  <button onClick={() => { removeFamilyChallenge(ch.id); refresh(); }} className="text-destructive/60 hover:text-destructive p-1 min-w-[36px] min-h-[36px] flex items-center justify-center">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+              <div className="space-y-2 mt-2">
+                <div className="flex gap-2 flex-wrap">
+                  <input value={newChallengeEmoji} onChange={e => setNewChallengeEmoji(e.target.value)} className="w-12 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-lg min-h-[44px]" maxLength={2} />
+                  <input value={newChallengeTitle} onChange={e => setNewChallengeTitle(e.target.value)} placeholder="عنوان التحدي..." className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm outline-none min-h-[44px]" />
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <select value={newChallengeType} onChange={e => setNewChallengeType(e.target.value as FamilyChallenge['type'])}
+                    className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-foreground text-sm min-h-[44px]">
+                    <option value="all_prayers">جميع الصلوات</option>
+                    <option value="fajr_streak">صلاة الفجر</option>
+                    <option value="jamaah">صلاة الجماعة</option>
+                    <option value="custom">مخصص</option>
+                  </select>
+                  <input value={newChallengeTarget} onChange={e => setNewChallengeTarget(e.target.value)} type="number" placeholder="هدف" className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm min-h-[44px]" dir="ltr" />
+                  <input value={newChallengeDays} onChange={e => setNewChallengeDays(e.target.value)} type="number" placeholder="أيام" className="w-16 bg-muted border border-border rounded-xl px-2 py-2 text-foreground text-center text-sm min-h-[44px]" dir="ltr" />
+                  <button onClick={() => {
+                    if (!newChallengeTitle.trim()) return;
+                    addFamilyChallenge(newChallengeTitle.trim(), newChallengeEmoji, parseInt(newChallengeTarget) || 5, newChallengeType, parseInt(newChallengeDays) || 7);
+                    setNewChallengeTitle(''); setNewChallengeEmoji('🏠'); setNewChallengeTarget('5'); setNewChallengeDays('7');
+                    refresh();
+                  }} className="gradient-gold text-primary-foreground font-bold px-4 py-2 rounded-xl text-sm min-h-[44px]">
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
