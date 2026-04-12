@@ -9,7 +9,9 @@ import {
   getDateLog, togglePrayerForDate, toggleJamaah, exportData, importData,
   getShopItems, addShopItem, removeShopItem,
   getParentMessages, addParentMessage, removeParentMessage,
-  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName, type ShopItem
+  getFamilyChallenges, addFamilyChallenge, removeFamilyChallenge,
+  getYearlyHeatmapData,
+  AVATAR_IMAGES, PRAYER_NAMES, localDateStr, type Child, type MoneyReward, type PrayerName, type ShopItem, type FamilyChallenge
 } from '@/lib/store';
 import AddChildDialog from '@/components/AddChildDialog';
 import EditChildDialog from '@/components/EditChildDialog';
@@ -20,6 +22,7 @@ import ReportView from '@/components/ReportView';
 import ComparisonChart from '@/components/ComparisonChart';
 import Leaderboard from '@/components/Leaderboard';
 import WeeklyChallenges from '@/components/WeeklyChallenges';
+import Heatmap from '@/components/Heatmap';
 import DateNavigator from '@/components/DateNavigator';
 import PrayerButton from '@/components/PrayerButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -76,6 +79,17 @@ export default function ParentDashboard() {
   const [newMsgText, setNewMsgText] = useState('');
   const [newMsgEmoji, setNewMsgEmoji] = useState('💪');
 
+  // Family challenges
+  const [challenges, setChallengesState] = useState<FamilyChallenge[]>(getFamilyChallenges());
+  const [newChallengeTitle, setNewChallengeTitle] = useState('');
+  const [newChallengeEmoji, setNewChallengeEmoji] = useState('🏠');
+  const [newChallengeTarget, setNewChallengeTarget] = useState('5');
+  const [newChallengeType, setNewChallengeType] = useState<FamilyChallenge['type']>('all_prayers');
+  const [newChallengeDays, setNewChallengeDays] = useState('7');
+
+  // Heatmap child
+  const [heatmapChildId, setHeatmapChildId] = useState('');
+
   // Edit day
   const [editDate, setEditDate] = useState(new Date());
   const [editChildId, setEditChildId] = useState('');
@@ -87,8 +101,13 @@ export default function ParentDashboard() {
     setShopItemsState(getShopItems());
     setMessagesState(getParentMessages());
     setSettingsState(getSettings());
+    setChallengesState(getFamilyChallenges());
   };
-  useEffect(refresh, []);
+  useEffect(() => {
+    refresh();
+    const kids = getChildren();
+    if (kids.length > 0 && !heatmapChildId) setHeatmapChildId(kids[0].id);
+  }, []);
 
   if (!pinVerified) {
     return (
