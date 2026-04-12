@@ -484,12 +484,61 @@ export default function KidTracker() {
           <QuranTracker childId={child.id} date={dateStr} onUpdate={refreshState} />
         </div>
 
+        {/* Family Challenge */}
+        {familyChallenge && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card rounded-2xl p-4 border border-border mb-5"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">{familyChallenge.emoji}</span>
+              <div className="flex-1">
+                <p className="text-gold font-bold text-sm">🏠 تحدي الأسرة</p>
+                <p className="text-foreground font-medium text-sm">{familyChallenge.title}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {challengeProgress.map(cp => {
+                const pct = Math.min((cp.progress / familyChallenge.target) * 100, 100);
+                return (
+                  <div key={cp.childId} className="flex items-center gap-2">
+                    <span className={`text-xs font-bold w-16 truncate ${cp.childId === child.id ? 'text-gold' : 'text-muted-foreground'}`}>
+                      {cp.childName}
+                    </span>
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        className="h-full rounded-full bg-primary"
+                        transition={{ duration: 0.8 }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-bold">{cp.progress}/{familyChallenge.target}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
         {/* Adventure Map */}
         <AdventureMap totalStars={progress.total} />
 
         {/* Weekly calendar */}
         <WeeklyCalendar childId={child.id} />
       </div>
+
+      {/* Theme Picker */}
+      <ThemePickerDialog
+        open={themePickerOpen}
+        onClose={() => setThemePickerOpen(false)}
+        currentTheme={childTheme}
+        onSelect={(theme) => {
+          setChildTheme(child.id, theme);
+          setChildThemeState(theme);
+        }}
+      />
 
       {/* Bottom Navigation */}
       <BottomNav childId={child.id} />
