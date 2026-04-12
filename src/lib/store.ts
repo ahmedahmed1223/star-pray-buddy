@@ -309,6 +309,8 @@ export function getData(): AppData {
   if (!data.shopItems) data.shopItems = [];
   if (!data.redemptionLogs) data.redemptionLogs = [];
   if (!data.parentMessages) data.parentMessages = [];
+  if (!data.familyChallenges) data.familyChallenges = [];
+  if (!data.childThemes) data.childThemes = {};
   _cachedData = data;
   return data;
 }
