@@ -96,7 +96,16 @@ export default function KidTracker() {
   const childMoney = getChildMoney(child.id);
   const dateProgress = getDateProgress(child.id, dateStr);
   const levelInfo = getChildLevel(child.id);
+  const familyChallenge = getActiveFamilyChallenge();
+  const challengeProgress = familyChallenge ? getFamilyChallengeProgress(familyChallenge) : [];
 
+  const themeVars = CHILD_THEMES[childTheme];
+  const themeStyle: React.CSSProperties = childTheme !== 'golden' ? {
+    '--primary': themeVars.primary,
+    '--ring': themeVars.primary,
+    '--gold': themeVars.primary,
+    '--gold-glow': themeVars.glow,
+  } as React.CSSProperties : {};
   const checkBadgesAndLevel = () => {
     const newBadges = getEarnedBadges(child.id);
     if (newBadges.length > prevBadgeCount.current) {
