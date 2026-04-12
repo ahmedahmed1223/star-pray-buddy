@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,7 +6,9 @@ import {
   isDateComplete, getRandomMotivation, getMoneyReward, getChildMoney, getSettings, getStreak,
   getCustomActivities, toggleActivity, getActivityLog, getEarnedBadges, getChildLevel, LEVELS,
   AVATAR_IMAGES, PRAYER_NAMES, localDateStr, getLatestParentMessage,
-  type PrayerLog, type PrayerName
+  getActiveFamilyChallenge, getFamilyChallengeProgress,
+  getChildTheme, setChildTheme, CHILD_THEMES,
+  type PrayerLog, type PrayerName, type ChildThemeName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
@@ -22,8 +24,9 @@ import Mascot from '@/components/Mascot';
 import DailyGoalCard from '@/components/DailyGoalCard';
 import QuranTracker from '@/components/QuranTracker';
 import AdventureMap from '@/components/AdventureMap';
+import ThemePickerDialog from '@/components/ThemePickerDialog';
 import { ParticleBurst } from '@/components/SkeletonLoader';
-import { ArrowLeft, Trophy, Coins, Flame, Award } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins, Flame, Award, Palette } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -45,7 +48,8 @@ export default function KidTracker() {
   const [badgePopup, setBadgePopup] = useState<{ name: string; icon: string } | null>(null);
   const [levelUpPopup, setLevelUpPopup] = useState<{ name: string; icon: string } | null>(null);
   const [particleBurst, setParticleBurst] = useState(false);
-  
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
+  const [childTheme, setChildThemeState] = useState<ChildThemeName>('golden');
   const prevBadgeCount = useRef(0);
   const prevLevelId = useRef(0);
 
@@ -78,6 +82,7 @@ export default function KidTracker() {
     refreshState();
     prevBadgeCount.current = getEarnedBadges(child.id).length;
     prevLevelId.current = getChildLevel(child.id).level.id;
+    setChildThemeState(getChildTheme(child.id));
   }, [child, dateStr]);
 
   if (!child) {
