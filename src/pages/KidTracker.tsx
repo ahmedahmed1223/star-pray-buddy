@@ -174,6 +174,7 @@ export default function KidTracker() {
   return (
     <motion.div
       className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden"
+      style={themeStyle}
       drag={allChildren.length > 1 ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
@@ -351,6 +352,14 @@ export default function KidTracker() {
               <span className="text-destructive font-extrabold">{streak.current}</span>
             </motion.div>
           )}
+          <motion.button
+            onClick={() => setThemePickerOpen(true)}
+            className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center"
+            whileTap={{ scale: 0.9 }}
+            title="تخصيص الثيم"
+          >
+            <Palette size={20} />
+          </motion.button>
           <motion.button
             onClick={() => navigate(`/rewards/${child.id}`)}
             className="bg-primary/15 text-gold p-3 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center"
