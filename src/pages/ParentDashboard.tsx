@@ -508,6 +508,24 @@ export default function ParentDashboard() {
           <TabsContent value="reports" className="space-y-4">
             {children.length > 0 ? (
               <>
+                {/* Heatmap */}
+                <div className="space-y-2">
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {children.map(c => (
+                      <button key={c.id} onClick={() => setHeatmapChildId(c.id)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap min-h-[36px] ${
+                          heatmapChildId === c.id ? 'bg-primary/20 border border-primary text-gold' : 'bg-muted text-muted-foreground'
+                        }`}>
+                        <img src={AVATAR_IMAGES[c.avatarIndex]} alt={c.name} className="w-5 h-5 rounded-full object-cover" />
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                  {heatmapChildId && (
+                    <Heatmap childId={heatmapChildId} getLogs={getYearlyHeatmapData} />
+                  )}
+                </div>
+
                 {children.length >= 2 && <ComparisonChart children={children} />}
                 {children.length >= 2 && <Leaderboard children={children} />}
                 <WeeklyChallenges children={children} />
