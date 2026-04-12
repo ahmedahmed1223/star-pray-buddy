@@ -123,6 +123,38 @@ export interface ParentMessage {
   createdAt: string;
 }
 
+// === FAMILY CHALLENGES ===
+export interface FamilyChallenge {
+  id: string;
+  title: string;
+  emoji: string;
+  target: number; // e.g. 5 days
+  type: 'fajr_streak' | 'all_prayers' | 'jamaah' | 'custom';
+  startDate: string;
+  endDate: string;
+  active: boolean;
+}
+
+// === CHILD THEMES ===
+export type ChildThemeName = 'golden' | 'ocean' | 'garden' | 'purple' | 'cosmic' | 'pink';
+
+export interface ChildTheme {
+  label: string;
+  emoji: string;
+  primary: string;
+  accent: string;
+  glow: string;
+}
+
+export const CHILD_THEMES: Record<ChildThemeName, ChildTheme> = {
+  golden: { label: 'ذهبي', emoji: '✨', primary: '42, 100%, 55%', accent: '25, 95%, 55%', glow: '42, 100%, 65%' },
+  ocean: { label: 'محيط أزرق', emoji: '🌊', primary: '200, 80%, 50%', accent: '180, 60%, 45%', glow: '200, 80%, 60%' },
+  garden: { label: 'حديقة خضراء', emoji: '🌿', primary: '140, 60%, 45%', accent: '120, 50%, 40%', glow: '140, 60%, 55%' },
+  purple: { label: 'غروب بنفسجي', emoji: '🌅', primary: '280, 60%, 55%', accent: '320, 50%, 50%', glow: '280, 60%, 65%' },
+  cosmic: { label: 'فضاء كوني', emoji: '🚀', primary: '260, 70%, 60%', accent: '180, 100%, 50%', glow: '260, 70%, 70%' },
+  pink: { label: 'وردي ناعم', emoji: '🌸', primary: '340, 70%, 60%', accent: '320, 60%, 55%', glow: '340, 70%, 70%' },
+};
+
 export interface AppData {
   pin: string;
   children: Child[];
@@ -140,6 +172,8 @@ export interface AppData {
   shopItems?: ShopItem[];
   redemptionLogs?: RedemptionLog[];
   parentMessages?: ParentMessage[];
+  familyChallenges?: FamilyChallenge[];
+  childThemes?: Record<string, ChildThemeName>;
 }
 
 // === LEVELING SYSTEM ===
@@ -275,6 +309,8 @@ export function getData(): AppData {
   if (!data.shopItems) data.shopItems = [];
   if (!data.redemptionLogs) data.redemptionLogs = [];
   if (!data.parentMessages) data.parentMessages = [];
+  if (!data.familyChallenges) data.familyChallenges = [];
+  if (!data.childThemes) data.childThemes = {};
   _cachedData = data;
   return data;
 }
@@ -1028,4 +1064,106 @@ export function removeParentMessage(id: string) {
 export function getLatestParentMessage(): ParentMessage | null {
   const msgs = getParentMessages();
   return msgs.length > 0 ? msgs[msgs.length - 1] : null;
+}
+
+// === FAMILY CHALLENGES ===
+export function getFamilyChallenges(): FamilyChallenge[] {
+  return getData().familyChallenges ?? [];
+}
+
+export function getActiveFamilyChallenge(): FamilyChallenge | null {
+  const challenges = getFamilyChallenges();
+  const today = localDateStr();
+  return challenges.find(c => c.active && c.startDate <= today && c.endDate >= today) ?? null;
+}
+
+export function addFamilyChallenge(title: string, emoji: string, target: number, type: FamilyChallenge['type'], durationDays: number): FamilyChallenge {
+  const data = getData();
+  if (!data.familyChallenges) data.familyChallenges = [];
+  // Deactivate existing
+  data.familyChallenges.forEach(c => c.active = false);
+  const start = new Date();
+  const end = new Date();
+  end.setDate(end.getDate() + durationDays - 1);
+  const challenge: FamilyChallenge = {
+    id: crypto.randomUUID(), title, emoji, target, type,
+    startDate: localDateStr(start), endDate: localDateStr(end), active: true,
+  };
+  data.familyChallenges.push(challenge);
+  saveData(data);
+  return challenge;
+}
+
+export function removeFamilyChallenge(id: string) {
+  const data = getData();
+  if (!data.familyChallenges) return;
+  data.familyChallenges = data.familyChallenges.filter(c => c.id !== id);
+  saveData(data);
+}
+
+export function getFamilyChallengeProgress(challenge: FamilyChallenge): { childId: string; childName: string; progress: number }[] {
+  const data = getData();
+  const children = data.children;
+  return children.map(child => {
+    let progress = 0;
+    const start = new Date(challenge.startDate);
+    const end = new Date(challenge.endDate);
+    const today = new Date(localDateStr());
+    const effectiveEnd = end < today ? end : today;
+    
+    for (let d = new Date(start); d <= effectiveEnd; d.setDate(d.getDate() + 1)) {
+      const dateStr = localDateStr(d);
+      const log = data.prayerLogs.find(l => l.childId === child.id && l.date === dateStr);
+      if (!log) continue;
+      
+      switch (challenge.type) {
+        case 'fajr_streak':
+          if (log.fajr) progress++;
+          break;
+        case 'all_prayers':
+          if (log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha) progress++;
+          break;
+        case 'jamaah':
+          if (log.fajrJamaah) progress++;
+          if (log.dhuhrJamaah) progress++;
+          if (log.asrJamaah) progress++;
+          if (log.maghribJamaah) progress++;
+          if (log.ishaJamaah) progress++;
+          break;
+        default:
+          if (log.fajr && log.dhuhr && log.asr && log.maghrib && log.isha) progress++;
+      }
+    }
+    return { childId: child.id, childName: child.name, progress };
+  });
+}
+
+// === CHILD THEMES ===
+export function getChildTheme(childId: string): ChildThemeName {
+  const data = getData();
+  return data.childThemes?.[childId] ?? 'golden';
+}
+
+export function setChildTheme(childId: string, theme: ChildThemeName) {
+  const data = getData();
+  if (!data.childThemes) data.childThemes = {};
+  data.childThemes[childId] = theme;
+  saveData(data);
+}
+
+// === YEARLY HEATMAP DATA ===
+export function getYearlyHeatmapData(childId: string): { date: string; count: number }[] {
+  const data = getData();
+  const today = new Date();
+  const result: { date: string; count: number }[] = [];
+  
+  for (let i = 364; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = localDateStr(d);
+    const log = data.prayerLogs.find(l => l.childId === childId && l.date === dateStr);
+    const count = log ? [log.fajr, log.dhuhr, log.asr, log.maghrib, log.isha].filter(Boolean).length : 0;
+    result.push({ date: dateStr, count });
+  }
+  return result;
 }

@@ -7,7 +7,7 @@ import {
 import BottomNav from '@/components/BottomNav';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 import { ArrowLeft, Flame, Target, TrendingUp, Share2, Download, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import CertificateGenerator from '@/components/CertificateGenerator';
 
 export default function AchievementsScreen() {
@@ -271,14 +271,34 @@ export default function AchievementsScreen() {
           className="bg-card rounded-2xl p-5 border border-border mb-5"
         >
           <h3 className="font-bold text-foreground mb-4 text-lg">📤 شارك إنجازاتك</h3>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowCertificate(true)}
-            className="w-full flex items-center justify-center gap-2 bg-primary/20 text-gold font-bold py-3 rounded-xl border border-primary/30 min-h-[48px]"
-          >
-            <Download size={18} />
-            <span className="text-sm">📜 إنشاء شهادة إنجاز</span>
-          </motion.button>
+          <div className="space-y-2">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCertificate(true)}
+              className="w-full flex items-center justify-center gap-2 bg-primary/20 text-gold font-bold py-3 rounded-xl border border-primary/30 min-h-[48px]"
+            >
+              <Download size={18} />
+              <span className="text-sm">📜 إنشاء شهادة إنجاز</span>
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={async () => {
+                const shareText = `🌟 ${child.name} وصل لمستوى ${levelInfo.level.name} ${levelInfo.level.icon}\n⭐ ${progress.total} نجمة\n🔥 ${streak.current} يوم متتالي\n🏅 ${earnedBadges.length}/${BADGES.length} شارة\n\nمن تطبيق متابع الصلاة 🕌`;
+                if (navigator.share) {
+                  try {
+                    await navigator.share({ title: `إنجازات ${child.name}`, text: shareText });
+                  } catch {}
+                } else {
+                  await navigator.clipboard.writeText(shareText);
+                  alert('تم نسخ الإنجازات! يمكنك لصقها ومشاركتها 📋');
+                }
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-secondary/20 text-secondary font-bold py-3 rounded-xl border border-secondary/30 min-h-[48px]"
+            >
+              <Share2 size={18} />
+              <span className="text-sm">📱 مشاركة سريعة</span>
+            </motion.button>
+          </div>
         </motion.div>
 
         {showCertificate && (

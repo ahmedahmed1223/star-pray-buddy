@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -6,7 +6,9 @@ import {
   isDateComplete, getRandomMotivation, getMoneyReward, getChildMoney, getSettings, getStreak,
   getCustomActivities, toggleActivity, getActivityLog, getEarnedBadges, getChildLevel, LEVELS,
   AVATAR_IMAGES, PRAYER_NAMES, localDateStr, getLatestParentMessage,
-  type PrayerLog, type PrayerName
+  getActiveFamilyChallenge, getFamilyChallengeProgress,
+  getChildTheme, setChildTheme, CHILD_THEMES,
+  type PrayerLog, type PrayerName, type ChildThemeName
 } from '@/lib/store';
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
@@ -22,8 +24,9 @@ import Mascot from '@/components/Mascot';
 import DailyGoalCard from '@/components/DailyGoalCard';
 import QuranTracker from '@/components/QuranTracker';
 import AdventureMap from '@/components/AdventureMap';
+import ThemePickerDialog from '@/components/ThemePickerDialog';
 import { ParticleBurst } from '@/components/SkeletonLoader';
-import { ArrowLeft, Trophy, Coins, Flame, Award } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins, Flame, Award, Palette } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -45,7 +48,8 @@ export default function KidTracker() {
   const [badgePopup, setBadgePopup] = useState<{ name: string; icon: string } | null>(null);
   const [levelUpPopup, setLevelUpPopup] = useState<{ name: string; icon: string } | null>(null);
   const [particleBurst, setParticleBurst] = useState(false);
-  
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
+  const [childTheme, setChildThemeState] = useState<ChildThemeName>('golden');
   const prevBadgeCount = useRef(0);
   const prevLevelId = useRef(0);
 
@@ -78,6 +82,7 @@ export default function KidTracker() {
     refreshState();
     prevBadgeCount.current = getEarnedBadges(child.id).length;
     prevLevelId.current = getChildLevel(child.id).level.id;
+    setChildThemeState(getChildTheme(child.id));
   }, [child, dateStr]);
 
   if (!child) {
@@ -91,7 +96,16 @@ export default function KidTracker() {
   const childMoney = getChildMoney(child.id);
   const dateProgress = getDateProgress(child.id, dateStr);
   const levelInfo = getChildLevel(child.id);
+  const familyChallenge = getActiveFamilyChallenge();
+  const challengeProgress = familyChallenge ? getFamilyChallengeProgress(familyChallenge) : [];
 
+  const themeVars = CHILD_THEMES[childTheme];
+  const themeStyle: React.CSSProperties = childTheme !== 'golden' ? {
+    '--primary': themeVars.primary,
+    '--ring': themeVars.primary,
+    '--gold': themeVars.primary,
+    '--gold-glow': themeVars.glow,
+  } as React.CSSProperties : {};
   const checkBadgesAndLevel = () => {
     const newBadges = getEarnedBadges(child.id);
     if (newBadges.length > prevBadgeCount.current) {
@@ -160,6 +174,7 @@ export default function KidTracker() {
   return (
     <motion.div
       className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden"
+      style={themeStyle}
       drag={allChildren.length > 1 ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.2}
@@ -338,6 +353,14 @@ export default function KidTracker() {
             </motion.div>
           )}
           <motion.button
+            onClick={() => setThemePickerOpen(true)}
+            className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center"
+            whileTap={{ scale: 0.9 }}
+            title="تخصيص الثيم"
+          >
+            <Palette size={20} />
+          </motion.button>
+          <motion.button
             onClick={() => navigate(`/rewards/${child.id}`)}
             className="bg-primary/15 text-gold p-3 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center"
             whileTap={{ scale: 0.9 }}
@@ -461,12 +484,61 @@ export default function KidTracker() {
           <QuranTracker childId={child.id} date={dateStr} onUpdate={refreshState} />
         </div>
 
+        {/* Family Challenge */}
+        {familyChallenge && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card rounded-2xl p-4 border border-border mb-5"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">{familyChallenge.emoji}</span>
+              <div className="flex-1">
+                <p className="text-gold font-bold text-sm">🏠 تحدي الأسرة</p>
+                <p className="text-foreground font-medium text-sm">{familyChallenge.title}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {challengeProgress.map(cp => {
+                const pct = Math.min((cp.progress / familyChallenge.target) * 100, 100);
+                return (
+                  <div key={cp.childId} className="flex items-center gap-2">
+                    <span className={`text-xs font-bold w-16 truncate ${cp.childId === child.id ? 'text-gold' : 'text-muted-foreground'}`}>
+                      {cp.childName}
+                    </span>
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        className="h-full rounded-full bg-primary"
+                        transition={{ duration: 0.8 }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-bold">{cp.progress}/{familyChallenge.target}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
         {/* Adventure Map */}
         <AdventureMap totalStars={progress.total} />
 
         {/* Weekly calendar */}
         <WeeklyCalendar childId={child.id} />
       </div>
+
+      {/* Theme Picker */}
+      <ThemePickerDialog
+        open={themePickerOpen}
+        onClose={() => setThemePickerOpen(false)}
+        currentTheme={childTheme}
+        onSelect={(theme) => {
+          setChildTheme(child.id, theme);
+          setChildThemeState(theme);
+        }}
+      />
 
       {/* Bottom Navigation */}
       <BottomNav childId={child.id} />
