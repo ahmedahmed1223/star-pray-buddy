@@ -52,8 +52,8 @@ export default function PrayerButton({ label, emoji, done, colorClass, prayerKey
         aria-pressed={done}
         className={`relative w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all overflow-hidden min-h-[64px] ${
           done
-            ? 'border-primary shadow-lg shadow-primary/20'
-            : 'border-border bg-muted hover:bg-muted/80'
+            ? 'border-primary shadow-lg shadow-primary/20 glass-prayer'
+            : 'border-border bg-muted/60 backdrop-blur-sm hover:bg-muted/80'
         }`}
       >
         {/* Background gradient when done */}
