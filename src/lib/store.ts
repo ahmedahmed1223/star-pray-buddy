@@ -123,6 +123,38 @@ export interface ParentMessage {
   createdAt: string;
 }
 
+// === FAMILY CHALLENGES ===
+export interface FamilyChallenge {
+  id: string;
+  title: string;
+  emoji: string;
+  target: number; // e.g. 5 days
+  type: 'fajr_streak' | 'all_prayers' | 'jamaah' | 'custom';
+  startDate: string;
+  endDate: string;
+  active: boolean;
+}
+
+// === CHILD THEMES ===
+export type ChildThemeName = 'golden' | 'ocean' | 'garden' | 'purple' | 'cosmic' | 'pink';
+
+export interface ChildTheme {
+  label: string;
+  emoji: string;
+  primary: string;
+  accent: string;
+  glow: string;
+}
+
+export const CHILD_THEMES: Record<ChildThemeName, ChildTheme> = {
+  golden: { label: 'ذهبي', emoji: '✨', primary: '42, 100%, 55%', accent: '25, 95%, 55%', glow: '42, 100%, 65%' },
+  ocean: { label: 'محيط أزرق', emoji: '🌊', primary: '200, 80%, 50%', accent: '180, 60%, 45%', glow: '200, 80%, 60%' },
+  garden: { label: 'حديقة خضراء', emoji: '🌿', primary: '140, 60%, 45%', accent: '120, 50%, 40%', glow: '140, 60%, 55%' },
+  purple: { label: 'غروب بنفسجي', emoji: '🌅', primary: '280, 60%, 55%', accent: '320, 50%, 50%', glow: '280, 60%, 65%' },
+  cosmic: { label: 'فضاء كوني', emoji: '🚀', primary: '260, 70%, 60%', accent: '180, 100%, 50%', glow: '260, 70%, 70%' },
+  pink: { label: 'وردي ناعم', emoji: '🌸', primary: '340, 70%, 60%', accent: '320, 60%, 55%', glow: '340, 70%, 70%' },
+};
+
 export interface AppData {
   pin: string;
   children: Child[];
@@ -140,6 +172,8 @@ export interface AppData {
   shopItems?: ShopItem[];
   redemptionLogs?: RedemptionLog[];
   parentMessages?: ParentMessage[];
+  familyChallenges?: FamilyChallenge[];
+  childThemes?: Record<string, ChildThemeName>;
 }
 
 // === LEVELING SYSTEM ===
