@@ -234,7 +234,7 @@ export default function ParentDashboard() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-2xl p-4 border border-border mb-4"
+          className="glass-card-strong rounded-2xl p-4 border border-border mb-4"
         >
           <div className="grid grid-cols-4 gap-2 text-center">
             <div>
