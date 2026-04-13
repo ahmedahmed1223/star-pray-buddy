@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getChildren, getStreak, getChildProgress, getChildLevel, AVATAR_IMAGES, type Child } from '@/lib/store';
+import { getChildren, getStreak, getChildProgress, getChildLevel, getDateProgress, AVATAR_IMAGES, localDateStr, type Child } from '@/lib/store';
 import { getGreeting, getSeasonalMessage } from '@/lib/greetings';
 import StarParticles from '@/components/StarParticles';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, TrendingUp } from 'lucide-react';
 
 const cardColors = [
   'border-gold/50 hover:border-gold',
@@ -20,7 +20,17 @@ export default function KidSelection() {
   const greeting = useMemo(() => getGreeting(), []);
   const seasonal = useMemo(() => getSeasonalMessage(), []);
 
-  useEffect(() => setChildren(getChildren()), []);
+  useEffect(() => {
+    const kids = getChildren();
+    // Sort by activity: most active today first, then by stars
+    const sorted = [...kids].sort((a, b) => {
+      const aToday = getDateProgress(a.id, localDateStr());
+      const bToday = getDateProgress(b.id, localDateStr());
+      if (bToday !== aToday) return bToday - aToday;
+      return b.totalStars - a.totalStars;
+    });
+    setChildren(sorted);
+  }, []);
 
   return (
     <div className="min-h-screen gradient-night p-4 relative overflow-hidden">
@@ -62,7 +72,7 @@ export default function KidSelection() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-3xl p-10 text-center border-2 border-dashed border-border"
+            className="glass-card-strong rounded-3xl p-10 text-center border-2 border-dashed border-border"
           >
             <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 3 }} className="mb-4">
               <svg width="80" height="100" viewBox="0 0 44 60" className="mx-auto">
@@ -88,8 +98,10 @@ export default function KidSelection() {
             {children.map((child, i) => {
               const streak = getStreak(child.id);
               const progress = getChildProgress(child.id);
+              const todayProgress = getDateProgress(child.id, localDateStr());
               const levelInfo = getChildLevel(child.id);
-              const isTopPerformer = progress.today === 5;
+              const isTopPerformer = todayProgress === 5;
+              const todayPct = (todayProgress / 5) * 100;
               return (
                 <motion.button
                   key={child.id}
@@ -100,7 +112,7 @@ export default function KidSelection() {
                   whileTap={{ scale: 0.92 }}
                   onClick={() => navigate(`/tracker/${child.id}`)}
                   style={{ perspective: 600 }}
-                  className={`bg-card border-2 ${isTopPerformer ? 'border-primary glow-gold' : cardColors[i % cardColors.length]} rounded-3xl p-5 flex flex-col items-center gap-2 transition-all relative overflow-hidden`}
+                  className={`glass-card-strong border-2 ${isTopPerformer ? 'border-primary glow-pulse' : cardColors[i % cardColors.length]} rounded-3xl p-5 flex flex-col items-center gap-2 transition-all relative overflow-hidden`}
                 >
                   {isTopPerformer && (
                     <motion.div
@@ -111,7 +123,17 @@ export default function KidSelection() {
                     />
                   )}
                   <div className="absolute top-4 w-24 h-24 rounded-full bg-primary/10 blur-xl" />
+                  
+                  {/* Avatar with progress ring */}
                   <motion.div whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }} className="relative">
+                    <svg className="absolute -inset-2 w-[104px] h-[104px] -rotate-90" viewBox="0 0 48 48">
+                      <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--muted))" strokeWidth="2" />
+                      <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 22}
+                        strokeDashoffset={2 * Math.PI * 22 * (1 - todayPct / 100)}
+                        style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+                      />
+                    </svg>
                     <img
                       src={AVATAR_IMAGES[child.avatarIndex]}
                       alt={child.name}
@@ -125,7 +147,15 @@ export default function KidSelection() {
                       transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }}
                     />
                   </motion.div>
+                  
                   <span className="text-foreground font-bold text-lg relative z-10">{child.name}</span>
+                  
+                  {/* Today's progress indicator */}
+                  <div className="flex items-center gap-1 relative z-10">
+                    <TrendingUp size={12} className="text-secondary" />
+                    <span className="text-xs font-bold text-secondary">{todayProgress}/٥ اليوم</span>
+                  </div>
+                  
                   <span className="text-xs font-bold relative z-10" style={{ color: levelInfo.level.color }}>
                     {levelInfo.level.icon} {levelInfo.level.name}
                   </span>

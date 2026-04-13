@@ -379,7 +379,7 @@ export default function KidTracker() {
 
         {/* Star & Money count */}
         <motion.div animate={{ scale: celebration ? [1, 1.1, 1] : 1 }} className="text-center my-4">
-          <div className="inline-flex items-center gap-4 bg-card px-6 py-3 rounded-2xl border border-border">
+          <div className="inline-flex items-center gap-4 glass-card-strong px-6 py-3 rounded-2xl">
             <div className="flex items-center gap-1.5">
               <motion.span
                 animate={{ rotate: [0, 15, -15, 0] }}
@@ -489,7 +489,7 @@ export default function KidTracker() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-2xl p-4 border border-border mb-5"
+            className="glass-card-strong rounded-2xl p-4 border border-border mb-5"
           >
             <div className="flex items-center gap-2 mb-3">
               <span className="text-2xl">{familyChallenge.emoji}</span>
