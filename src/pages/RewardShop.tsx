@@ -7,8 +7,10 @@ import {
 } from '@/lib/store';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
-import { ArrowLeft, ShoppingBag, Ticket, Gift, Check } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Ticket, Gift, Filter } from 'lucide-react';
 import { hapticSuccess, hapticLight } from '@/lib/haptics';
+
+type FilterType = 'all' | 'reward' | 'coupon';
 
 export default function RewardShop() {
   const { childId } = useParams<{ childId: string }>();
@@ -19,6 +21,7 @@ export default function RewardShop() {
   const [progress, setProgress] = useState({ today: 0, total: 0 });
   const [confetti, setConfetti] = useState(false);
   const [justBought, setJustBought] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterType>('all');
 
   useEffect(() => {
     setItems(getShopItems());
@@ -47,8 +50,9 @@ export default function RewardShop() {
     }
   };
 
-  const rewards = items.filter(i => i.type === 'reward');
-  const coupons = items.filter(i => i.type === 'coupon');
+  const filteredItems = items.filter(i => filter === 'all' || i.type === filter);
+  const rewards = filteredItems.filter(i => i.type === 'reward');
+  const coupons = filteredItems.filter(i => i.type === 'coupon');
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-24">
@@ -60,17 +64,44 @@ export default function RewardShop() {
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <h1 className="text-2xl font-bold text-gold flex-1">🛍️ المتجر</h1>
-          <div className="flex items-center gap-1.5 bg-card px-3 py-1.5 rounded-xl border border-border">
+          <div className="flex items-center gap-1.5 glass-card-strong px-3 py-1.5 rounded-xl">
             <span className="text-star text-lg">⭐</span>
             <span className="text-gold font-extrabold text-lg">{progress.total}</span>
           </div>
         </div>
 
+        {/* Filter tabs */}
+        {items.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-2 mb-4"
+          >
+            {([
+              { key: 'all' as FilterType, label: '📦 الكل', count: items.length },
+              { key: 'reward' as FilterType, label: '🎁 مكافآت', count: items.filter(i => i.type === 'reward').length },
+              { key: 'coupon' as FilterType, label: '🎫 كوبونات', count: items.filter(i => i.type === 'coupon').length },
+            ]).map(f => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
+                  filter === f.key
+                    ? 'bg-primary/20 text-gold border border-primary'
+                    : 'bg-card text-muted-foreground border border-border'
+                }`}
+              >
+                {f.label} ({f.count})
+              </button>
+            ))}
+          </motion.div>
+        )}
+
         {items.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-3xl p-10 text-center border-2 border-dashed border-border"
+            className="glass-card-strong rounded-3xl p-10 text-center border-2 border-dashed border-border"
           >
             <ShoppingBag size={48} className="mx-auto mb-4 text-muted-foreground" />
             <p className="text-foreground font-bold text-lg mb-2">المتجر فارغ! 🏪</p>
@@ -95,7 +126,7 @@ export default function RewardShop() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.08 }}
-                        className={`bg-card rounded-2xl p-4 border transition-all ${canAfford ? 'border-primary/50' : 'border-border opacity-60'}`}
+                        className={`glass-card-strong rounded-2xl p-4 border transition-all ${canAfford ? 'border-primary/50' : 'border-border opacity-60'}`}
                       >
                         <motion.span className="text-3xl block text-center mb-2" animate={wasBought ? { scale: [1, 1.5, 1], rotate: [0, 15, -15, 0] } : {}}>
                           {item.emoji}
@@ -135,7 +166,7 @@ export default function RewardShop() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.08 }}
-                        className={`bg-card rounded-2xl p-4 border flex items-center gap-3 ${canAfford ? 'border-accent/50' : 'border-border opacity-60'}`}
+                        className={`glass-card-strong rounded-2xl p-4 border flex items-center gap-3 ${canAfford ? 'border-accent/50' : 'border-border opacity-60'}`}
                       >
                         <span className="text-2xl">{item.emoji}</span>
                         <div className="flex-1 min-w-0">
@@ -162,22 +193,30 @@ export default function RewardShop() {
           </>
         )}
 
-        {/* Redemption history */}
+        {/* Redemption history - Timeline style */}
         {logs.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-2xl p-4 border border-border"
+            className="glass-card-strong rounded-2xl p-4 border border-border"
           >
             <h3 className="text-foreground font-bold text-sm mb-3">📋 سجل المشتريات</h3>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {logs.slice().reverse().map(log => (
-                <div key={log.id} className={`flex items-center gap-2 text-xs p-2 rounded-xl ${log.redeemed ? 'bg-secondary/10' : 'bg-primary/10'}`}>
+            <div className="space-y-0 max-h-48 overflow-y-auto relative">
+              <div className="absolute right-5 top-0 bottom-0 w-0.5 bg-border" />
+              {logs.slice().reverse().map((log, i) => (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`flex items-center gap-3 text-xs p-2.5 rounded-xl relative mr-3 ${log.redeemed ? 'bg-secondary/10' : 'bg-primary/10'}`}
+                >
+                  <div className="absolute -right-[1.1rem] w-2.5 h-2.5 rounded-full border-2 border-border bg-card z-10" />
                   <span>{log.redeemed ? '✅' : '🎫'}</span>
                   <span className="text-foreground font-medium flex-1">{log.itemName}</span>
                   <span className="text-gold font-bold">-{log.cost}⭐</span>
                   <span className="text-muted-foreground">{log.date}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>

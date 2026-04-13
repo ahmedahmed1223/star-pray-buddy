@@ -6,9 +6,28 @@ import {
 } from '@/lib/store';
 import BottomNav from '@/components/BottomNav';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
-import { ArrowLeft, Flame, Target, TrendingUp, Share2, Download, MessageCircle } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { ArrowLeft, Flame, Target, TrendingUp, Share2, Download } from 'lucide-react';
+import { useState } from 'react';
 import CertificateGenerator from '@/components/CertificateGenerator';
+
+function ProgressRing({ progress, size = 48, strokeWidth = 3, color }: { progress: number; size?: number; strokeWidth?: number; color: string }) {
+  const r = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - progress / 100);
+  return (
+    <svg width={size} height={size} className="-rotate-90">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth={strokeWidth} />
+      <motion.circle
+        cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color}
+        strokeWidth={strokeWidth} strokeLinecap="round"
+        initial={{ strokeDashoffset: circumference }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+        strokeDasharray={circumference}
+      />
+    </svg>
+  );
+}
 
 export default function AchievementsScreen() {
   const { childId } = useParams<{ childId: string }>();
@@ -37,7 +56,6 @@ export default function AchievementsScreen() {
     fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء'
   };
 
-
   const prayerAnalysisData = [
     { key: 'fajr', label: 'الفجر', pct: analysis.fajr },
     { key: 'dhuhr', label: 'الظهر', pct: analysis.dhuhr },
@@ -45,6 +63,10 @@ export default function AchievementsScreen() {
     { key: 'maghrib', label: 'المغرب', pct: analysis.maghrib },
     { key: 'isha', label: 'العشاء', pct: analysis.isha },
   ];
+
+  // Upcoming badges (not yet earned)
+  const upcomingBadges = BADGES.filter(b => !earnedBadges.some(e => e.id === b.id)).slice(0, 3);
+  const badgeProgressPct = (earnedBadges.length / BADGES.length) * 100;
 
   return (
     <div className="min-h-screen gradient-night p-4 pb-24">
@@ -57,20 +79,29 @@ export default function AchievementsScreen() {
           <h1 className="text-2xl font-bold text-gold">الإنجازات 🏅</h1>
         </div>
 
-        {/* Level Card */}
+        {/* Level Card - Enhanced */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-2xl p-5 border border-border mb-5"
+          className="glass-card-strong rounded-2xl p-5 border border-border mb-5 relative overflow-hidden"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <motion.span
-              className="text-4xl"
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              {levelInfo.level.icon}
-            </motion.span>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent"
+            animate={{ x: ['-100%', '200%'] }}
+            transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }}
+            style={{ skewX: '-12deg' }}
+          />
+          <div className="flex items-center gap-3 mb-4 relative z-10">
+            <div className="relative">
+              <ProgressRing progress={levelInfo.progress} size={56} strokeWidth={4} color={levelInfo.level.color} />
+              <motion.span
+                className="absolute inset-0 flex items-center justify-center text-2xl"
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                {levelInfo.level.icon}
+              </motion.span>
+            </div>
             <div className="flex-1">
               <p className="font-extrabold text-xl" style={{ color: levelInfo.level.color }}>{levelInfo.level.name}</p>
               <p className="text-muted-foreground text-sm">
@@ -81,20 +112,10 @@ export default function AchievementsScreen() {
               </p>
             </div>
           </div>
-          {/* Level progress */}
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${levelInfo.progress}%` }}
-              transition={{ duration: 1 }}
-              className="h-full rounded-full"
-              style={{ backgroundColor: levelInfo.level.color }}
-            />
-          </div>
           {/* All levels display */}
-          <div className="flex justify-between mt-3">
+          <div className="flex justify-between mt-3 relative z-10">
             {LEVELS.map(level => (
-              <div key={level.id} className={`flex flex-col items-center ${level.id <= levelInfo.level.id ? 'opacity-100' : 'opacity-30'}`}>
+              <div key={level.id} className={`flex flex-col items-center transition-all ${level.id <= levelInfo.level.id ? 'opacity-100 scale-100' : 'opacity-30 scale-90'}`}>
                 <span className="text-lg">{level.icon}</span>
                 <span className="text-xs text-muted-foreground">{level.minStars}</span>
               </div>
@@ -107,7 +128,7 @@ export default function AchievementsScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-card rounded-2xl p-5 border border-border mb-5"
+          className="glass-card-strong rounded-2xl p-5 border border-border mb-5"
         >
           <div className="flex items-center gap-2 mb-4">
             <Flame size={20} className="text-destructive" />
@@ -137,7 +158,7 @@ export default function AchievementsScreen() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-card rounded-2xl p-5 border border-border mb-5"
+            className="glass-card-strong rounded-2xl p-5 border border-border mb-5"
           >
             <h3 className="font-bold text-foreground text-lg mb-4">📊 تحليل الصلوات</h3>
             
@@ -185,51 +206,81 @@ export default function AchievementsScreen() {
           </motion.div>
         )}
 
-        {/* Stats Grid */}
+        {/* Stats Grid - Enhanced with colored cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           className="grid grid-cols-3 gap-3 mb-5"
         >
-          <div className="bg-card rounded-xl p-3 border border-border text-center">
+          <div className="glass-card-strong rounded-xl p-3 border border-primary/20 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <Target size={14} className="text-gold" />
             </div>
             <p className="text-2xl font-extrabold text-gold">{progress.total}</p>
             <p className="text-muted-foreground text-xs">نجمة</p>
           </div>
-          <div className="bg-card rounded-xl p-3 border border-border text-center">
+          <div className="glass-card-strong rounded-xl p-3 border border-secondary/20 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <TrendingUp size={14} className="text-secondary" />
             </div>
             <p className="text-2xl font-extrabold text-secondary">{totalWeekPrayers}</p>
             <p className="text-muted-foreground text-xs">صلاة/أسبوع</p>
           </div>
-          <div className="bg-card rounded-xl p-3 border border-border text-center">
+          <div className="glass-card-strong rounded-xl p-3 border border-accent/20 text-center">
             <p className="text-sm mb-1">🕌</p>
             <p className="text-2xl font-extrabold text-accent">{jamaahCount}</p>
             <p className="text-muted-foreground text-xs">جماعة</p>
           </div>
         </motion.div>
 
-        {/* Badges */}
+        {/* Upcoming Badges - NEW SECTION */}
+        {upcomingBadges.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="glass-card-strong rounded-2xl p-5 border border-primary/20 mb-5"
+          >
+            <h3 className="font-bold text-foreground mb-3 text-lg">🎯 الإنجازات القريبة</h3>
+            <div className="space-y-3">
+              {upcomingBadges.map((badge, i) => (
+                <motion.div
+                  key={badge.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + i * 0.08 }}
+                  className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl"
+                >
+                  <span className="text-2xl grayscale opacity-60">{badge.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-foreground text-sm font-bold">{badge.name}</p>
+                    <p className="text-muted-foreground text-xs">{badge.description}</p>
+                  </div>
+                  <span className="text-xs text-gold font-bold bg-primary/10 px-2 py-1 rounded-lg">قريباً</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Badges - 3D Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-card rounded-2xl p-5 border border-border mb-5"
+          className="glass-card-strong rounded-2xl p-5 border border-border mb-5"
         >
-          <h3 className="font-bold text-foreground mb-4 text-lg">🏅 الشارات ({earnedBadges.length}/{BADGES.length})</h3>
+          <h3 className="font-bold text-foreground mb-3 text-lg">🏅 الشارات ({earnedBadges.length}/{BADGES.length})</h3>
           
-          {/* Progress bar for badges */}
-          <div className="h-2 bg-muted rounded-full overflow-hidden mb-4">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${(earnedBadges.length / BADGES.length) * 100}%` }}
-              transition={{ duration: 1 }}
-              className="h-full gradient-gold rounded-full"
-            />
+          {/* Overall badge progress ring */}
+          <div className="flex items-center justify-center mb-4">
+            <div className="relative">
+              <ProgressRing progress={badgeProgressPct} size={72} strokeWidth={5} color="hsl(var(--gold))" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-gold font-extrabold text-lg">{Math.round(badgeProgressPct)}%</span>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -241,8 +292,10 @@ export default function AchievementsScreen() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.05 }}
+                  whileHover={earned ? { scale: 1.05, rotateY: 5 } : {}}
+                  style={{ perspective: 600 }}
                   className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    earned ? 'border-primary bg-primary/10' : 'border-border bg-muted/50 opacity-50'
+                    earned ? 'border-primary bg-primary/10 glass-card' : 'border-border bg-muted/50 opacity-50'
                   }`}
                 >
                   <motion.span
@@ -268,7 +321,7 @@ export default function AchievementsScreen() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="bg-card rounded-2xl p-5 border border-border mb-5"
+          className="glass-card-strong rounded-2xl p-5 border border-border mb-5"
         >
           <h3 className="font-bold text-foreground mb-4 text-lg">📤 شارك إنجازاتك</h3>
           <div className="space-y-2">
