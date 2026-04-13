@@ -146,24 +146,20 @@
     -webkit-font-smoothing: antialiased;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
-    /* Safe area padding for notched devices */
     padding-top: env(safe-area-inset-top);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Ensure minimum touch targets */
   button, a, [role="button"] {
     min-height: 44px;
   }
 
-  /* Disable text selection on non-text elements */
   button, img, svg, [role="button"], nav {
     -webkit-user-select: none;
     user-select: none;
   }
 
-  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
@@ -246,19 +242,7 @@
     background: linear-gradient(135deg, hsl(var(--isha-from)), hsl(var(--isha-to)));
   }
 
-  /* Responsive font scaling for small screens */
-  @media (max-width: 360px) {
-    .text-4xl { font-size: 1.75rem; }
-    .text-3xl { font-size: 1.5rem; }
-    .text-2xl { font-size: 1.25rem; }
-  }
-
-  /* Tablet/desktop centering */
-  @media (min-width: 768px) {
-    .max-w-md { max-width: 32rem; }
-  }
-
-  /* Glass morphism for prayer cards */
+  /* Glass morphism utilities */
   .glass-prayer {
     background: linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(var(--card) / 0.6));
     backdrop-filter: blur(12px);
@@ -269,5 +253,98 @@
     background: hsl(var(--card) / 0.7);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-card-strong {
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .glass-frosted {
+    background: hsl(var(--card) / 0.5);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  }
+
+  /* 3D card effect */
+  .card-3d {
+    transform-style: preserve-3d;
+    perspective: 800px;
+  }
+
+  .card-3d-inner {
+    transition: transform 0.3s ease;
+  }
+
+  .card-3d:hover .card-3d-inner {
+    transform: rotateY(5deg) rotateX(2deg);
+  }
+
+  /* Shimmer animation */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.1), transparent);
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Progress ring */
+  .progress-ring-bg {
+    stroke: hsl(var(--muted));
+  }
+
+  .progress-ring-fill {
+    stroke: hsl(var(--primary));
+    transition: stroke-dashoffset 1s ease;
+  }
+
+  /* Glow pulse */
+  .glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 10px hsl(var(--gold) / 0.3); }
+    50% { box-shadow: 0 0 25px hsl(var(--gold) / 0.6), 0 0 50px hsl(var(--gold) / 0.2); }
+  }
+
+  /* Timeline connector */
+  .timeline-line {
+    position: relative;
+  }
+
+  .timeline-line::before {
+    content: '';
+    position: absolute;
+    right: 1.25rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: hsl(var(--border));
+  }
+
+  /* Responsive font scaling for small screens */
+  @media (max-width: 360px) {
+    .text-4xl { font-size: 1.75rem; }
+    .text-3xl { font-size: 1.5rem; }
+    .text-2xl { font-size: 1.25rem; }
+  }
+
+  /* Tablet/desktop centering */
+  @media (min-width: 768px) {
+    .max-w-md { max-width: 32rem; }
   }
 }
