@@ -28,8 +28,9 @@ import PrayerButton from '@/components/PrayerButton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   ArrowLeft, Plus, Trash2, Gift, Star, KeyRound, RotateCcw, Coins,
-  Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil
+  Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil, Cloud
 } from 'lucide-react';
+import CloudSyncPanel from '@/components/CloudSyncPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import PinDialog from '@/components/PinDialog';
 
@@ -276,7 +277,7 @@ export default function ParentDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="children" className="w-full" dir="rtl">
-          <TabsList className="w-full grid grid-cols-4 bg-card border border-border rounded-2xl h-12 mb-4">
+          <TabsList className="w-full grid grid-cols-5 bg-card border border-border rounded-2xl h-12 mb-4">
             <TabsTrigger value="children" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
               <Users size={14} /> الأطفال
             </TabsTrigger>
@@ -288,6 +289,9 @@ export default function ParentDashboard() {
             </TabsTrigger>
             <TabsTrigger value="rewards" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
               <Gift size={14} /> المكافآت
+            </TabsTrigger>
+            <TabsTrigger value="cloud" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
+              <Cloud size={14} /> السحابة
             </TabsTrigger>
           </TabsList>
 
@@ -757,6 +761,11 @@ export default function ParentDashboard() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          {/* ===== CLOUD TAB ===== */}
+          <TabsContent value="cloud" className="space-y-4">
+            <CloudSyncPanel onDataRestored={refresh} />
           </TabsContent>
         </Tabs>
       </div>
