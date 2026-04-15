@@ -18,6 +18,7 @@ import ActivityButton from '@/components/ActivityButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
+import CircularProgress from '@/components/CircularProgress';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
 import Mascot from '@/components/Mascot';
@@ -173,7 +174,7 @@ export default function KidTracker() {
 
   return (
     <motion.div
-      className="min-h-screen gradient-night p-4 pb-24 relative overflow-hidden"
+      className="min-h-screen gradient-night p-3 pb-24 relative overflow-hidden"
       style={themeStyle}
       drag={allChildren.length > 1 ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -306,116 +307,68 @@ export default function KidTracker() {
       </AnimatePresence>
 
       <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => navigate('/kids')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
-            <ArrowLeft size={24} className="rtl:rotate-180" />
-          </button>
-          <div className="flex items-center gap-3 flex-1">
-            <motion.div className="relative">
-              <motion.img
-                src={AVATAR_IMAGES[child.avatarIndex]}
-                alt={child.name}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/30"
-                whileTap={{ scale: 1.1 }}
-              />
-              <span className="absolute -bottom-1 -right-1 text-sm bg-card rounded-full px-1 border border-border">{levelInfo.level.icon}</span>
-            </motion.div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-foreground">{child.name}</h1>
-              {/* Level progress bar */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold" style={{ color: levelInfo.level.color }}>{levelInfo.level.name}</span>
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: levelInfo.level.color }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${levelInfo.progress}%` }}
-                    transition={{ duration: 0.8 }}
-                  />
-                </div>
-                {levelInfo.nextLevel && (
-                  <span className="text-xs text-muted-foreground">{levelInfo.starsToNext}⭐</span>
-                )}
-              </div>
+        {/* Glass Header Card */}
+        <div className="glass-card-strong rounded-2xl p-3 mb-3">
+          {/* Top row: back + actions */}
+          <div className="flex items-center justify-between mb-2">
+            <button onClick={() => navigate('/kids')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
+              <ArrowLeft size={22} className="rtl:rotate-180" />
+            </button>
+            <div className="flex items-center gap-1">
+              {streak.current > 0 && (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1 bg-destructive/15 px-2.5 py-1 rounded-xl">
+                  <Flame size={14} className="text-destructive" />
+                  <span className="text-destructive font-extrabold text-sm">{streak.current}</span>
+                </motion.div>
+              )}
+              <motion.button onClick={() => setThemePickerOpen(true)} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }}>
+                <Palette size={18} />
+              </motion.button>
+              <motion.button onClick={() => navigate(`/rewards/${child.id}`)} className="bg-primary/15 text-gold p-2.5 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }}>
+                <Trophy size={20} />
+              </motion.button>
             </div>
           </div>
-          {/* Streak badge */}
-          {streak.current > 0 && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="flex items-center gap-1 bg-destructive/15 px-3 py-1.5 rounded-xl"
-            >
-              <Flame size={16} className="text-destructive" />
-              <span className="text-destructive font-extrabold">{streak.current}</span>
+
+          {/* Avatar + Name centered */}
+          <div className="flex flex-col items-center gap-1 mb-2">
+            <motion.div className="relative">
+              <motion.img src={AVATAR_IMAGES[child.avatarIndex]} alt={child.name} className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/40" whileTap={{ scale: 1.1 }} />
+              <span className="absolute -bottom-1 -right-1 text-sm bg-card rounded-full px-1 border border-border">{levelInfo.level.icon}</span>
             </motion.div>
-          )}
-          <motion.button
-            onClick={() => setThemePickerOpen(true)}
-            className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center"
-            whileTap={{ scale: 0.9 }}
-            title="تخصيص الثيم"
-          >
-            <Palette size={20} />
-          </motion.button>
-          <motion.button
-            onClick={() => navigate(`/rewards/${child.id}`)}
-            className="bg-primary/15 text-gold p-3 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center"
-            whileTap={{ scale: 0.9 }}
-          >
-            <Trophy size={22} />
-          </motion.button>
+            <h1 className="text-lg font-bold text-foreground">{child.name}</h1>
+            {/* Level bar */}
+            <div className="flex items-center gap-2 w-full max-w-[200px]">
+              <span className="text-xs font-bold" style={{ color: levelInfo.level.color }}>{levelInfo.level.name}</span>
+              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                <motion.div className="h-full rounded-full gradient-gold" initial={{ width: 0 }} animate={{ width: `${levelInfo.progress}%` }} transition={{ duration: 0.8 }} />
+              </div>
+              {levelInfo.nextLevel && <span className="text-xs text-muted-foreground">{levelInfo.starsToNext}⭐</span>}
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-xl">
+              <motion.span animate={{ rotate: [0, 15, -15, 0] }} transition={{ repeat: Infinity, duration: 3 }} className="text-lg">⭐</motion.span>
+              <span className="text-xl font-extrabold text-gold">{progress.total}</span>
+            </div>
+            {moneyReward.enabled && (
+              <div className="flex items-center gap-1.5 bg-secondary/10 px-3 py-1.5 rounded-xl">
+                <Coins size={18} className="text-secondary" />
+                <span className="text-xl font-extrabold text-secondary">{childMoney}</span>
+                <span className="text-xs text-muted-foreground">{moneyReward.currency}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Date Navigator */}
-        <DateNavigator
-          date={selectedDate}
-          onDateChange={setSelectedDate}
-          allowPast={settings.allowChildPastEdit}
-          allowFuture={false}
-        />
+        <DateNavigator date={selectedDate} onDateChange={setSelectedDate} allowPast={settings.allowChildPastEdit} allowFuture={false} />
 
-        {/* Star & Money count */}
-        <motion.div animate={{ scale: celebration ? [1, 1.1, 1] : 1 }} className="text-center my-4">
-          <div className="inline-flex items-center gap-4 glass-card-strong px-6 py-3 rounded-2xl">
-            <div className="flex items-center gap-1.5">
-              <motion.span
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ repeat: Infinity, duration: 3 }}
-                className="text-star text-2xl"
-              >
-                ⭐
-              </motion.span>
-              <span className="text-3xl font-extrabold text-gold">{progress.total}</span>
-              <span className="text-muted-foreground font-medium text-sm">نجمة</span>
-            </div>
-            {moneyReward.enabled && (
-              <>
-                <div className="w-px h-8 bg-border" />
-                <div className="flex items-center gap-1.5">
-                  <Coins size={20} className="text-secondary" />
-                  <span className="text-2xl font-extrabold text-secondary">{childMoney}</span>
-                  <span className="text-muted-foreground font-medium text-sm">{moneyReward.currency}</span>
-                </div>
-              </>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Lantern Progress */}
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-1 px-2">
-            <span className="text-muted-foreground font-medium">{isToday ? 'تقدّم اليوم' : 'تقدّم هذا اليوم'}</span>
-            <span className="text-gold font-bold">{dateProgress}/٥</span>
-          </div>
-          <LanternProgress count={dateProgress} />
-          {dateProgress === 5 && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-gold font-bold text-sm mt-1">
-              🎉 أتممت جميع الصلوات!
-            </motion.p>
-          )}
+        {/* Circular Progress */}
+        <div className="my-3 flex justify-center">
+          <CircularProgress count={dateProgress} />
         </div>
         {/* Parent message */}
         {(() => {
