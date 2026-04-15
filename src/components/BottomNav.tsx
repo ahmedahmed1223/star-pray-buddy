@@ -69,7 +69,7 @@ export default function BottomNav({ childId }: Props) {
                   animate={active ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : {}}
                   transition={{ duration: 0.4 }}
                 >
-                  <tab.Icon size={24} />
+                  <tab.Icon size={22} />
                   {tab.badge > 0 && !active && (
                     <motion.span
                       initial={{ scale: 0 }}

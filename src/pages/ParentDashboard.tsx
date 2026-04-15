@@ -238,37 +238,55 @@ export default function ParentDashboard() {
           className="glass-card-strong rounded-2xl p-4 border border-border mb-4"
         >
           <div className="grid grid-cols-4 gap-2 text-center">
-            <div>
-              <p className="text-2xl font-extrabold text-gold">{children.length}</p>
-              <p className="text-muted-foreground text-xs">أطفال</p>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
+                <Users size={18} className="text-gold" />
+              </div>
+              <p className="text-lg font-extrabold text-gold">{children.length}</p>
+              <p className="text-muted-foreground text-[10px]">أطفال</p>
             </div>
-            <div>
-              <p className="text-2xl font-extrabold text-secondary">{totalTodayPrayers}</p>
-              <p className="text-muted-foreground text-xs">صلاة اليوم</p>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-10 h-10 rounded-full bg-secondary/15 flex items-center justify-center">
+                <BookOpen size={18} className="text-secondary" />
+              </div>
+              <p className="text-lg font-extrabold text-secondary">{totalTodayPrayers}</p>
+              <p className="text-muted-foreground text-[10px]">صلاة اليوم</p>
             </div>
-            <div>
+            <div className="flex flex-col items-center gap-1">
               {bestStreak && bestStreak.streak > 0 ? (
                 <>
-                  <p className="text-2xl font-extrabold text-destructive">🔥{bestStreak.streak}</p>
-                  <p className="text-muted-foreground text-xs truncate">{bestStreak.name}</p>
+                  <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center">
+                    <span className="text-base">🔥</span>
+                  </div>
+                  <p className="text-lg font-extrabold text-destructive">{bestStreak.streak}</p>
+                  <p className="text-muted-foreground text-[10px] truncate max-w-[60px]">{bestStreak.name}</p>
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-extrabold text-muted-foreground">-</p>
-                  <p className="text-muted-foreground text-xs">أفضل streak</p>
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-base">🔥</span>
+                  </div>
+                  <p className="text-lg font-extrabold text-muted-foreground">-</p>
+                  <p className="text-muted-foreground text-[10px]">أفضل streak</p>
                 </>
               )}
             </div>
-            <div>
+            <div className="flex flex-col items-center gap-1">
               {bestChild ? (
                 <>
-                  <p className="text-2xl font-extrabold text-star">⭐</p>
-                  <p className="text-muted-foreground text-xs truncate">{bestChild.name}</p>
+                  <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
+                    <Star size={18} className="text-star" />
+                  </div>
+                  <p className="text-lg font-extrabold text-star">⭐</p>
+                  <p className="text-muted-foreground text-[10px] truncate max-w-[60px]">{bestChild.name}</p>
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-extrabold text-muted-foreground">-</p>
-                  <p className="text-muted-foreground text-xs">الأفضل</p>
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Star size={18} className="text-muted-foreground" />
+                  </div>
+                  <p className="text-lg font-extrabold text-muted-foreground">-</p>
+                  <p className="text-muted-foreground text-[10px]">الأفضل</p>
                 </>
               )}
             </div>
