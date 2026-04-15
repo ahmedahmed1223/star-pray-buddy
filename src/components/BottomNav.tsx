@@ -53,7 +53,7 @@ export default function BottomNav({ childId }: Props) {
                 role="tab"
                 aria-selected={active}
                 aria-label={tab.label}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all relative min-w-[60px] min-h-[48px] ${
+                className={`flex flex-col items-center gap-0.5 px-2 sm:px-4 py-2 rounded-xl transition-all relative min-w-[52px] min-h-[48px] ${
                   active ? 'text-gold' : 'text-muted-foreground'
                 }`}
               >

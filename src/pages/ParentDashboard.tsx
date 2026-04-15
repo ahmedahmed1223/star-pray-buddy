@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   getChildren, getChildProgress, getReward, setReward, removeChild, resetChildStars, setPin,
   getMoneyReward, setMoneyReward, getChildMoney, getSettings, updateSettings, getStreak,
@@ -277,22 +277,23 @@ export default function ParentDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="children" className="w-full" dir="rtl">
-          <TabsList className="w-full grid grid-cols-5 bg-card border border-border rounded-2xl h-12 mb-4">
-            <TabsTrigger value="children" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-              <Users size={14} /> الأطفال
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-              <Settings2 size={14} /> الإعدادات
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-              <BarChart3 size={14} /> التقارير
-            </TabsTrigger>
-            <TabsTrigger value="rewards" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-              <Gift size={14} /> المكافآت
-            </TabsTrigger>
-            <TabsTrigger value="cloud" className="rounded-xl text-xs font-bold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1">
-              <Cloud size={14} /> السحابة
-            </TabsTrigger>
+          <TabsList className="w-full flex justify-around bg-card border border-border rounded-2xl p-1.5 mb-4 gap-1">
+            {[
+              { value: 'children', label: 'الأطفال', Icon: Users, activeClass: 'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground' },
+              { value: 'settings', label: 'الإعدادات', Icon: Settings2, activeClass: 'data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground' },
+              { value: 'reports', label: 'التقارير', Icon: BarChart3, activeClass: 'data-[state=active]:bg-accent data-[state=active]:text-accent-foreground' },
+              { value: 'rewards', label: 'المكافآت', Icon: Gift, activeClass: 'data-[state=active]:bg-destructive/80 data-[state=active]:text-destructive-foreground' },
+              { value: 'cloud', label: 'السحابة', Icon: Cloud, activeClass: 'data-[state=active]:bg-[hsl(200_70%_45%)] data-[state=active]:text-white' },
+            ].map(tab => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className={`flex-1 rounded-xl font-bold transition-all min-h-[44px] gap-1.5 px-1 py-2 text-xs ${tab.activeClass}`}
+              >
+                <tab.Icon size={18} className="shrink-0" />
+                <span className="hidden sm:inline text-[11px]">{tab.label}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* ===== CHILDREN TAB ===== */}
