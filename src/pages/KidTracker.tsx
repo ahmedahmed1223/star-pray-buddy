@@ -393,10 +393,15 @@ export default function KidTracker() {
           <DailyGoalCard childId={child.id} date={dateStr} onComplete={refreshState} />
         </div>
 
-        {/* Prayer buttons */}
-        <div className="space-y-4 mb-5">
+        {/* Section: Prayer Buttons */}
+        <div className="flex items-center gap-2 mb-2 mt-1 px-1">
+          <span className="text-lg">🕌</span>
+          <span className="text-sm font-bold text-foreground">الصلوات الخمس</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <div className="space-y-2.5 mb-4">
           {PRAYER_NAMES.map((prayer, i) => (
-            <motion.div key={prayer.key} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
+            <motion.div key={prayer.key} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
               <PrayerButton
                 label={prayer.label}
                 emoji={prayer.emoji}
@@ -412,10 +417,14 @@ export default function KidTracker() {
           ))}
         </div>
 
-        {/* Custom Activities */}
+        {/* Section: Activities */}
         {activities.length > 0 && (
-          <div className="mb-5">
-            <h3 className="text-foreground font-bold text-lg mb-3">📋 أنشطة إضافية</h3>
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <span className="text-lg">📋</span>
+              <span className="text-sm font-bold text-foreground">أنشطة إضافية</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
             <div className="space-y-2">
               {activities.map((activity, i) => (
                 <motion.div key={activity.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
@@ -432,8 +441,13 @@ export default function KidTracker() {
           </div>
         )}
 
-        {/* Quran Tracker */}
-        <div className="mb-5">
+        {/* Section: Quran */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-lg">📖</span>
+            <span className="text-sm font-bold text-foreground">القرآن الكريم</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
           <QuranTracker childId={child.id} date={dateStr} onUpdate={refreshState} />
         </div>
 
