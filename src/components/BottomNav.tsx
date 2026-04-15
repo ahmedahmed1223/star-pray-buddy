@@ -53,7 +53,7 @@ export default function BottomNav({ childId }: Props) {
                 role="tab"
                 aria-selected={active}
                 aria-label={tab.label}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all relative min-w-[60px] min-h-[48px] ${
+                className={`flex flex-col items-center gap-0.5 px-2 sm:px-4 py-2 rounded-xl transition-all relative min-w-[52px] min-h-[48px] ${
                   active ? 'text-gold' : 'text-muted-foreground'
                 }`}
               >
@@ -69,7 +69,7 @@ export default function BottomNav({ childId }: Props) {
                   animate={active ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : {}}
                   transition={{ duration: 0.4 }}
                 >
-                  <tab.Icon size={24} />
+                  <tab.Icon size={22} />
                   {tab.badge > 0 && !active && (
                     <motion.span
                       initial={{ scale: 0 }}
