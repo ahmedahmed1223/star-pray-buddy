@@ -50,7 +50,7 @@ export default function PrayerButton({ label, emoji, done, colorClass, prayerKey
         style={{ perspective: 800, transformStyle: 'preserve-3d' }}
         aria-label={`${label} - ${done ? 'تم' : 'لم تُصلَّ'}`}
         aria-pressed={done}
-        className={`relative w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all overflow-hidden min-h-[64px] ${
+        className={`relative w-full flex items-center gap-3 px-3 py-3 rounded-2xl border-2 transition-all overflow-hidden min-h-[56px] ${
           done
             ? 'border-primary shadow-lg shadow-primary/20 glass-prayer'
             : 'border-border bg-muted/60 backdrop-blur-sm hover:bg-muted/80'
