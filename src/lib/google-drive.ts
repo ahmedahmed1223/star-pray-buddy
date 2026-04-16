@@ -43,11 +43,11 @@ function setStoredToken(token: string) {
 }
 
 export function clearGoogleAuth() {
-  localStorage.removeItem(GD_TOKEN_KEY);
+  sessionStorage.removeItem(GD_TOKEN_KEY);
 }
 
 export function isGoogleConnected(): boolean {
-  return !!getStoredToken();
+  return !!sessionStorage.getItem(GD_TOKEN_KEY);
 }
 
 // Load Google Identity Services script
