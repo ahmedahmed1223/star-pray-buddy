@@ -1,28 +1,72 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { getChildren, getStreak, getChildProgress, getChildLevel, getDateProgress, AVATAR_IMAGES, localDateStr, type Child } from '@/lib/store';
 import { getGreeting, getSeasonalMessage } from '@/lib/greetings';
 import StarParticles from '@/components/StarParticles';
-import { ArrowLeft, TrendingUp } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Crown, Flame, Star } from 'lucide-react';
 
-const cardColors = [
-  'border-gold/50 hover:border-gold',
-  'border-secondary/50 hover:border-secondary',
-  'border-accent/50 hover:border-accent',
-  'border-lantern/50 hover:border-lantern',
-  'border-star/50 hover:border-star',
+const cardGradients = [
+  'from-primary/20 via-primary/5 to-transparent',
+  'from-secondary/20 via-secondary/5 to-transparent',
+  'from-accent/20 via-accent/5 to-transparent',
+  'from-lantern/20 via-lantern/5 to-transparent',
+  'from-gold/20 via-gold/5 to-transparent',
 ];
+
+const encouragements = [
+  'هيا نبدأ يومًا مباركًا! 🌟',
+  'كل صلاة نور يوم القيامة 💫',
+  'الصلاة خير من النوم ☀️',
+  'ربي اجعلني مقيم الصلاة 🤲',
+  'من حافظ عليها كانت له نورًا 🌙',
+  'بارك الله في يومك! 🌈',
+];
+
+function Card3D({ children, index, onClick }: { children: React.ReactNode; index: number; onClick: () => void }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(y, [-100, 100], [12, -12]), { stiffness: 300, damping: 30 });
+  const rotateY = useSpring(useTransform(x, [-100, 100], [-12, 12]), { stiffness: 300, damping: 30 });
+
+  function handleMove(e: React.PointerEvent) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set(e.clientX - rect.left - rect.width / 2);
+    y.set(e.clientY - rect.top - rect.height / 2);
+  }
+
+  function handleLeave() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <motion.div
+      style={{ perspective: 800, rotateX, rotateY, transformStyle: 'preserve-3d' }}
+      initial={{ opacity: 0, scale: 0.7, y: 30 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay: index * 0.1, type: 'spring', stiffness: 200 }}
+      whileTap={{ scale: 0.95 }}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
+      onClick={onClick}
+      className="cursor-pointer"
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function KidSelection() {
   const navigate = useNavigate();
   const [children, setChildren] = useState<Child[]>([]);
   const greeting = useMemo(() => getGreeting(), []);
   const seasonal = useMemo(() => getSeasonalMessage(), []);
+  const encouragement = useMemo(() => encouragements[Math.floor(Math.random() * encouragements.length)], []);
 
   useEffect(() => {
     const kids = getChildren();
-    // Sort by activity: most active today first, then by stars
     const sorted = [...kids].sort((a, b) => {
       const aToday = getDateProgress(a.id, localDateStr());
       const bToday = getDateProgress(b.id, localDateStr());
@@ -36,20 +80,28 @@ export default function KidSelection() {
     <div className="min-h-screen gradient-night p-4 relative overflow-hidden">
       <StarParticles />
       <div className="max-w-md mx-auto sm:max-w-lg relative z-10">
-        <div className="flex items-center gap-3 mb-2">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-3">
           <button onClick={() => navigate('/')} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center">
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <h1 className="text-2xl font-bold text-gold">من يصلّي؟ 🤲</h1>
         </div>
 
-        {/* Dynamic greeting + seasonal */}
+        {/* Welcome card */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-4"
+          className="glass-card-strong rounded-2xl p-4 mb-5 text-center border border-border/50"
         >
-          <p className="text-foreground/70 text-lg font-medium">
+          <motion.div
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+            className="text-3xl mb-1"
+          >
+            🕌
+          </motion.div>
+          <p className="text-foreground/80 text-base font-bold">
             {greeting.text} {greeting.emoji}
           </p>
           {seasonal.isSpecial && (
@@ -57,13 +109,14 @@ export default function KidSelection() {
               {seasonal.emoji} {seasonal.message}
             </p>
           )}
+          <p className="text-muted-foreground text-sm mt-1">{encouragement}</p>
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-center text-foreground/70 text-base mb-6 font-medium"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15 }}
+          className="text-center text-foreground/70 text-base mb-4 font-bold"
         >
           اختر اسمك 👇
         </motion.p>
@@ -94,93 +147,109 @@ export default function KidSelection() {
             </motion.button>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className={`grid gap-4 ${children.length === 1 ? 'grid-cols-1 max-w-[220px] mx-auto' : 'grid-cols-2'}`}>
             {children.map((child, i) => {
               const streak = getStreak(child.id);
-              const progress = getChildProgress(child.id);
               const todayProgress = getDateProgress(child.id, localDateStr());
               const levelInfo = getChildLevel(child.id);
-              const isTopPerformer = todayProgress === 5;
+              const isAllDone = todayProgress === 5;
               const todayPct = (todayProgress / 5) * 100;
+
               return (
-                <motion.button
-                  key={child.id}
-                  initial={{ opacity: 0, scale: 0.7, rotateY: -15 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  transition={{ delay: i * 0.12, type: 'spring', stiffness: 200 }}
-                  whileHover={{ scale: 1.06, rotateY: 5 }}
-                  whileTap={{ scale: 0.92 }}
-                  onClick={() => navigate(`/tracker/${child.id}`)}
-                  style={{ perspective: 600 }}
-                  className={`glass-card-strong border-2 ${isTopPerformer ? 'border-primary glow-pulse' : cardColors[i % cardColors.length]} rounded-3xl p-5 flex flex-col items-center gap-2 transition-all relative overflow-hidden`}
-                >
-                  {isTopPerformer && (
+                <Card3D key={child.id} index={i} onClick={() => navigate(`/tracker/${child.id}`)}>
+                  <div className={`glass-card-strong border-2 ${isAllDone ? 'border-gold glow-gold' : 'border-border/50 hover:border-primary/50'} rounded-3xl p-4 flex flex-col items-center gap-2 transition-all relative overflow-hidden bg-gradient-to-br ${cardGradients[i % cardGradients.length]}`}>
+                    
+                    {/* Shimmer effect */}
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/10 to-transparent"
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+                      initial={{ x: '-100%' }}
+                      animate={{ x: '200%' }}
+                      transition={{ duration: 2, delay: i * 0.3, repeat: Infinity, repeatDelay: 5 }}
                       style={{ skewX: '-12deg' }}
                     />
-                  )}
-                  <div className="absolute top-4 w-24 h-24 rounded-full bg-primary/10 blur-xl" />
-                  
-                  {/* Avatar with progress ring */}
-                  <motion.div whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }} className="relative">
-                    <svg className="absolute -inset-2 w-[104px] h-[104px] -rotate-90" viewBox="0 0 48 48">
-                      <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--muted))" strokeWidth="2" />
-                      <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round"
-                        strokeDasharray={2 * Math.PI * 22}
-                        strokeDashoffset={2 * Math.PI * 22 * (1 - todayPct / 100)}
-                        style={{ transition: 'stroke-dashoffset 0.8s ease' }}
-                      />
-                    </svg>
-                    <img
-                      src={AVATAR_IMAGES[child.avatarIndex]}
-                      alt={child.name}
-                      className="w-22 h-22 rounded-full object-cover ring-3 ring-primary/30"
-                      style={{ width: 88, height: 88 }}
-                    />
-                    <span className="absolute -bottom-1 -right-1 text-lg bg-card rounded-full px-1 border border-border">{levelInfo.level.icon}</span>
-                    <motion.div
-                      className="absolute -inset-1 rounded-full border-2 border-gold/40"
-                      animate={{ scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }}
-                    />
-                  </motion.div>
-                  
-                  <span className="text-foreground font-bold text-lg relative z-10">{child.name}</span>
-                  
-                  {/* Today's progress indicator */}
-                  <div className="flex items-center gap-1 relative z-10">
-                    <TrendingUp size={12} className="text-secondary" />
-                    <span className="text-xs font-bold text-secondary">{todayProgress}/٥ اليوم</span>
-                  </div>
-                  
-                  <span className="text-xs font-bold relative z-10" style={{ color: levelInfo.level.color }}>
-                    {levelInfo.level.icon} {levelInfo.level.name}
-                  </span>
-                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden relative z-10">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: levelInfo.level.color }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${levelInfo.progress}%` }}
-                      transition={{ duration: 1, delay: i * 0.15 }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-3 relative z-10">
-                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }} className="flex items-center gap-1">
-                      <span className="text-star text-lg">⭐</span>
-                      <span className="text-gold font-extrabold text-lg">{child.totalStars}</span>
-                    </motion.div>
-                    {streak.current > 0 && (
-                      <div className="flex items-center gap-0.5 bg-destructive/20 px-2 py-0.5 rounded-full">
-                        <span className="text-sm">🔥</span>
-                        <span className="text-destructive font-bold text-sm">{streak.current}</span>
-                      </div>
+
+                    {/* All done badge */}
+                    {isAllDone && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute top-2 left-2 z-20"
+                      >
+                        <motion.div
+                          animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                          transition={{ repeat: Infinity, duration: 2 }}
+                        >
+                          <Crown size={20} className="text-gold drop-shadow-lg" />
+                        </motion.div>
+                      </motion.div>
                     )}
+
+                    {/* Avatar with progress ring */}
+                    <div className="relative mt-1">
+                      <svg className="absolute -inset-2 w-[96px] h-[96px] -rotate-90" viewBox="0 0 48 48">
+                        <circle cx="24" cy="24" r="21" fill="none" stroke="hsl(var(--muted))" strokeWidth="2.5" />
+                        <motion.circle
+                          cx="24" cy="24" r="21" fill="none"
+                          stroke={isAllDone ? 'hsl(var(--gold))' : 'hsl(var(--primary))'}
+                          strokeWidth="3" strokeLinecap="round"
+                          strokeDasharray={2 * Math.PI * 21}
+                          initial={{ strokeDashoffset: 2 * Math.PI * 21 }}
+                          animate={{ strokeDashoffset: 2 * Math.PI * 21 * (1 - todayPct / 100) }}
+                          transition={{ duration: 1, delay: i * 0.15 }}
+                        />
+                      </svg>
+                      <img
+                        src={AVATAR_IMAGES[child.avatarIndex]}
+                        alt={child.name}
+                        className="w-20 h-20 rounded-full object-cover ring-2 ring-primary/20"
+                      />
+                      <span className="absolute -bottom-1 -right-1 text-base bg-card rounded-full px-1 border border-border shadow-sm">
+                        {levelInfo.level.icon}
+                      </span>
+                    </div>
+
+                    {/* Name */}
+                    <span className="text-foreground font-extrabold text-lg relative z-10 leading-tight">{child.name}</span>
+
+                    {/* Level */}
+                    <span className="text-xs font-bold relative z-10" style={{ color: levelInfo.level.color }}>
+                      {levelInfo.level.name}
+                    </span>
+
+                    {/* Level progress bar */}
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden relative z-10">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ backgroundColor: levelInfo.level.color }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${levelInfo.progress}%` }}
+                        transition={{ duration: 1, delay: i * 0.15 }}
+                      />
+                    </div>
+
+                    {/* Today progress */}
+                    <div className="flex items-center gap-1 relative z-10">
+                      <TrendingUp size={12} className={isAllDone ? 'text-gold' : 'text-secondary'} />
+                      <span className={`text-xs font-bold ${isAllDone ? 'text-gold' : 'text-secondary'}`}>
+                        {todayProgress}/٥ اليوم
+                      </span>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className="flex items-center gap-1">
+                        <Star size={14} className="text-gold fill-gold" />
+                        <span className="text-gold font-extrabold text-sm">{child.totalStars}</span>
+                      </div>
+                      {streak.current > 0 && (
+                        <div className="flex items-center gap-0.5 bg-destructive/15 px-1.5 py-0.5 rounded-full">
+                          <Flame size={12} className="text-destructive" />
+                          <span className="text-destructive font-bold text-xs">{streak.current}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </motion.button>
+                </Card3D>
               );
             })}
           </div>

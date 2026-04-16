@@ -35,19 +35,19 @@ function setLastBackupDate(date: string) {
 }
 
 function getStoredToken(): string | null {
-  return localStorage.getItem(GD_TOKEN_KEY);
+  return sessionStorage.getItem(GD_TOKEN_KEY);
 }
 
 function setStoredToken(token: string) {
-  localStorage.setItem(GD_TOKEN_KEY, token);
+  sessionStorage.setItem(GD_TOKEN_KEY, token);
 }
 
 export function clearGoogleAuth() {
-  localStorage.removeItem(GD_TOKEN_KEY);
+  sessionStorage.removeItem(GD_TOKEN_KEY);
 }
 
 export function isGoogleConnected(): boolean {
-  return !!getStoredToken();
+  return !!sessionStorage.getItem(GD_TOKEN_KEY);
 }
 
 // Load Google Identity Services script

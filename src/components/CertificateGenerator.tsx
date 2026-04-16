@@ -3,6 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, MessageCircle, X, Award, Flame, Star } from 'lucide-react';
 import { Child, LEVELS, Level } from '@/lib/store';
 
+// Sanitize text for safe SVG embedding (prevent XSS)
+function escapeSVGText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 interface CertificateProps {
   child: Child;
   levelInfo: { level: Level; nextLevel: Level | null; progress: number; starsToNext: number };
@@ -192,12 +202,12 @@ function generateSVG(
     
     <!-- Child name -->
     <text x="400" y="190" text-anchor="middle" fill="${theme.accent}" font-size="40" font-family="Cairo, Arial" font-weight="900" filter="url(#glow)">
-      ${child.name}
+      ${escapeSVGText(child.name)}
     </text>
     
     <!-- Level info -->
     <text x="400" y="235" text-anchor="middle" fill="#d0d0e0" font-size="20" font-family="Cairo, Arial" font-weight="600">
-      ${levelInfo.level.icon} المستوى: ${levelInfo.level.name}
+      ${levelInfo.level.icon} المستوى: ${escapeSVGText(levelInfo.level.name)}
     </text>
     
     <!-- Separator -->
