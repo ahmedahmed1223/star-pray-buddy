@@ -35,11 +35,11 @@ function setLastBackupDate(date: string) {
 }
 
 function getStoredToken(): string | null {
-  return localStorage.getItem(GD_TOKEN_KEY);
+  return sessionStorage.getItem(GD_TOKEN_KEY);
 }
 
 function setStoredToken(token: string) {
-  localStorage.setItem(GD_TOKEN_KEY, token);
+  sessionStorage.setItem(GD_TOKEN_KEY, token);
 }
 
 export function clearGoogleAuth() {

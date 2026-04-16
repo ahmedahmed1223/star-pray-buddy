@@ -3,6 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Download, MessageCircle, X, Award, Flame, Star } from 'lucide-react';
 import { Child, LEVELS, Level } from '@/lib/store';
 
+// Sanitize text for safe SVG embedding (prevent XSS)
+function escapeSVGText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 interface CertificateProps {
   child: Child;
   levelInfo: { level: Level; nextLevel: Level | null; progress: number; starsToNext: number };
