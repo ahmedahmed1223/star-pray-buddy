@@ -256,6 +256,29 @@ export default function Index() {
           </motion.div>
         )}
 
+        {/* Quick Access — last selected child */}
+        {lastChild && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate(`/tracker/${lastChild.id}`)}
+            className="relative w-full glass-card-strong rounded-2xl p-3 mb-3 overflow-hidden flex items-center gap-3 text-right border border-primary/30 glow-season"
+            aria-label={`متابعة ${lastChild.name}`}
+          >
+            <img src={AVATAR_IMAGES[lastChild.avatarIndex]} alt="" className="w-11 h-11 rounded-full object-cover ring-2 ring-primary/40 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <Zap size={12} className="text-season" />
+                <span className="text-xs text-muted-foreground">متابعة سريعة</span>
+              </div>
+              <p className="text-foreground font-bold truncate">{lastChild.name}</p>
+            </div>
+            <ChevronLeft size={18} className="text-muted-foreground" />
+          </motion.button>
+        )}
+
         {/* Navigation Cards */}
         <div className="space-y-3">
           <motion.button
@@ -303,6 +326,7 @@ export default function Index() {
       </motion.div>
 
       <PinDialog open={pinOpen} onClose={() => setPinOpen(false)} onSuccess={() => { setPinOpen(false); navigate('/parent'); }} />
+      <SeasonalThemePicker open={themePickerOpen} onClose={() => setThemePickerOpen(false)} />
     </div>
   );
 }
