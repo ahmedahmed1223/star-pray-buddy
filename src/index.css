@@ -219,7 +219,30 @@
   }
 
   .gradient-night {
-    background: linear-gradient(180deg, hsl(230 45% 8%), hsl(230 45% 16%));
+    background: linear-gradient(
+      180deg,
+      hsl(var(--season-bg-from, 230 45% 8%)),
+      hsl(var(--season-bg-to, 230 45% 16%))
+    );
+    transition: background 0.6s ease;
+  }
+
+  .glow-season {
+    box-shadow:
+      0 0 20px hsl(var(--season-glow, var(--gold-glow)) / 0.4),
+      0 0 40px hsl(var(--season-glow, var(--gold-glow)) / 0.2);
+  }
+
+  .text-season {
+    color: hsl(var(--season-glow, var(--gold-glow)));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   .gradient-fajr {

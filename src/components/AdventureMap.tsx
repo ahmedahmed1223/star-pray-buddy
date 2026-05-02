@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 
 interface Props {
@@ -16,7 +17,7 @@ const STATIONS = [
   { stars: 300, label: 'الجنة', emoji: '🌈', color: 'hsl(var(--accent))' },
 ];
 
-export default function AdventureMap({ totalStars }: Props) {
+function AdventureMapImpl({ totalStars }: Props) {
   const currentStationIdx = STATIONS.reduce((acc, s, i) => totalStars >= s.stars ? i : acc, 0);
   const nextStation = STATIONS[currentStationIdx + 1];
   const progressToNext = nextStation
@@ -82,3 +83,5 @@ export default function AdventureMap({ totalStars }: Props) {
     </motion.div>
   );
 }
+
+export default memo(AdventureMapImpl);

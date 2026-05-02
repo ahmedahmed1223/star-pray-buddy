@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { localDateStr } from '@/lib/store';
 
@@ -18,7 +18,7 @@ function getColor(count: number): string {
   return 'hsl(var(--primary))';
 }
 
-export default function Heatmap({ childId, getLogs }: Props) {
+function HeatmapImpl({ childId, getLogs }: Props) {
   const { weeks, monthLabels, stats } = useMemo(() => {
     const today = new Date();
     const logsMap = new Map<string, number>();
@@ -161,3 +161,5 @@ export default function Heatmap({ childId, getLogs }: Props) {
     </motion.div>
   );
 }
+
+export default memo(HeatmapImpl);

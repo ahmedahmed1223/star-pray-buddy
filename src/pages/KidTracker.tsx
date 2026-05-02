@@ -13,12 +13,14 @@ import {
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
+import { toast } from 'sonner';
 import PrayerButton from '@/components/PrayerButton';
 import ActivityButton from '@/components/ActivityButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import CircularProgress from '@/components/CircularProgress';
+import SeasonalBackground from '@/components/SeasonalBackground';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
 import Mascot from '@/components/Mascot';
@@ -27,7 +29,7 @@ import QuranTracker from '@/components/QuranTracker';
 import AdventureMap from '@/components/AdventureMap';
 import ThemePickerDialog from '@/components/ThemePickerDialog';
 import { ParticleBurst } from '@/components/SkeletonLoader';
-import { ArrowLeft, Trophy, Coins, Flame, Award, Palette } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins, Flame, Award, Palette, Clock } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -84,7 +86,23 @@ export default function KidTracker() {
     prevBadgeCount.current = getEarnedBadges(child.id).length;
     prevLevelId.current = getChildLevel(child.id).level.id;
     setChildThemeState(getChildTheme(child.id));
+    // Remember last selected child for Quick Access on Index
+    try { localStorage.setItem('last-child-id', child.id); } catch {}
   }, [child, dateStr]);
+
+  // Approximate "next prayer" badge (no API; uses local hour windows)
+  const nextPrayer = useMemo(() => {
+    const hour = new Date().getHours();
+    const minute = new Date().getMinutes();
+    const t = hour + minute / 60;
+    // Approx local prayer windows
+    if (t < 5) return { key: 'fajr', label: 'الفجر', emoji: '🌅', at: '~05:00' };
+    if (t < 12) return { key: 'dhuhr', label: 'الظهر', emoji: '☀️', at: '~12:30' };
+    if (t < 15.5) return { key: 'asr', label: 'العصر', emoji: '🌇', at: '~15:30' };
+    if (t < 18) return { key: 'maghrib', label: 'المغرب', emoji: '🌆', at: 'بعد الغروب' };
+    if (t < 20) return { key: 'isha', label: 'العشاء', emoji: '🌙', at: '~20:00' };
+    return { key: 'fajr', label: 'الفجر (غداً)', emoji: '🌅', at: '~05:00' };
+  }, [dateStr]);
 
   if (!child) {
     return (
@@ -140,6 +158,21 @@ export default function KidTracker() {
       setParticleBurst(true);
       setTimeout(() => { setCelebration(false); setMotivation(''); setParticleBurst(false); }, 1500);
 
+      // Undo toast — 5 seconds to revert
+      const prayerLabel = PRAYER_NAMES.find(p => p.key === prayer)?.label || '';
+      toast.success(`✅ تم تسجيل صلاة ${prayerLabel}`, {
+        duration: 5000,
+        action: {
+          label: '↩️ تراجع',
+          onClick: () => {
+            togglePrayerForDate(child.id, prayer, dateStr);
+            refreshState();
+            playUndoSound();
+            hapticLight();
+          },
+        },
+      });
+
       if (isDateComplete(child.id, dateStr)) {
         setTimeout(() => {
           playAllCompleteSound();
@@ -185,6 +218,8 @@ export default function KidTracker() {
         }
       }}
     >
+      {/* Seasonal decorative background */}
+      <SeasonalBackground density="low" />
       {/* Particle Burst */}
       <ParticleBurst active={particleBurst} x={50} y={60} />
       
@@ -392,6 +427,22 @@ export default function KidTracker() {
         <div className="mb-4">
           <DailyGoalCard childId={child.id} date={dateStr} onComplete={refreshState} />
         </div>
+
+        {/* Next Prayer Badge */}
+        {isToday && dateProgress < 5 && !log?.[nextPrayer.key as PrayerName] && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 glass-card rounded-2xl px-3 py-2 mb-3 border border-primary/20"
+            role="status"
+            aria-label={`الصلاة القادمة ${nextPrayer.label}`}
+          >
+            <Clock size={14} className="text-season shrink-0" />
+            <span className="text-xs text-muted-foreground">القادمة:</span>
+            <span className="text-sm font-bold text-foreground">{nextPrayer.emoji} {nextPrayer.label}</span>
+            <span className="text-xs text-muted-foreground mr-auto">{nextPrayer.at}</span>
+          </motion.div>
+        )}
 
         {/* Section: Prayer Buttons */}
         <div className="flex items-center gap-2 mb-2 mt-1 px-1">

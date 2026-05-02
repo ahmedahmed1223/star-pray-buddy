@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PinDialog from '@/components/PinDialog';
 import StarParticles from '@/components/StarParticles';
+import SeasonalBackground from '@/components/SeasonalBackground';
+import SeasonalThemePicker from '@/components/SeasonalThemePicker';
 import ramadanBg from '@/assets/ramadan-bg.jpg';
-import { isOnboardingDone, setOnboardingDone, getChildren, getChildProgress, getStreak } from '@/lib/store';
-import { Users, Lock, ChevronLeft, Star, Flame, TrendingUp } from 'lucide-react';
+import { isOnboardingDone, setOnboardingDone, getChildren, getChildProgress, getStreak, AVATAR_IMAGES } from '@/lib/store';
+import { Users, Lock, ChevronLeft, Star, Flame, TrendingUp, Sparkles, Zap } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { getGreeting, getSeasonalMessage } from '@/lib/greetings';
 
@@ -88,12 +90,17 @@ const onboardingSlides = [
 export default function Index() {
   const navigate = useNavigate();
   const [pinOpen, setPinOpen] = useState(false);
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
   const greeting = useMemo(() => getGreeting(), []);
   const seasonal = useMemo(() => getSeasonalMessage(), []);
   const children = getChildren();
   const needsOnboarding = !isOnboardingDone() && children.length === 0;
   const [showOnboarding, setShowOnboarding] = useState(needsOnboarding);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Last selected child for quick access
+  const lastChildId = typeof localStorage !== 'undefined' ? localStorage.getItem('last-child-id') : null;
+  const lastChild = lastChildId ? children.find(c => c.id === lastChildId) : null;
 
   // Quick stats
   const totalTodayPrayers = children.reduce((sum, c) => sum + getChildProgress(c.id).today, 0);
@@ -146,13 +153,23 @@ export default function Index() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${ramadanBg})` }} />
-      <div className="absolute inset-0 gradient-night opacity-75" />
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style={{ backgroundImage: `url(${ramadanBg})` }} />
+      <div className="absolute inset-0 gradient-night opacity-90" />
+      <SeasonalBackground density="medium" />
       <StarParticles />
 
-      {/* Theme Toggle */}
-      <div className="absolute top-4 left-4 z-20">
+      {/* Top controls */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
         <ThemeToggle />
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          onClick={() => setThemePickerOpen(true)}
+          aria-label="اختر الثيم الموسمي"
+          className="w-11 h-11 rounded-xl glass-card-strong flex items-center justify-center text-season glow-season"
+        >
+          <Sparkles size={18} />
+        </motion.button>
       </div>
 
       <motion.div
@@ -239,6 +256,29 @@ export default function Index() {
           </motion.div>
         )}
 
+        {/* Quick Access — last selected child */}
+        {lastChild && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate(`/tracker/${lastChild.id}`)}
+            className="relative w-full glass-card-strong rounded-2xl p-3 mb-3 overflow-hidden flex items-center gap-3 text-right border border-primary/30 glow-season"
+            aria-label={`متابعة ${lastChild.name}`}
+          >
+            <img src={AVATAR_IMAGES[lastChild.avatarIndex]} alt="" className="w-11 h-11 rounded-full object-cover ring-2 ring-primary/40 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <Zap size={12} className="text-season" />
+                <span className="text-xs text-muted-foreground">متابعة سريعة</span>
+              </div>
+              <p className="text-foreground font-bold truncate">{lastChild.name}</p>
+            </div>
+            <ChevronLeft size={18} className="text-muted-foreground" />
+          </motion.button>
+        )}
+
         {/* Navigation Cards */}
         <div className="space-y-3">
           <motion.button
@@ -286,6 +326,7 @@ export default function Index() {
       </motion.div>
 
       <PinDialog open={pinOpen} onClose={() => setPinOpen(false)} onSuccess={() => { setPinOpen(false); navigate('/parent'); }} />
+      <SeasonalThemePicker open={themePickerOpen} onClose={() => setThemePickerOpen(false)} />
     </div>
   );
 }
