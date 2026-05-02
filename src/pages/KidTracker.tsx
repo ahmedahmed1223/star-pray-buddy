@@ -218,6 +218,8 @@ export default function KidTracker() {
         }
       }}
     >
+      {/* Seasonal decorative background */}
+      <SeasonalBackground density="low" />
       {/* Particle Burst */}
       <ParticleBurst active={particleBurst} x={50} y={60} />
       
@@ -425,6 +427,22 @@ export default function KidTracker() {
         <div className="mb-4">
           <DailyGoalCard childId={child.id} date={dateStr} onComplete={refreshState} />
         </div>
+
+        {/* Next Prayer Badge */}
+        {isToday && dateProgress < 5 && !log?.[nextPrayer.key as PrayerName] && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 glass-card rounded-2xl px-3 py-2 mb-3 border border-primary/20"
+            role="status"
+            aria-label={`الصلاة القادمة ${nextPrayer.label}`}
+          >
+            <Clock size={14} className="text-season shrink-0" />
+            <span className="text-xs text-muted-foreground">القادمة:</span>
+            <span className="text-sm font-bold text-foreground">{nextPrayer.emoji} {nextPrayer.label}</span>
+            <span className="text-xs text-muted-foreground mr-auto">{nextPrayer.at}</span>
+          </motion.div>
+        )}
 
         {/* Section: Prayer Buttons */}
         <div className="flex items-center gap-2 mb-2 mt-1 px-1">
