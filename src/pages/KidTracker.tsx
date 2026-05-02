@@ -13,12 +13,14 @@ import {
 import { formatHijri } from '@/lib/hijri';
 import { playPrayerSound, playUndoSound, playAllCompleteSound, playBadgeUnlockSound, playLevelUpSound, playSwipeSound } from '@/lib/sounds';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
+import { toast } from 'sonner';
 import PrayerButton from '@/components/PrayerButton';
 import ActivityButton from '@/components/ActivityButton';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 import DateNavigator from '@/components/DateNavigator';
 import LanternProgress from '@/components/LanternProgress';
 import CircularProgress from '@/components/CircularProgress';
+import SeasonalBackground from '@/components/SeasonalBackground';
 import BottomNav from '@/components/BottomNav';
 import Confetti from '@/components/Confetti';
 import Mascot from '@/components/Mascot';
@@ -27,7 +29,7 @@ import QuranTracker from '@/components/QuranTracker';
 import AdventureMap from '@/components/AdventureMap';
 import ThemePickerDialog from '@/components/ThemePickerDialog';
 import { ParticleBurst } from '@/components/SkeletonLoader';
-import { ArrowLeft, Trophy, Coins, Flame, Award, Palette } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins, Flame, Award, Palette, Clock } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -84,7 +86,23 @@ export default function KidTracker() {
     prevBadgeCount.current = getEarnedBadges(child.id).length;
     prevLevelId.current = getChildLevel(child.id).level.id;
     setChildThemeState(getChildTheme(child.id));
+    // Remember last selected child for Quick Access on Index
+    try { localStorage.setItem('last-child-id', child.id); } catch {}
   }, [child, dateStr]);
+
+  // Approximate "next prayer" badge (no API; uses local hour windows)
+  const nextPrayer = useMemo(() => {
+    const hour = new Date().getHours();
+    const minute = new Date().getMinutes();
+    const t = hour + minute / 60;
+    // Approx local prayer windows
+    if (t < 5) return { key: 'fajr', label: 'الفجر', emoji: '🌅', at: '~05:00' };
+    if (t < 12) return { key: 'dhuhr', label: 'الظهر', emoji: '☀️', at: '~12:30' };
+    if (t < 15.5) return { key: 'asr', label: 'العصر', emoji: '🌇', at: '~15:30' };
+    if (t < 18) return { key: 'maghrib', label: 'المغرب', emoji: '🌆', at: 'بعد الغروب' };
+    if (t < 20) return { key: 'isha', label: 'العشاء', emoji: '🌙', at: '~20:00' };
+    return { key: 'fajr', label: 'الفجر (غداً)', emoji: '🌅', at: '~05:00' };
+  }, [dateStr]);
 
   if (!child) {
     return (
