@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PinDialog from '@/components/PinDialog';
 import StarParticles from '@/components/StarParticles';
+import SeasonalBackground from '@/components/SeasonalBackground';
+import SeasonalThemePicker from '@/components/SeasonalThemePicker';
 import ramadanBg from '@/assets/ramadan-bg.jpg';
-import { isOnboardingDone, setOnboardingDone, getChildren, getChildProgress, getStreak } from '@/lib/store';
-import { Users, Lock, ChevronLeft, Star, Flame, TrendingUp } from 'lucide-react';
+import { isOnboardingDone, setOnboardingDone, getChildren, getChildProgress, getStreak, AVATAR_IMAGES } from '@/lib/store';
+import { Users, Lock, ChevronLeft, Star, Flame, TrendingUp, Sparkles, Zap } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { getGreeting, getSeasonalMessage } from '@/lib/greetings';
 
@@ -88,12 +90,17 @@ const onboardingSlides = [
 export default function Index() {
   const navigate = useNavigate();
   const [pinOpen, setPinOpen] = useState(false);
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
   const greeting = useMemo(() => getGreeting(), []);
   const seasonal = useMemo(() => getSeasonalMessage(), []);
   const children = getChildren();
   const needsOnboarding = !isOnboardingDone() && children.length === 0;
   const [showOnboarding, setShowOnboarding] = useState(needsOnboarding);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Last selected child for quick access
+  const lastChildId = typeof localStorage !== 'undefined' ? localStorage.getItem('last-child-id') : null;
+  const lastChild = lastChildId ? children.find(c => c.id === lastChildId) : null;
 
   // Quick stats
   const totalTodayPrayers = children.reduce((sum, c) => sum + getChildProgress(c.id).today, 0);
