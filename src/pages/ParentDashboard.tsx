@@ -32,6 +32,8 @@ import {
 } from 'lucide-react';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
 import ThemeToggle from '@/components/ThemeToggle';
+import SeasonalThemePicker from '@/components/SeasonalThemePicker';
+import { Sparkles } from 'lucide-react';
 import PinDialog from '@/components/PinDialog';
 
 export default function ParentDashboard() {
@@ -52,6 +54,7 @@ export default function ParentDashboard() {
   const [moneyReward, setMoneyRewardState] = useState<MoneyReward>(getMoneyReward());
   const [editingMoney, setEditingMoney] = useState(false);
   const [settings, setSettingsState] = useState(getSettings());
+  const [seasonalPickerOpen, setSeasonalPickerOpen] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -228,8 +231,18 @@ export default function ParentDashboard() {
             <ArrowLeft size={24} className="rtl:rotate-180" />
           </button>
           <h1 className="text-2xl font-bold text-gold flex-1">لوحة الوالدين</h1>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setSeasonalPickerOpen(true)}
+            aria-label="الثيم الموسمي"
+            className="w-11 h-11 rounded-xl glass-card-strong flex items-center justify-center text-season glow-season"
+          >
+            <Sparkles size={18} />
+          </motion.button>
           <ThemeToggle />
         </div>
+
+        <SeasonalThemePicker open={seasonalPickerOpen} onClose={() => setSeasonalPickerOpen(false)} />
 
         {/* Quick Summary Card */}
         <motion.div
