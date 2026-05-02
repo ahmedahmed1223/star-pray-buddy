@@ -118,3 +118,5 @@ function MonthlyChartImpl({ children }: Props) {
     </motion.div>
   );
 }
+
+export default memo(MonthlyChartImpl);

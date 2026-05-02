@@ -161,3 +161,5 @@ function HeatmapImpl({ childId, getLogs }: Props) {
     </motion.div>
   );
 }
+
+export default memo(HeatmapImpl);

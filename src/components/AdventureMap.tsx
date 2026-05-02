@@ -83,3 +83,5 @@ function AdventureMapImpl({ totalStars }: Props) {
     </motion.div>
   );
 }
+
+export default memo(AdventureMapImpl);
