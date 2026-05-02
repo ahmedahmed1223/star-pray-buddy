@@ -158,6 +158,21 @@ export default function KidTracker() {
       setParticleBurst(true);
       setTimeout(() => { setCelebration(false); setMotivation(''); setParticleBurst(false); }, 1500);
 
+      // Undo toast — 5 seconds to revert
+      const prayerLabel = PRAYER_NAMES.find(p => p.key === prayer)?.label || '';
+      toast.success(`✅ تم تسجيل صلاة ${prayerLabel}`, {
+        duration: 5000,
+        action: {
+          label: '↩️ تراجع',
+          onClick: () => {
+            togglePrayerForDate(child.id, prayer, dateStr);
+            refreshState();
+            playUndoSound();
+            hapticLight();
+          },
+        },
+      });
+
       if (isDateComplete(child.id, dateStr)) {
         setTimeout(() => {
           playAllCompleteSound();
