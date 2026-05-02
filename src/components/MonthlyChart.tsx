@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getMonthlyLogs, getChildren, AVATAR_IMAGES, localDateStr, type Child } from '@/lib/store';
 
@@ -9,7 +9,7 @@ interface Props {
   children: Child[];
 }
 
-export default function MonthlyChart({ children }: Props) {
+function MonthlyChartImpl({ children }: Props) {
   const [selectedChild, setSelectedChild] = useState<string>(children[0]?.id || '');
   const now = new Date();
   const monthName = MONTH_NAMES[now.getMonth()];
