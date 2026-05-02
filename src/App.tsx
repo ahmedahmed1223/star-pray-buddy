@@ -7,6 +7,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { initReminders } from "@/lib/reminders";
 import { applyTheme, getStoredTheme } from "@/components/ThemeToggle";
+import { applySeasonalTheme, getStoredSeasonalTheme } from "@/lib/seasonalThemes";
 import InstallPrompt from "@/components/InstallPrompt";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
@@ -65,6 +66,7 @@ function AnimatedRoutes() {
 const App = () => {
   useEffect(() => {
     applyTheme(getStoredTheme());
+    applySeasonalTheme(getStoredSeasonalTheme());
     initReminders();
   }, []);
 
