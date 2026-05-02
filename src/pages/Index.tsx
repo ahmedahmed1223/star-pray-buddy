@@ -153,13 +153,23 @@ export default function Index() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${ramadanBg})` }} />
-      <div className="absolute inset-0 gradient-night opacity-75" />
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style={{ backgroundImage: `url(${ramadanBg})` }} />
+      <div className="absolute inset-0 gradient-night opacity-90" />
+      <SeasonalBackground density="medium" />
       <StarParticles />
 
-      {/* Theme Toggle */}
-      <div className="absolute top-4 left-4 z-20">
+      {/* Top controls */}
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
         <ThemeToggle />
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          onClick={() => setThemePickerOpen(true)}
+          aria-label="اختر الثيم الموسمي"
+          className="w-11 h-11 rounded-xl glass-card-strong flex items-center justify-center text-season glow-season"
+        >
+          <Sparkles size={18} />
+        </motion.button>
       </div>
 
       <motion.div
