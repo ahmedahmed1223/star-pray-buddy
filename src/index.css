@@ -69,6 +69,26 @@
     --isha-from: 240 55% 45%;
     --isha-to: 260 60% 35%;
 
+    /* Prayer glow tokens (pair with --*-from) */
+    --fajr-glow: 220 70% 70%;
+    --dhuhr-glow: 42 100% 70%;
+    --asr-glow: 35 95% 70%;
+    --maghrib-glow: 350 75% 70%;
+    --isha-glow: 240 60% 60%;
+
+    /* Chart palette — semantic, theme-driven */
+    --chart-1: 42 100% 55%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 280 50% 60%;
+    --chart-4: 25 95% 55%;
+    --chart-5: 200 70% 55%;
+
+    /* Extra particle accents (kid-friendly, soft) */
+    --particle-blue: 220 80% 75%;
+    --particle-purple: 280 60% 75%;
+    --particle-pink: 330 75% 78%;
+    --particle-mint: 160 60% 70%;
+
     font-family: 'Cairo', sans-serif;
   }
 
@@ -131,6 +151,23 @@
     --maghrib-to: 20 70% 50%;
     --isha-from: 240 45% 50%;
     --isha-to: 260 50% 40%;
+
+    --fajr-glow: 220 60% 65%;
+    --dhuhr-glow: 42 90% 65%;
+    --asr-glow: 35 85% 65%;
+    --maghrib-glow: 350 65% 65%;
+    --isha-glow: 240 50% 55%;
+
+    --chart-1: 42 90% 48%;
+    --chart-2: 160 55% 38%;
+    --chart-3: 280 45% 50%;
+    --chart-4: 25 85% 50%;
+    --chart-5: 200 65% 48%;
+
+    --particle-blue: 220 70% 60%;
+    --particle-purple: 280 55% 60%;
+    --particle-pink: 330 65% 65%;
+    --particle-mint: 160 55% 55%;
   }
 }
 

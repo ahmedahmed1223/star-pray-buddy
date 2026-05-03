@@ -18,12 +18,12 @@ interface Particle {
 }
 
 const COLORS = [
-  'hsl(42, 100%, 55%)',   // gold
-  'hsl(42, 100%, 65%)',   // light gold
-  'hsl(160, 60%, 45%)',   // emerald
-  'hsl(160, 60%, 55%)',   // light emerald
-  'hsl(45, 100%, 70%)',   // yellow
-  'hsl(25, 95%, 55%)',    // orange
+  'hsl(var(--gold))',
+  'hsl(var(--gold-glow))',
+  'hsl(var(--emerald))',
+  'hsl(var(--star-yellow))',
+  'hsl(var(--lantern-orange))',
+  'hsl(var(--accent))',
 ];
 
 function ParticleShape({ type, color, size }: { type: string; color: string; size: number }) {
@@ -38,7 +38,7 @@ function ParticleShape({ type, color, size }: { type: string; color: string; siz
       return (
         <svg width={size} height={size} viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="8" fill={color} />
-          <circle cx="15" cy="10" r="7" fill="hsl(230, 45%, 12%)" />
+          <circle cx="15" cy="10" r="7" fill="hsl(var(--background))" />
         </svg>
       );
     case 'diamond':

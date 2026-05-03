@@ -6,11 +6,11 @@ interface Props {
 }
 
 const lanternColors = [
-  { body: 'hsl(var(--fajr-from))', glow: 'hsl(220, 60%, 65%)' },
-  { body: 'hsl(var(--dhuhr-from))', glow: 'hsl(42, 100%, 65%)' },
-  { body: 'hsl(var(--asr-from))', glow: 'hsl(35, 90%, 65%)' },
-  { body: 'hsl(var(--maghrib-from))', glow: 'hsl(350, 70%, 65%)' },
-  { body: 'hsl(var(--isha-from))', glow: 'hsl(240, 55%, 55%)' },
+  { body: 'hsl(var(--fajr-from))', glow: 'hsl(var(--fajr-glow))' },
+  { body: 'hsl(var(--dhuhr-from))', glow: 'hsl(var(--dhuhr-glow))' },
+  { body: 'hsl(var(--asr-from))', glow: 'hsl(var(--asr-glow))' },
+  { body: 'hsl(var(--maghrib-from))', glow: 'hsl(var(--maghrib-glow))' },
+  { body: 'hsl(var(--isha-from))', glow: 'hsl(var(--isha-glow))' },
 ];
 
 function LanternSVG({ lit, color, glow }: { lit: boolean; color: string; glow: string }) {

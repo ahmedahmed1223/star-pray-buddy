@@ -5,8 +5,8 @@ const starColors = [
   'hsl(var(--star-yellow))',
   'hsl(var(--gold))',
   'hsl(var(--lantern-orange))',
-  'hsl(220, 80%, 75%)',
-  'hsl(280, 60%, 70%)',
+  'hsl(var(--particle-blue))',
+  'hsl(var(--particle-purple))',
 ];
 
 /** Adaptive particle count based on device capability */
