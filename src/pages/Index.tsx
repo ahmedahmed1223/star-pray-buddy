@@ -18,15 +18,15 @@ function SVGLantern({ delay = 0, x = 0 }: { delay?: number; x?: number }) {
       transition={{ repeat: Infinity, duration: 3 + delay * 0.5, ease: 'easeInOut', delay }}
       style={{ transformOrigin: `${x + 20}px 0px` }}
     >
-      <line x1={x + 20} y1={0} x2={x + 20} y2={14} stroke="hsl(42, 100%, 55%)" strokeWidth="1.5" />
-      <rect x={x + 14} y={12} width={12} height={4} rx={1.5} fill="hsl(42, 100%, 55%)" />
+      <line x1={x + 20} y1={0} x2={x + 20} y2={14} stroke="hsl(var(--season-glow, var(--gold-glow)))" strokeWidth="1.5" />
+      <rect x={x + 14} y={12} width={12} height={4} rx={1.5} fill="hsl(var(--season-glow, var(--gold-glow)))" />
       <path
         d={`M${x + 12} 16 C${x + 12} 16, ${x + 8} 24, ${x + 8} 34 C${x + 8} 44, ${x + 12} 50, ${x + 20} 52 C${x + 28} 50, ${x + 32} 44, ${x + 32} 34 C${x + 32} 24, ${x + 28} 16, ${x + 28} 16 Z`}
-        fill="hsl(25, 95%, 55%)"
+        fill="hsl(var(--season-primary, var(--lantern-orange)))"
       />
-      <ellipse cx={x + 20} cy={34} rx={6} ry={10} fill="hsl(42, 100%, 65%)" opacity={0.5} />
+      <ellipse cx={x + 20} cy={34} rx={6} ry={10} fill="hsl(var(--season-glow, var(--gold-glow)))" opacity={0.5} />
       <ellipse cx={x + 20} cy={34} rx={3} ry={5} fill="white" opacity={0.3} />
-      <path d={`M${x + 17} 50 L${x + 20} 58 L${x + 23} 50`} fill="hsl(42, 100%, 55%)" opacity={0.7} />
+      <path d={`M${x + 17} 50 L${x + 20} 58 L${x + 23} 50`} fill="hsl(var(--season-glow, var(--gold-glow)))" opacity={0.7} />
     </motion.g>
   );
 }
@@ -192,8 +192,8 @@ export default function Index() {
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <defs>
               <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: 'hsl(42, 100%, 65%)', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: 'hsl(42, 100%, 50%)', stopOpacity: 1 }} />
+                <stop offset="0%" stopColor="hsl(var(--season-glow, var(--gold-glow)))" stopOpacity={1} />
+                <stop offset="100%" stopColor="hsl(var(--season-primary, var(--gold)))" stopOpacity={1} />
               </linearGradient>
               <filter id="moonGlow">
                 <feGaussianBlur stdDeviation="3" result="blur" />
@@ -201,7 +201,7 @@ export default function Index() {
               </filter>
             </defs>
             <circle cx="40" cy="40" r="30" fill="url(#moonGrad)" filter="url(#moonGlow)" />
-            <circle cx="50" cy="35" r="25" fill="hsl(230, 45%, 10%)" />
+            <circle cx="50" cy="35" r="25" fill="hsl(var(--season-bg-from, 230 45% 10%))" />
           </svg>
         </motion.div>
 
