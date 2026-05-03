@@ -169,6 +169,24 @@ export function applySeasonalTheme(key: SeasonalThemeKey) {
   root.style.setProperty('--season-primary', theme.primary);
   root.style.setProperty('--season-glow', theme.glow);
   root.style.setProperty('--season-particle', theme.particleColor);
+
+  // Cohesion: drive the global accent tokens from the active theme so that
+  // buttons, gold text, rings and glows stay in harmony with background + shapes.
+  // For the "default" theme we clear the overrides so index.css base values apply.
+  if (theme.key === 'default') {
+    ['--primary', '--ring', '--gold', '--gold-glow', '--star-yellow', '--lantern-orange', '--lantern-glow', '--accent']
+      .forEach(v => root.style.removeProperty(v));
+  } else {
+    root.style.setProperty('--primary', theme.primary);
+    root.style.setProperty('--ring', theme.primary);
+    root.style.setProperty('--gold', theme.primary);
+    root.style.setProperty('--gold-glow', theme.glow);
+    root.style.setProperty('--star-yellow', theme.glow);
+    root.style.setProperty('--lantern-orange', theme.primary);
+    root.style.setProperty('--lantern-glow', theme.glow);
+    root.style.setProperty('--accent', theme.glow);
+  }
+
   root.dataset.seasonPattern = theme.pattern;
   root.dataset.seasonKey = theme.key;
 }
