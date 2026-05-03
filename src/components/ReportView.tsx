@@ -5,7 +5,7 @@ import { getWeeklyLogs, getMonthlyLogs, getYearlyStats, getJamaahCount, getStrea
 import { Copy, Check, Trophy, Download, TrendingUp, TrendingDown } from 'lucide-react';
 
 const DAY_NAMES_SHORT = ['أحد', 'إثن', 'ثلا', 'أربع', 'خمي', 'جمع', 'سبت'];
-const CHILD_COLORS = ['hsl(42, 100%, 55%)', 'hsl(160, 60%, 45%)', 'hsl(280, 50%, 55%)', 'hsl(25, 95%, 55%)', 'hsl(200, 70%, 50%)'];
+const CHILD_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 const PRAYER_LABELS: Record<string, string> = {
   fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء',
@@ -264,8 +264,8 @@ export default function ReportView({ children }: Props) {
                   <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
                   <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
                   <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(var(--foreground))' }} />
-                  <Bar dataKey="أسبوع" fill="hsl(42, 100%, 55%)" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="نجوم" fill="hsl(160, 60%, 45%)" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="أسبوع" fill="hsl(var(--chart-1))" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="نجوم" fill="hsl(var(--chart-2))" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -321,7 +321,7 @@ export default function ReportView({ children }: Props) {
                   <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
                     <PolarGrid stroke="hsl(var(--border))" />
                     <PolarAngleAxis dataKey="prayer" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
-                    <Radar name="نسبة" dataKey="نسبة" stroke="hsl(42, 100%, 55%)" fill="hsl(42, 100%, 55%)" fillOpacity={0.3} />
+                    <Radar name="نسبة" dataKey="نسبة" stroke="hsl(var(--chart-1))" fill="hsl(var(--chart-1))" fillOpacity={0.3} />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
@@ -334,7 +334,7 @@ export default function ReportView({ children }: Props) {
                   <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
                   <YAxis domain={[0, 5]} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
                   <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(var(--foreground))' }} />
-                  <Bar dataKey="صلوات" fill="hsl(42, 100%, 55%)" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="صلوات" fill="hsl(var(--chart-1))" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -346,7 +346,7 @@ export default function ReportView({ children }: Props) {
                   <PieChart>
                     <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={50}>
                       {pieData.map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? 'hsl(42, 100%, 55%)' : 'hsl(var(--border))'} />
+                        <Cell key={i} fill={i === 0 ? 'hsl(var(--chart-1))' : 'hsl(var(--border))'} />
                       ))}
                     </Pie>
                     <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', color: 'hsl(var(--foreground))' }} />
