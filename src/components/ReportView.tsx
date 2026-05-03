@@ -119,7 +119,7 @@ export default function ReportView({ children }: Props) {
       ctx.scale(scale, scale);
       ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--background').trim()
         ? `hsl(${getComputedStyle(document.documentElement).getPropertyValue('--background').trim()})`
-        : '#1a1a2e';
+        : '#1a1a2e'; // theme-allow: PNG export fallback when CSS vars unavailable
       ctx.fillRect(0, 0, el.offsetWidth, el.offsetHeight);
 
       // Use html-to-image approach via SVG foreignObject
