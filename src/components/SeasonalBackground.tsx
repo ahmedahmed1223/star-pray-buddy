@@ -21,11 +21,14 @@ function SeasonalBackgroundImpl({ pattern, density = 'medium', className = '' }:
 
   useEffect(() => {
     if (pattern) { setActivePattern(pattern); return; }
-    setActivePattern(getActiveSeasonalTheme().pattern);
-    // Re-read on storage changes
-    const onStorage = () => setActivePattern(getActiveSeasonalTheme().pattern);
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    const sync = () => setActivePattern(getActiveSeasonalTheme().pattern);
+    sync();
+    window.addEventListener('storage', sync);
+    window.addEventListener('seasonal-theme-change', sync);
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('seasonal-theme-change', sync);
+    };
   }, [pattern]);
 
   const count = reduced ? 4 : density === 'low' ? 8 : density === 'high' ? 24 : 14;
