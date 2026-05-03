@@ -192,8 +192,8 @@ export default function Index() {
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <defs>
               <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{ stopColor: 'hsl(42, 100%, 65%)', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: 'hsl(42, 100%, 50%)', stopOpacity: 1 }} />
+                <stop offset="0%" stopColor="hsl(var(--season-glow, var(--gold-glow)))" stopOpacity={1} />
+                <stop offset="100%" stopColor="hsl(var(--season-primary, var(--gold)))" stopOpacity={1} />
               </linearGradient>
               <filter id="moonGlow">
                 <feGaussianBlur stdDeviation="3" result="blur" />
@@ -201,7 +201,7 @@ export default function Index() {
               </filter>
             </defs>
             <circle cx="40" cy="40" r="30" fill="url(#moonGrad)" filter="url(#moonGlow)" />
-            <circle cx="50" cy="35" r="25" fill="hsl(230, 45%, 10%)" />
+            <circle cx="50" cy="35" r="25" fill="hsl(var(--season-bg-from, 230 45% 10%))" />
           </svg>
         </motion.div>
 
