@@ -130,6 +130,9 @@ export function getStoredSeasonalTheme(): SeasonalThemeKey {
 export function setStoredSeasonalTheme(key: SeasonalThemeKey) {
   localStorage.setItem(STORAGE_KEY, key);
   applySeasonalTheme(key);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('seasonal-theme-change', { detail: key }));
+  }
 }
 
 /** Detect appropriate theme based on Hijri/Gregorian date */
