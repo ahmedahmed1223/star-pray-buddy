@@ -314,7 +314,7 @@ export default function ParentDashboard() {
               { value: 'settings', label: 'الإعدادات', Icon: Settings2, activeClass: 'data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground' },
               { value: 'reports', label: 'التقارير', Icon: BarChart3, activeClass: 'data-[state=active]:bg-accent data-[state=active]:text-accent-foreground' },
               { value: 'rewards', label: 'المكافآت', Icon: Gift, activeClass: 'data-[state=active]:bg-destructive/80 data-[state=active]:text-destructive-foreground' },
-              { value: 'cloud', label: 'السحابة', Icon: Cloud, activeClass: 'data-[state=active]:bg-[hsl(200_70%_45%)] data-[state=active]:text-white' },
+              { value: 'cloud', label: 'السحابة', Icon: Cloud, activeClass: 'data-[state=active]:bg-primary/80 data-[state=active]:text-primary-foreground' },
             ].map(tab => (
               <TabsTrigger
                 key={tab.value}
