@@ -310,15 +310,15 @@ export default function KidTracker() {
                 <svg width="64" height="64" viewBox="0 0 64 64" className="mx-auto mb-3">
                   <defs>
                     <linearGradient id="trophyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(42, 100%, 65%)', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(42, 100%, 45%)', stopOpacity: 1 }} />
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--gold-glow))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--gold))', stopOpacity: 1 }} />
                     </linearGradient>
                   </defs>
                   <path d="M16 8h32v4c0 12-8 24-16 28-8-4-16-16-16-28V8z" fill="url(#trophyGrad)" />
-                  <rect x="24" y="40" width="16" height="4" rx="2" fill="hsl(42, 100%, 50%)" />
-                  <rect x="20" y="44" width="24" height="6" rx="3" fill="hsl(42, 100%, 55%)" />
-                  <path d="M16 8C16 8, 4 10, 4 20C4 28, 12 28, 16 24" fill="hsl(42, 100%, 60%)" opacity="0.5" />
-                  <path d="M48 8C48 8, 60 10, 60 20C60 28, 52 28, 48 24" fill="hsl(42, 100%, 60%)" opacity="0.5" />
+                  <rect x="24" y="40" width="16" height="4" rx="2" fill="hsl(var(--gold))" />
+                  <rect x="20" y="44" width="24" height="6" rx="3" fill="hsl(var(--gold))" />
+                  <path d="M16 8C16 8, 4 10, 4 20C4 28, 12 28, 16 24" fill="hsl(var(--gold-glow))" opacity="0.5" />
+                  <path d="M48 8C48 8, 60 10, 60 20C60 28, 52 28, 48 24" fill="hsl(var(--gold-glow))" opacity="0.5" />
                 </svg>
               </motion.div>
               <p className="text-gold font-extrabold text-2xl mb-1">ماشاء الله!</p>
