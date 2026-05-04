@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { PrayerName } from '@/lib/store';
+import { playPrayerChime, playUndoSound } from '@/lib/sounds';
 
 interface Props {
   label: string;
