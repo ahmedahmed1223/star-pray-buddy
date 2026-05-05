@@ -86,16 +86,16 @@ export const SEASONAL_THEMES: Record<Exclude<SeasonalThemeKey, 'auto'>, Seasonal
   mawlid: {
     key: 'mawlid', label: 'المولد النبوي', emoji: '🕌',
     description: 'ذكرى مولد الحبيب ﷺ',
-    bgFrom: '160 40% 10%', bgTo: '180 35% 18%',
-    primary: '160 70% 50%', glow: '170 80% 60%',
-    pattern: 'crescents', particleColor: '160 70% 65%',
+    bgFrom: '155 55% 12%', bgTo: '180 60% 22%',
+    primary: '165 85% 55%', glow: '155 95% 70%',
+    pattern: 'crescents', particleColor: '160 90% 75%',
   },
   spring: {
     key: 'spring', label: 'الربيع', emoji: '🌸',
     description: 'زهور وأخضرار',
-    bgFrom: '140 35% 14%', bgTo: '120 40% 22%',
-    primary: '120 65% 55%', glow: '140 70% 65%',
-    pattern: 'petals', particleColor: '320 70% 75%',
+    bgFrom: '155 45% 16%', bgTo: '110 50% 26%',
+    primary: '135 70% 58%', glow: '95 80% 68%',
+    pattern: 'petals', particleColor: '330 85% 80%',
   },
   summer: {
     key: 'summer', label: 'الصيف', emoji: '☀️',
