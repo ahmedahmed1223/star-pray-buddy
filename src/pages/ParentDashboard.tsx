@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
 import ThemeToggle from '@/components/ThemeToggle';
+import SoundToggle from '@/components/SoundToggle';
 import SeasonalThemePicker from '@/components/SeasonalThemePicker';
 import { Sparkles } from 'lucide-react';
 import PinDialog from '@/components/PinDialog';
@@ -240,6 +241,7 @@ export default function ParentDashboard() {
             <Sparkles size={18} />
           </motion.button>
           <ThemeToggle />
+          <SoundToggle />
         </div>
 
         <SeasonalThemePicker open={seasonalPickerOpen} onClose={() => setSeasonalPickerOpen(false)} />

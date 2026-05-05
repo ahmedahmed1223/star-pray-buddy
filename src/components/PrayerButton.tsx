@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { PrayerName } from '@/lib/store';
 import { playPrayerChime, playUndoSound } from '@/lib/sounds';
+import { useReducedMotion } from '@/lib/motion';
+import { hapticLight, hapticSuccess } from '@/lib/haptics';
 
 interface Props {
   label: string;
@@ -36,6 +38,7 @@ export default function PrayerButton({ label, emoji, done, colorClass, prayerKey
   const gradientClass = prayerKey ? prayerGradients[prayerKey] : '';
   const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null);
   const [wave, setWave] = useState(0); // increments to retrigger wave animation
+  const reduced = useReducedMotion();
 
   // Per-prayer light wave colors (from → glow → to) using existing CSS tokens
   const waveFrom = prayerKey ? `hsl(var(--${prayerKey}-from))` : 'hsl(var(--primary))';
@@ -47,15 +50,15 @@ export default function PrayerButton({ label, emoji, done, colorClass, prayerKey
     setRipple({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     setTimeout(() => setRipple(null), 600);
 
-    // Sound: chime when checking in, soft undo when un-checking
-    if (!done && prayerKey) playPrayerChime(prayerKey);
-    else if (done) playUndoSound();
+    // Sound + haptics
+    if (!done && prayerKey) { playPrayerChime(prayerKey); hapticSuccess(); }
+    else if (done) { playUndoSound(); hapticLight(); }
 
-    // Trigger light-wave only on check-in (not on undo)
-    if (!done) setWave(w => w + 1);
+    // Trigger light-wave only on check-in (not on undo) and respect reduced motion
+    if (!done && !reduced) setWave(w => w + 1);
 
     onToggle();
-  }, [onToggle, done, prayerKey]);
+  }, [onToggle, done, prayerKey, reduced]);
 
   return (
     <div className="flex flex-col gap-1">

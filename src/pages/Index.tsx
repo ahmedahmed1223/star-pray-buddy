@@ -9,6 +9,7 @@ import ramadanBg from '@/assets/ramadan-bg.jpg';
 import { isOnboardingDone, setOnboardingDone, getChildren, getChildProgress, getStreak, AVATAR_IMAGES } from '@/lib/store';
 import { Users, Lock, ChevronLeft, Star, Flame, TrendingUp, Sparkles, Zap } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import SoundToggle from '@/components/SoundToggle';
 import { getGreeting, getSeasonalMessage } from '@/lib/greetings';
 
 function SVGLantern({ delay = 0, x = 0 }: { delay?: number; x?: number }) {
@@ -161,6 +162,7 @@ export default function Index() {
       {/* Top controls */}
       <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
         <ThemeToggle />
+        <SoundToggle />
         <motion.button
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
