@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { initReminders } from "@/lib/reminders";
 import { applyTheme, getStoredTheme } from "@/components/ThemeToggle";
 import { applySeasonalTheme, getStoredSeasonalTheme } from "@/lib/seasonalThemes";
+import { preloadSounds } from "@/lib/sounds";
 import InstallPrompt from "@/components/InstallPrompt";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
@@ -68,6 +69,9 @@ const App = () => {
     applyTheme(getStoredTheme());
     applySeasonalTheme(getStoredSeasonalTheme());
     initReminders();
+    const onFirst = () => { preloadSounds(); window.removeEventListener('pointerdown', onFirst); };
+    window.addEventListener('pointerdown', onFirst, { once: true });
+    return () => window.removeEventListener('pointerdown', onFirst);
   }, []);
 
   return (
