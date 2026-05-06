@@ -8,6 +8,7 @@ import avatarBoy4 from '@/assets/avatar-boy4.png';
 import avatarGirl4 from '@/assets/avatar-girl4.png';
 import avatarBoy5 from '@/assets/avatar-boy5.png';
 import avatarGirl5 from '@/assets/avatar-girl5.png';
+import { storageGet, storageSet } from '@/lib/storage';
 
 export interface Child {
   id: string;
