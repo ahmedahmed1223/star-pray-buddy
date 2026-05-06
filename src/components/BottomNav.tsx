@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Gift, Award, ShoppingBag } from 'lucide-react';
+import { BookOpen, Gift, Award, ShoppingBag, BookHeart } from 'lucide-react';
 import { getEarnedBadges, BADGES } from '@/lib/store';
 import { hapticLight } from '@/lib/haptics';
 
@@ -19,6 +19,7 @@ export default function BottomNav({ childId }: Props) {
 
   const tabs = [
     { path: 'tracker', label: 'الصلوات', Icon: BookOpen, badge: 0 },
+    { path: 'azkar', label: 'الأذكار', Icon: BookHeart, badge: 0 },
     { path: 'shop', label: 'المتجر', Icon: ShoppingBag, badge: 0 },
     { path: 'rewards', label: 'المكافآت', Icon: Gift, badge: 0 },
     { path: 'achievements', label: 'الإنجازات', Icon: Award, badge: hasNewBadges ? unreadBadges : 0 },
@@ -26,6 +27,8 @@ export default function BottomNav({ childId }: Props) {
 
   const currentTab = location.pathname.includes('/achievements')
     ? 'achievements'
+    : location.pathname.includes('/azkar')
+    ? 'azkar'
     : location.pathname.includes('/rewards')
     ? 'rewards'
     : location.pathname.includes('/shop')
@@ -35,11 +38,13 @@ export default function BottomNav({ childId }: Props) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} aria-label="التنقل الرئيسي" role="navigation">
       <div className="max-w-md mx-auto">
-        <div className="bg-card/95 backdrop-blur-xl border-t border-border px-2 py-2 flex justify-around items-center rounded-t-2xl shadow-lg" role="tablist">
+        <div className="bg-card/95 backdrop-blur-xl border-t border-border px-1.5 py-2 flex justify-around items-center rounded-t-2xl shadow-lg" role="tablist">
           {tabs.map(tab => {
             const active = currentTab === tab.path;
             const targetPath = tab.path === 'tracker'
               ? `/tracker/${childId}`
+              : tab.path === 'azkar'
+              ? `/azkar/${childId}`
               : tab.path === 'shop'
               ? `/shop/${childId}`
               : tab.path === 'rewards'
@@ -53,7 +58,7 @@ export default function BottomNav({ childId }: Props) {
                 role="tab"
                 aria-selected={active}
                 aria-label={tab.label}
-                className={`flex flex-col items-center gap-0.5 px-2 sm:px-4 py-2 rounded-xl transition-all relative min-w-[52px] min-h-[48px] ${
+                className={`flex flex-col items-center gap-0.5 px-1 sm:px-3 py-2 rounded-xl transition-all relative min-w-[44px] min-h-[48px] ${
                   active ? 'text-gold' : 'text-muted-foreground'
                 }`}
               >
@@ -69,7 +74,7 @@ export default function BottomNav({ childId }: Props) {
                   animate={active ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : {}}
                   transition={{ duration: 0.4 }}
                 >
-                  <tab.Icon size={22} />
+                  <tab.Icon size={20} />
                   {tab.badge > 0 && !active && (
                     <motion.span
                       initial={{ scale: 0 }}
@@ -80,7 +85,7 @@ export default function BottomNav({ childId }: Props) {
                     </motion.span>
                   )}
                 </motion.div>
-                <span className="text-xs font-bold relative z-10">{tab.label}</span>
+                <span className="text-[10px] font-bold relative z-10 leading-tight">{tab.label}</span>
               </motion.button>
             );
           })}
