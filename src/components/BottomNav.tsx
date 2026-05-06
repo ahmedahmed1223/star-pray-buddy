@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Gift, Award, ShoppingBag } from 'lucide-react';
+import { BookOpen, Gift, Award, ShoppingBag, BookHeart } from 'lucide-react';
 import { getEarnedBadges, BADGES } from '@/lib/store';
 import { hapticLight } from '@/lib/haptics';
 
