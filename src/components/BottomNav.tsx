@@ -19,6 +19,7 @@ export default function BottomNav({ childId }: Props) {
 
   const tabs = [
     { path: 'tracker', label: 'الصلوات', Icon: BookOpen, badge: 0 },
+    { path: 'azkar', label: 'الأذكار', Icon: BookHeart, badge: 0 },
     { path: 'shop', label: 'المتجر', Icon: ShoppingBag, badge: 0 },
     { path: 'rewards', label: 'المكافآت', Icon: Gift, badge: 0 },
     { path: 'achievements', label: 'الإنجازات', Icon: Award, badge: hasNewBadges ? unreadBadges : 0 },
@@ -26,6 +27,8 @@ export default function BottomNav({ childId }: Props) {
 
   const currentTab = location.pathname.includes('/achievements')
     ? 'achievements'
+    : location.pathname.includes('/azkar')
+    ? 'azkar'
     : location.pathname.includes('/rewards')
     ? 'rewards'
     : location.pathname.includes('/shop')
@@ -35,11 +38,13 @@ export default function BottomNav({ childId }: Props) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} aria-label="التنقل الرئيسي" role="navigation">
       <div className="max-w-md mx-auto">
-        <div className="bg-card/95 backdrop-blur-xl border-t border-border px-2 py-2 flex justify-around items-center rounded-t-2xl shadow-lg" role="tablist">
+        <div className="bg-card/95 backdrop-blur-xl border-t border-border px-1.5 py-2 flex justify-around items-center rounded-t-2xl shadow-lg" role="tablist">
           {tabs.map(tab => {
             const active = currentTab === tab.path;
             const targetPath = tab.path === 'tracker'
               ? `/tracker/${childId}`
+              : tab.path === 'azkar'
+              ? `/azkar/${childId}`
               : tab.path === 'shop'
               ? `/shop/${childId}`
               : tab.path === 'rewards'
