@@ -87,7 +87,7 @@ export default function KidTracker() {
     prevLevelId.current = getChildLevel(child.id).level.id;
     setChildThemeState(getChildTheme(child.id));
     // Remember last selected child for Quick Access on Index
-    try { localStorage.setItem('last-child-id', child.id); } catch {}
+    try { storageSet('last-child-id', child.id); } catch {}
   }, [child, dateStr]);
 
   // Approximate "next prayer" badge (no API; uses local hour windows)

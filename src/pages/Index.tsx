@@ -100,7 +100,7 @@ export default function Index() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Last selected child for quick access
-  const lastChildId = typeof localStorage !== 'undefined' ? localStorage.getItem('last-child-id') : null;
+  const lastChildId = typeof localStorage !== 'undefined' ? storageGet('last-child-id') : null;
   const lastChild = lastChildId ? children.find(c => c.id === lastChildId) : null;
 
   // Quick stats

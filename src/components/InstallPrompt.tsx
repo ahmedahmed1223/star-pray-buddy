@@ -16,7 +16,7 @@ export default function InstallPrompt() {
   useEffect(() => {
     // Hide on native platforms
     if (Capacitor.isNativePlatform()) return;
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    const dismissed = storageGet('pwa-install-dismissed');
     if (dismissed) return;
 
     const handler = (e: Event) => {
@@ -42,7 +42,7 @@ export default function InstallPrompt() {
   const handleDismiss = () => {
     setShowPrompt(false);
     setDismissed(true);
-    localStorage.setItem('pwa-install-dismissed', 'true');
+    storageSet('pwa-install-dismissed', 'true');
   };
 
   if (dismissed || !showPrompt) return null;

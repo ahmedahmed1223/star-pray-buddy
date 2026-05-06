@@ -5,12 +5,12 @@ import { Sun, Moon } from 'lucide-react';
 const THEME_KEY = 'salat-theme';
 
 export function getStoredTheme(): 'dark' | 'light' {
-  return (localStorage.getItem(THEME_KEY) as 'dark' | 'light') || 'dark';
+  return (storageGet(THEME_KEY) as 'dark' | 'light') || 'dark';
 }
 
 export function applyTheme(theme: 'dark' | 'light') {
   document.documentElement.classList.toggle('light', theme === 'light');
-  localStorage.setItem(THEME_KEY, theme);
+  storageSet(THEME_KEY, theme);
 }
 
 export default function ThemeToggle({ className = '' }: { className?: string }) {
