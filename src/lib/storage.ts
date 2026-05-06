@@ -13,10 +13,14 @@ let initPromise: Promise<void> | null = null;
 // Keys we want to hydrate from IDB on boot. Anything else falls back to lazy localStorage.
 const HYDRATE_KEYS = [
   'salat-tracker-data',
-  'salat-tracker-pwa-prompt-dismissed',
-  'theme-mode',
+  'pwa-install-dismissed',
+  'salat-theme',
   'sound-muted',
   'seasonal-theme',
+  'reminder-settings',
+  'last-child-id',
+  'gd-client-id',
+  'gd-last-backup',
 ];
 
 async function idbGet(key: string): Promise<string | undefined> {
