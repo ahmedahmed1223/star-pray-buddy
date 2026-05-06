@@ -3,6 +3,7 @@
  *  Source: Mixkit Free SFX (https://mixkit.co/free-sound-effects/) — free for commercial use.
  */
 
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import type { PrayerName } from '@/lib/store';
 
 type SoundKey =
@@ -32,10 +33,10 @@ const VOLUMES: Record<SoundKey, number> = {
 const cache: Partial<Record<SoundKey, HTMLAudioElement>> = {};
 
 function isMuted(): boolean {
-  try { return localStorage.getItem('sound-muted') === '1'; } catch { return false; }
+  try { return storageGet('sound-muted') === '1'; } catch { return false; }
 }
 export function setMuted(m: boolean) {
-  try { localStorage.setItem('sound-muted', m ? '1' : '0'); } catch {}
+  try { storageSet('sound-muted', m ? '1' : '0'); } catch {}
   try { window.dispatchEvent(new CustomEvent('sound-muted-change', { detail: m })); } catch {}
 }
 export function getMuted(): boolean { return isMuted(); }

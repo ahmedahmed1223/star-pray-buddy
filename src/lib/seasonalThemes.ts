@@ -1,6 +1,7 @@
 // نظام ثيمات وخلفيات موسمية دينية وفصلية
 // يعتمد على التقويم الهجري والميلادي للكشف التلقائي
 
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import { toHijri } from '@/lib/hijri';
 
 export type SeasonalThemeKey =
@@ -124,11 +125,11 @@ const STORAGE_KEY = 'seasonal-theme';
 
 export function getStoredSeasonalTheme(): SeasonalThemeKey {
   if (typeof localStorage === 'undefined') return 'auto';
-  return (localStorage.getItem(STORAGE_KEY) as SeasonalThemeKey) || 'auto';
+  return (storageGet(STORAGE_KEY) as SeasonalThemeKey) || 'auto';
 }
 
 export function setStoredSeasonalTheme(key: SeasonalThemeKey) {
-  localStorage.setItem(STORAGE_KEY, key);
+  storageSet(STORAGE_KEY, key);
   applySeasonalTheme(key);
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('seasonal-theme-change', { detail: key }));

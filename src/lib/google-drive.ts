@@ -1,5 +1,6 @@
 // Google Drive API integration for per-user cloud backup
 // Uses Google Identity Services (GIS) for OAuth2
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -19,19 +20,19 @@ export interface BackupInfo {
 }
 
 export function getStoredClientId(): string {
-  return localStorage.getItem(GD_CLIENT_ID_KEY) || '';
+  return storageGet(GD_CLIENT_ID_KEY) || '';
 }
 
 export function setStoredClientId(clientId: string) {
-  localStorage.setItem(GD_CLIENT_ID_KEY, clientId);
+  storageSet(GD_CLIENT_ID_KEY, clientId);
 }
 
 export function getLastBackupDate(): string | null {
-  return localStorage.getItem(GD_LAST_BACKUP_KEY);
+  return storageGet(GD_LAST_BACKUP_KEY);
 }
 
 function setLastBackupDate(date: string) {
-  localStorage.setItem(GD_LAST_BACKUP_KEY, date);
+  storageSet(GD_LAST_BACKUP_KEY, date);
 }
 
 function getStoredToken(): string | null {

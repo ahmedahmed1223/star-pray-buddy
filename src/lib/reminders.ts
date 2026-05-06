@@ -1,3 +1,4 @@
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import { PRAYER_NAMES, getChildren, isDateComplete, localDateStr } from './store';
 import {
   requestPermission,
@@ -33,7 +34,7 @@ const MOTIVATIONAL_NOTIFICATIONS = [
 ];
 
 export function getReminderSettings(): ReminderSettings {
-  const raw = localStorage.getItem(REMINDER_KEY);
+  const raw = storageGet(REMINDER_KEY);
   if (!raw) return { enabled: false, times: { ...defaultTimes }, smartReminders: false, streakAlert: false };
   const parsed = JSON.parse(raw);
   return {
@@ -45,7 +46,7 @@ export function getReminderSettings(): ReminderSettings {
 }
 
 export function saveReminderSettings(settings: ReminderSettings) {
-  localStorage.setItem(REMINDER_KEY, JSON.stringify(settings));
+  storageSet(REMINDER_KEY, JSON.stringify(settings));
   if (settings.enabled) {
     scheduleReminders(settings);
   } else {

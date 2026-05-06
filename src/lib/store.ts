@@ -8,6 +8,7 @@ import avatarBoy4 from '@/assets/avatar-boy4.png';
 import avatarGirl4 from '@/assets/avatar-girl4.png';
 import avatarBoy5 from '@/assets/avatar-boy5.png';
 import avatarGirl5 from '@/assets/avatar-girl5.png';
+import { storageGet, storageSet } from '@/lib/storage';
 
 export interface Child {
   id: string;
@@ -293,7 +294,7 @@ let _cacheVersion = 0;
 
 export function getData(): AppData {
   if (_cachedData) return _cachedData;
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = storageGet(STORAGE_KEY);
   if (!raw) {
     _cachedData = { ...defaultData };
     return _cachedData;
@@ -318,7 +319,7 @@ export function getData(): AppData {
 function saveData(data: AppData) {
   _cachedData = data;
   _cacheVersion++;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  storageSet(STORAGE_KEY, JSON.stringify(data));
 }
 
 function invalidateCache() {
@@ -788,7 +789,7 @@ export function isTodayComplete(childId: string): boolean {
 
 // === EXPORT / IMPORT ===
 export function exportData(): string {
-  return localStorage.getItem(STORAGE_KEY) || JSON.stringify(defaultData);
+  return storageGet(STORAGE_KEY) || JSON.stringify(defaultData);
 }
 
 export async function importData(jsonStr: string): Promise<boolean> {
@@ -869,7 +870,7 @@ export async function importData(jsonStr: string): Promise<boolean> {
     });
 
     const validated = appDataSchema.parse(parsed);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(validated));
+    storageSet(STORAGE_KEY, JSON.stringify(validated));
     invalidateCache();
     return true;
   } catch {

@@ -1,3 +1,4 @@
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -87,7 +88,7 @@ export default function KidTracker() {
     prevLevelId.current = getChildLevel(child.id).level.id;
     setChildThemeState(getChildTheme(child.id));
     // Remember last selected child for Quick Access on Index
-    try { localStorage.setItem('last-child-id', child.id); } catch {}
+    try { storageSet('last-child-id', child.id); } catch {}
   }, [child, dateStr]);
 
   // Approximate "next prayer" badge (no API; uses local hour windows)
