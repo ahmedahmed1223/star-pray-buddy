@@ -3,6 +3,7 @@
  *  Source: Mixkit Free SFX (https://mixkit.co/free-sound-effects/) — free for commercial use.
  */
 
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import type { PrayerName } from '@/lib/store';
 
 type SoundKey =

@@ -1,3 +1,4 @@
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X } from 'lucide-react';

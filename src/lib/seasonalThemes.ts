@@ -1,6 +1,7 @@
 // نظام ثيمات وخلفيات موسمية دينية وفصلية
 // يعتمد على التقويم الهجري والميلادي للكشف التلقائي
 
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 import { toHijri } from '@/lib/hijri';
 
 export type SeasonalThemeKey =
