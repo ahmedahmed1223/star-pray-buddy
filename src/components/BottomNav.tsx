@@ -85,7 +85,7 @@ export default function BottomNav({ childId }: Props) {
                     </motion.span>
                   )}
                 </motion.div>
-                <span className="text-xs font-bold relative z-10">{tab.label}</span>
+                <span className="text-[10px] font-bold relative z-10 leading-tight">{tab.label}</span>
               </motion.button>
             );
           })}
