@@ -1,5 +1,6 @@
 // Google Drive API integration for per-user cloud backup
 // Uses Google Identity Services (GIS) for OAuth2
+import { storageGet, storageSet, storageRemove } from '@/lib/storage';
 
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
