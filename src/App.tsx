@@ -20,6 +20,7 @@ const KidTracker = lazy(() => import("./pages/KidTracker"));
 const RewardsScreen = lazy(() => import("./pages/RewardsScreen"));
 const RewardShop = lazy(() => import("./pages/RewardShop"));
 const AchievementsScreen = lazy(() => import("./pages/AchievementsScreen"));
+const Azkar = lazy(() => import("./pages/Azkar"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
