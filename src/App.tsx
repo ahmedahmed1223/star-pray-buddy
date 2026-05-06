@@ -57,6 +57,8 @@ function AnimatedRoutes() {
             <Route path="/shop/:childId" element={<RewardShop />} />
             <Route path="/rewards/:childId" element={<RewardsScreen />} />
             <Route path="/achievements/:childId" element={<AchievementsScreen />} />
+            <Route path="/azkar/:childId" element={<Azkar />} />
+            <Route path="/azkar/:childId/:sectionId" element={<Azkar />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
