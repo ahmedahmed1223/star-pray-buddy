@@ -46,6 +46,9 @@ function SeasonalBackgroundImpl({ pattern, density = 'medium', className = '' }:
       {activePattern === 'leaves' && <Leaves count={Math.max(6, Math.floor(count / 1.5))} reduced={reduced} />}
       {activePattern === 'petals' && <Petals count={Math.max(6, Math.floor(count / 1.5))} reduced={reduced} />}
       {activePattern === 'kaaba' && <KaabaPattern reduced={reduced} />}
+      {activePattern === 'balloons' && <Balloons count={Math.max(5, Math.floor(count / 1.6))} reduced={reduced} />}
+      {activePattern === 'suns' && <Suns count={Math.max(3, Math.floor(count / 3))} reduced={reduced} />}
+      {activePattern === 'bubbles' && <Bubbles count={count} reduced={reduced} />}
     </div>
   );
 }
