@@ -19,7 +19,7 @@ export type SeasonalThemeKey =
   | 'autumn'
   | 'winter';
 
-export type SeasonPattern = 'stars' | 'crescents' | 'lanterns' | 'snow' | 'leaves' | 'petals' | 'kaaba' | 'none';
+export type SeasonPattern = 'stars' | 'crescents' | 'lanterns' | 'snow' | 'leaves' | 'petals' | 'kaaba' | 'balloons' | 'suns' | 'bubbles' | 'none';
 
 export interface SeasonalTheme {
   key: Exclude<SeasonalThemeKey, 'auto'>;
