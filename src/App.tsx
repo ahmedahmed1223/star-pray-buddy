@@ -21,6 +21,7 @@ const RewardsScreen = lazy(() => import("./pages/RewardsScreen"));
 const RewardShop = lazy(() => import("./pages/RewardShop"));
 const AchievementsScreen = lazy(() => import("./pages/AchievementsScreen"));
 const Azkar = lazy(() => import("./pages/Azkar"));
+const BattlePass = lazy(() => import("./pages/BattlePass"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ function AnimatedRoutes() {
             <Route path="/achievements/:childId" element={<AchievementsScreen />} />
             <Route path="/azkar/:childId" element={<Azkar />} />
             <Route path="/azkar/:childId/:sectionId" element={<Azkar />} />
+            <Route path="/pass/:childId" element={<BattlePass />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
