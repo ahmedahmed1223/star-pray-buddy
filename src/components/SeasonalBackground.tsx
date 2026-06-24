@@ -202,3 +202,77 @@ function KaabaPattern({ reduced }: { reduced: boolean }) {
     </>
   );
 }
+
+function Balloons({ count, reduced }: { count: number; reduced: boolean }) {
+  const colors = ['330 90% 70%', '200 90% 65%', '45 100% 65%', '150 75% 60%', '280 80% 70%'];
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => {
+        const x = rand(2, 95), size = rand(22, 38), dur = rand(10, 18);
+        const color = colors[i % colors.length];
+        return (
+          <motion.svg
+            key={i} width={size} height={size * 1.45} viewBox="0 0 40 58"
+            className="absolute" style={{ left: `${x}%`, top: '110%', opacity: 0.65 }}
+            animate={reduced ? {} : { y: ['0vh', '-130vh'], x: [0, rand(-25, 25), 0], rotate: [-5, 5, -5] }}
+            transition={{ duration: dur, repeat: Infinity, delay: rand(0, dur), ease: 'linear' }}
+          >
+            <ellipse cx="20" cy="20" rx="14" ry="17" fill={`hsl(${color})`} />
+            <ellipse cx="15" cy="14" rx="3" ry="5" fill="hsl(0 0% 100%)" opacity="0.4" />
+            <path d="M20 37 L18 41 L22 41 Z" fill={`hsl(${color})`} />
+            <path d="M20 41 Q22 48 19 52 Q17 56 20 58" stroke="hsl(0 0% 100% / 0.5)" strokeWidth="0.8" fill="none" />
+          </motion.svg>
+        );
+      })}
+    </>
+  );
+}
+
+function Suns({ count, reduced }: { count: number; reduced: boolean }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => {
+        const x = rand(5, 90), y = rand(5, 60), size = rand(36, 60);
+        return (
+          <motion.svg
+            key={i} width={size} height={size} viewBox="0 0 60 60"
+            className="absolute" style={{ left: `${x}%`, top: `${y}%`, opacity: 0.35 }}
+            animate={reduced ? {} : { rotate: [0, 360] }}
+            transition={{ duration: rand(20, 40), repeat: Infinity, ease: 'linear' }}
+          >
+            <g fill="hsl(var(--season-glow))">
+              {Array.from({ length: 8 }).map((_, j) => (
+                <rect key={j} x="28" y="2" width="4" height="10" rx="2" transform={`rotate(${j * 45} 30 30)`} />
+              ))}
+            </g>
+            <circle cx="30" cy="30" r="14" fill="hsl(var(--season-primary))" />
+            <circle cx="30" cy="30" r="14" fill="hsl(var(--season-glow))" opacity="0.5" />
+          </motion.svg>
+        );
+      })}
+    </>
+  );
+}
+
+function Bubbles({ count, reduced }: { count: number; reduced: boolean }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => {
+        const x = rand(0, 100), size = rand(10, 26), dur = rand(8, 16);
+        return (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              left: `${x}%`, top: '110%', width: size, height: size,
+              background: 'hsl(var(--season-particle) / 0.35)',
+              border: '1px solid hsl(var(--season-glow) / 0.4)',
+            }}
+            animate={reduced ? {} : { y: ['0vh', '-120vh'], x: [0, rand(-30, 30), 0] }}
+            transition={{ duration: dur, repeat: Infinity, delay: rand(0, dur), ease: 'linear' }}
+          />
+        );
+      })}
+    </>
+  );
+}
