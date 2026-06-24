@@ -98,19 +98,23 @@ function key(childId: string, seasonKey: string) {
   return `battlePass:${childId}:${seasonKey}`;
 }
 
-export async function getPassState(childId: string): Promise<PassState> {
+export function getPassState(childId: string): PassState {
   const theme = getActiveSeasonalTheme();
   const seasonKey = theme.key;
   const child = getChild(childId);
-  const raw = await storageGet<PassState | null>(key(childId, seasonKey), null);
-  if (raw && raw.seasonKey === seasonKey) {
-    // ensure daysActive includes today
-    const today = localDateStr();
-    if (!raw.daysActive.includes(today)) {
-      raw.daysActive.push(today);
-      await storageSet(key(childId, seasonKey), raw);
-    }
-    return raw;
+  const raw = storageGet(key(childId, seasonKey));
+  if (raw) {
+    try {
+      const parsed: PassState = JSON.parse(raw);
+      if (parsed.seasonKey === seasonKey) {
+        const today = localDateStr();
+        if (!parsed.daysActive.includes(today)) {
+          parsed.daysActive.push(today);
+          storageSet(key(childId, seasonKey), JSON.stringify(parsed));
+        }
+        return parsed;
+      }
+    } catch { /* fall through */ }
   }
   const fresh: PassState = {
     seasonKey,
@@ -123,12 +127,12 @@ export async function getPassState(childId: string): Promise<PassState> {
     premium: false,
     daysActive: [localDateStr()],
   };
-  await storageSet(key(childId, seasonKey), fresh);
+  storageSet(key(childId, seasonKey), JSON.stringify(fresh));
   return fresh;
 }
 
-export async function savePassState(state: PassState) {
-  await storageSet(key(state.childId, state.seasonKey), state);
+export function savePassState(state: PassState) {
+  storageSet(key(state.childId, state.seasonKey), JSON.stringify(state));
 }
 
 export function getTierFromXp(xp: number): number {
@@ -142,7 +146,7 @@ export function getTierProgress(xp: number) {
 }
 
 // Evaluate a mission against live data
-export async function evaluateMission(state: PassState, m: PassMission): Promise<{ done: boolean; current: number }> {
+export function evaluateMission(state: PassState, m: PassMission): { done: boolean; current: number } {
   const child = getChild(state.childId);
   if (!child) return { done: false, current: 0 };
   switch (m.type) {
@@ -159,12 +163,11 @@ export async function evaluateMission(state: PassState, m: PassMission): Promise
       return { done: delta >= m.target, current: Math.max(0, delta) };
     }
     case 'azkar_sections': {
-      // count distinct azkar sections completed today (stored under azkarProgress)
       const today = localDateStr();
       const sections = ['morning', 'evening', 'sleep', 'after_prayer'];
       let done = 0;
       for (const sec of sections) {
-        const last = await storageGet<string | null>(`azkar:${state.childId}:${sec}:lastDone`, null);
+        const last = storageGet(`azkar-reset-${state.childId}-${sec}`);
         if (last === today) done++;
       }
       return { done: done >= m.target, current: done };
@@ -175,27 +178,27 @@ export async function evaluateMission(state: PassState, m: PassMission): Promise
   }
 }
 
-export async function completeMission(state: PassState, m: PassMission): Promise<PassState> {
+export function completeMission(state: PassState, m: PassMission): PassState {
   if (state.completedMissions.includes(m.id)) return state;
-  const ev = await evaluateMission(state, m);
+  const ev = evaluateMission(state, m);
   if (!ev.done) return state;
   state.completedMissions.push(m.id);
   state.xp = Math.min(MAX_TIER * XP_PER_TIER, state.xp + m.xp);
-  await savePassState(state);
+  savePassState(state);
   return state;
 }
 
-export async function claimTier(state: PassState, tier: number, track: 'free' | 'premium'): Promise<PassState> {
+export function claimTier(state: PassState, tier: number, track: 'free' | 'premium'): PassState {
   if (tier > getTierFromXp(state.xp)) return state;
   if (track === 'premium' && !state.premium) return state;
   if (state.claimedTiers[track].includes(tier)) return state;
   state.claimedTiers[track].push(tier);
-  await savePassState(state);
+  savePassState(state);
   return state;
 }
 
-export async function upgradePremium(state: PassState): Promise<PassState> {
+export function upgradePremium(state: PassState): PassState {
   state.premium = true;
-  await savePassState(state);
+  savePassState(state);
   return state;
 }
