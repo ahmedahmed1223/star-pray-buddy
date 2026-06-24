@@ -30,7 +30,7 @@ import QuranTracker from '@/components/QuranTracker';
 import AdventureMap from '@/components/AdventureMap';
 import ThemePickerDialog from '@/components/ThemePickerDialog';
 import { ParticleBurst } from '@/components/SkeletonLoader';
-import { ArrowLeft, Trophy, Coins, Flame, Award, Palette, Clock } from 'lucide-react';
+import { ArrowLeft, Trophy, Coins, Flame, Award, Palette, Clock, Sparkles } from 'lucide-react';
 
 export default function KidTracker() {
   const { childId } = useParams<{ childId: string }>();
@@ -357,10 +357,13 @@ export default function KidTracker() {
                   <span className="text-destructive font-extrabold text-sm">{streak.current}</span>
                 </motion.div>
               )}
-              <motion.button onClick={() => setThemePickerOpen(true)} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }}>
+              <motion.button onClick={() => setThemePickerOpen(true)} className="text-muted-foreground p-2 rounded-xl hover:bg-muted min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }} aria-label="ثيم">
                 <Palette size={18} />
               </motion.button>
-              <motion.button onClick={() => navigate(`/rewards/${child.id}`)} className="bg-primary/15 text-gold p-2.5 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }}>
+              <motion.button onClick={() => navigate(`/pass/${child.id}`)} className="bg-amber-500/15 text-amber-400 p-2 rounded-xl min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }} aria-label="جواز الموسم">
+                <Sparkles size={18} />
+              </motion.button>
+              <motion.button onClick={() => navigate(`/rewards/${child.id}`)} className="bg-primary/15 text-gold p-2.5 rounded-xl glow-gold min-w-[44px] min-h-[44px] flex items-center justify-center" whileTap={{ scale: 0.9 }} aria-label="المكافآت">
                 <Trophy size={20} />
               </motion.button>
             </div>
