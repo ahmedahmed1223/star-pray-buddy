@@ -23,6 +23,8 @@ const AchievementsScreen = lazy(() => import("./pages/AchievementsScreen"));
 const Azkar = lazy(() => import("./pages/Azkar"));
 const BattlePass = lazy(() => import("./pages/BattlePass"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,8 @@ function AnimatedRoutes() {
             <Route path="/azkar/:childId" element={<Azkar />} />
             <Route path="/azkar/:childId/:sectionId" element={<Azkar />} />
             <Route path="/pass/:childId" element={<BattlePass />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
@@ -76,6 +80,20 @@ const App = () => {
     initReminders();
     const onFirst = () => { preloadSounds(); window.removeEventListener('pointerdown', onFirst); };
     window.addEventListener('pointerdown', onFirst, { once: true });
+    // Auto cloud sync (daily) if enabled and user signed in
+    (async () => {
+      try {
+        const { isAutoSyncEnabled, uploadBackup } = await import('@/lib/cloudSync');
+        const { supabase } = await import('@/integrations/supabase/client');
+        if (!isAutoSyncEnabled()) return;
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) return;
+        const last = Number(localStorage.getItem('last_auto_sync') || 0);
+        if (Date.now() - last < 24 * 60 * 60 * 1000) return;
+        await uploadBackup(`مزامنة تلقائية ${new Date().toLocaleDateString('ar')}`);
+        localStorage.setItem('last_auto_sync', String(Date.now()));
+      } catch { /* silent */ }
+    })();
     return () => window.removeEventListener('pointerdown', onFirst);
   }, []);
 

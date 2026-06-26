@@ -31,6 +31,7 @@ import {
   Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil, Cloud
 } from 'lucide-react';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
+import CloudAccountPanel from '@/components/CloudAccountPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import SoundToggle from '@/components/SoundToggle';
 import SeasonalThemePicker from '@/components/SeasonalThemePicker';
@@ -799,7 +800,15 @@ export default function ParentDashboard() {
 
           {/* ===== CLOUD TAB ===== */}
           <TabsContent value="cloud" className="space-y-4">
-            <CloudSyncPanel onDataRestored={refresh} />
+            <CloudAccountPanel onDataRestored={refresh} />
+            <details className="bg-card rounded-2xl border border-border">
+              <summary className="cursor-pointer p-4 text-sm font-bold text-muted-foreground">
+                مزامنة Google Drive (متقدم)
+              </summary>
+              <div className="p-4 pt-0">
+                <CloudSyncPanel onDataRestored={refresh} />
+              </div>
+            </details>
           </TabsContent>
         </Tabs>
       </div>
