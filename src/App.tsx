@@ -23,6 +23,8 @@ const AchievementsScreen = lazy(() => import("./pages/AchievementsScreen"));
 const Azkar = lazy(() => import("./pages/Azkar"));
 const BattlePass = lazy(() => import("./pages/BattlePass"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,8 @@ function AnimatedRoutes() {
             <Route path="/azkar/:childId" element={<Azkar />} />
             <Route path="/azkar/:childId/:sectionId" element={<Azkar />} />
             <Route path="/pass/:childId" element={<BattlePass />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
