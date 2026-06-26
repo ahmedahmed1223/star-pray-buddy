@@ -31,6 +31,7 @@ import {
   Settings2, Target, BookOpen, BarChart3, CalendarDays, Users, Download, Upload, Pencil, Cloud
 } from 'lucide-react';
 import CloudSyncPanel from '@/components/CloudSyncPanel';
+import CloudAccountPanel from '@/components/CloudAccountPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import SoundToggle from '@/components/SoundToggle';
 import SeasonalThemePicker from '@/components/SeasonalThemePicker';
