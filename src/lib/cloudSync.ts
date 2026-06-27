@@ -26,6 +26,8 @@ export async function uploadBackup(name?: string): Promise<CloudBackup> {
     .select('id, name, size_bytes, created_at, updated_at')
     .single();
   if (error) throw error;
+  // Best-effort: also mirror the kids list so the parent account is linked to them.
+  try { await syncKidsToCloud(); } catch { /* non-fatal */ }
   return data as CloudBackup;
 }
 
