@@ -48,7 +48,9 @@ export async function restoreBackup(id: string): Promise<boolean> {
     .single();
   if (error) throw error;
   const json = JSON.stringify(data.payload);
-  return importData(json);
+  const ok = importData(json);
+  if (ok) { try { await syncKidsToCloud(); } catch { /* non-fatal */ } }
+  return ok;
 }
 
 export async function deleteBackup(id: string): Promise<void> {
