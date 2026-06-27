@@ -27,8 +27,9 @@ export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: 
   const refresh = async () => {
     setBusy('list');
     try {
-      const list = await listBackups();
+      const [list, k] = await Promise.all([listBackups(), listFamilyKids()]);
       setBackups(list);
+      setKids(k);
     } catch (e: any) {
       show('error', e.message || 'فشل الجلب');
     } finally {
@@ -36,9 +37,38 @@ export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: 
     }
   };
 
+  const refreshKids = async () => {
+    try { setKids(await listFamilyKids()); } catch { /* noop */ }
+  };
+
+  const handleLinkKids = async () => {
+    setBusy('link');
+    try {
+      const { synced } = await syncKidsToCloud();
+      show('success', `تم ربط ${synced} ${synced === 1 ? 'طفل' : 'أطفال'} بحسابك 👨‍👩‍👧`);
+      await refreshKids();
+    } catch (e: any) {
+      show('error', e.message || 'فشل الربط');
+    } finally { setBusy(null); }
+  };
+
+  const handleUnlink = async (childId: string) => {
+    setBusy('unlink-' + childId);
+    setConfirmUnlink(null);
+    try {
+      await unlinkFamilyKid(childId);
+      setKids(k => k.filter(x => x.child_id !== childId));
+      show('success', 'تم فك الربط');
+    } catch (e: any) {
+      show('error', e.message || 'فشل فك الربط');
+    } finally { setBusy(null); }
+  };
+
   useEffect(() => {
     if (user) {
       refresh();
+      // auto-link local kids to the parent account on first login
+      syncKidsToCloud().then(refreshKids).catch(() => {});
       supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle().then(({ data }) => {
         setProfileName(data?.display_name || user.email?.split('@')[0] || '');
       });
