@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cloud, CloudUpload, CloudDownload, Trash2, LogOut, LogIn, Loader2, Check, X, RefreshCw, User as UserIcon } from 'lucide-react';
+import { Cloud, CloudUpload, CloudDownload, Trash2, LogOut, LogIn, Loader2, Check, X, RefreshCw, User as UserIcon, Users, Link2Off, ShieldCheck } from 'lucide-react';
 import { useAuth, signOut } from '@/lib/auth';
 import { listBackups, uploadBackup, restoreBackup, deleteBackup, type CloudBackup, isAutoSyncEnabled, setAutoSyncEnabled } from '@/lib/cloudSync';
+import { listFamilyKids, syncKidsToCloud, unlinkFamilyKid, type FamilyKidRow } from '@/lib/familySync';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: () => void }) {
