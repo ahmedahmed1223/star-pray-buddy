@@ -10,12 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: () => void }) {
   const { user, loading } = useAuth();
   const [backups, setBackups] = useState<CloudBackup[]>([]);
+  const [kids, setKids] = useState<FamilyKidRow[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [profileName, setProfileName] = useState<string>('');
   const [auto, setAuto] = useState(isAutoSyncEnabled());
   const [confirmRestore, setConfirmRestore] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmUnlink, setConfirmUnlink] = useState<string | null>(null);
 
   const show = (type: 'success' | 'error', text: string) => {
     setMsg({ type, text });
