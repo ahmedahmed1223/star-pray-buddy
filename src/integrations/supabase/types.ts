@@ -44,6 +44,66 @@ export type Database = {
         }
         Relationships: []
       }
+      family_kids: {
+        Row: {
+          avatar_index: number
+          child_id: string
+          created_at: string
+          id: string
+          last_synced_at: string
+          name: string
+          owner_id: string
+          total_stars: number
+          updated_at: string
+        }
+        Insert: {
+          avatar_index?: number
+          child_id: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string
+          name: string
+          owner_id: string
+          total_stars?: number
+          updated_at?: string
+        }
+        Update: {
+          avatar_index?: number
+          child_id?: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string
+          name?: string
+          owner_id?: string
+          total_stars?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          owner_id: string
+          role: Database["public"]["Enums"]["family_role"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          owner_id: string
+          role?: Database["public"]["Enums"]["family_role"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          owner_id?: string
+          role?: Database["public"]["Enums"]["family_role"]
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -76,7 +136,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      family_role: "owner" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -203,6 +263,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      family_role: ["owner", "viewer"],
+    },
   },
 } as const
