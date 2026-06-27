@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cloud, CloudUpload, CloudDownload, Trash2, LogOut, LogIn, Loader2, Check, X, RefreshCw, User as UserIcon } from 'lucide-react';
+import { Cloud, CloudUpload, CloudDownload, Trash2, LogOut, LogIn, Loader2, Check, X, RefreshCw, User as UserIcon, Users, Link2Off, ShieldCheck } from 'lucide-react';
 import { useAuth, signOut } from '@/lib/auth';
 import { listBackups, uploadBackup, restoreBackup, deleteBackup, type CloudBackup, isAutoSyncEnabled, setAutoSyncEnabled } from '@/lib/cloudSync';
+import { listFamilyKids, syncKidsToCloud, unlinkFamilyKid, type FamilyKidRow } from '@/lib/familySync';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: () => void }) {
   const { user, loading } = useAuth();
   const [backups, setBackups] = useState<CloudBackup[]>([]);
+  const [kids, setKids] = useState<FamilyKidRow[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [profileName, setProfileName] = useState<string>('');
   const [auto, setAuto] = useState(isAutoSyncEnabled());
   const [confirmRestore, setConfirmRestore] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmUnlink, setConfirmUnlink] = useState<string | null>(null);
 
   const show = (type: 'success' | 'error', text: string) => {
     setMsg({ type, text });
@@ -24,8 +27,9 @@ export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: 
   const refresh = async () => {
     setBusy('list');
     try {
-      const list = await listBackups();
+      const [list, k] = await Promise.all([listBackups(), listFamilyKids()]);
       setBackups(list);
+      setKids(k);
     } catch (e: any) {
       show('error', e.message || 'فشل الجلب');
     } finally {
@@ -33,9 +37,38 @@ export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: 
     }
   };
 
+  const refreshKids = async () => {
+    try { setKids(await listFamilyKids()); } catch { /* noop */ }
+  };
+
+  const handleLinkKids = async () => {
+    setBusy('link');
+    try {
+      const { synced } = await syncKidsToCloud();
+      show('success', `تم ربط ${synced} ${synced === 1 ? 'طفل' : 'أطفال'} بحسابك 👨‍👩‍👧`);
+      await refreshKids();
+    } catch (e: any) {
+      show('error', e.message || 'فشل الربط');
+    } finally { setBusy(null); }
+  };
+
+  const handleUnlink = async (childId: string) => {
+    setBusy('unlink-' + childId);
+    setConfirmUnlink(null);
+    try {
+      await unlinkFamilyKid(childId);
+      setKids(k => k.filter(x => x.child_id !== childId));
+      show('success', 'تم فك الربط');
+    } catch (e: any) {
+      show('error', e.message || 'فشل فك الربط');
+    } finally { setBusy(null); }
+  };
+
   useEffect(() => {
     if (user) {
       refresh();
+      // auto-link local kids to the parent account on first login
+      syncKidsToCloud().then(refreshKids).catch(() => {});
       supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle().then(({ data }) => {
         setProfileName(data?.display_name || user.email?.split('@')[0] || '');
       });
@@ -161,6 +194,57 @@ export default function CloudAccountPanel({ onDataRestored }: { onDataRestored: 
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      <div className="bg-card rounded-2xl p-5 border border-border">
+        <div className="flex items-center gap-2 mb-2">
+          <Users size={18} className="text-gold" />
+          <span className="font-bold text-sm text-foreground">أطفال مرتبطون بحسابك ({kids.length})</span>
+          <button
+            onClick={handleLinkKids}
+            disabled={busy === 'link'}
+            className="mr-auto text-[11px] bg-primary/10 text-gold font-bold px-3 py-1.5 rounded-lg min-h-[32px] disabled:opacity-50 flex items-center gap-1"
+          >
+            {busy === 'link' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+            مزامنة الآن
+          </button>
+        </div>
+        <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground mb-3 bg-muted/50 rounded-lg p-2">
+          <ShieldCheck size={12} className="text-secondary mt-0.5 shrink-0" />
+          <span>أنت فقط (مالك الحساب) من يمكنه استرجاع أو فك ربط هؤلاء الأطفال. لا يستطيع أي حساب آخر الوصول لبياناتهم.</span>
+        </div>
+        {kids.length === 0 ? (
+          <p className="text-muted-foreground text-xs text-center py-3">لم يتم ربط أي طفل بعد. اضغط "مزامنة الآن".</p>
+        ) : (
+          <div className="space-y-2 max-h-56 overflow-y-auto">
+            {kids.map(k => (
+              <div key={k.id} className="bg-muted rounded-xl p-2.5 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-gold">
+                  {k.name.slice(0, 1)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground truncate">{k.name}</p>
+                  <p className="text-[10px] text-muted-foreground">⭐ {k.total_stars} · آخر مزامنة {fmtDate(k.last_synced_at)}</p>
+                </div>
+                {confirmUnlink === k.child_id ? (
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => handleUnlink(k.child_id)} className="text-[11px] bg-destructive/20 text-destructive px-2 py-1 rounded-lg font-bold">فك</button>
+                    <button onClick={() => setConfirmUnlink(null)} className="text-[11px] text-muted-foreground px-1">لا</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmUnlink(k.child_id)}
+                    disabled={!!busy}
+                    className="text-destructive/60 hover:text-destructive p-1.5"
+                    title="فك الربط"
+                  >
+                    {busy === 'unlink-' + k.child_id ? <Loader2 size={12} className="animate-spin" /> : <Link2Off size={12} />}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="bg-card rounded-2xl p-5 border border-border">

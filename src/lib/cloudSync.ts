@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { exportData, importData } from '@/lib/store';
+import { syncKidsToCloud } from '@/lib/familySync';
 
 export interface CloudBackup {
   id: string;
@@ -25,6 +26,8 @@ export async function uploadBackup(name?: string): Promise<CloudBackup> {
     .select('id, name, size_bytes, created_at, updated_at')
     .single();
   if (error) throw error;
+  // Best-effort: also mirror the kids list so the parent account is linked to them.
+  try { await syncKidsToCloud(); } catch { /* non-fatal */ }
   return data as CloudBackup;
 }
 
@@ -45,7 +48,9 @@ export async function restoreBackup(id: string): Promise<boolean> {
     .single();
   if (error) throw error;
   const json = JSON.stringify(data.payload);
-  return importData(json);
+  const ok = importData(json);
+  if (ok) { try { await syncKidsToCloud(); } catch { /* non-fatal */ } }
+  return ok;
 }
 
 export async function deleteBackup(id: string): Promise<void> {
