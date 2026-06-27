@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { exportData, importData } from '@/lib/store';
+import { syncKidsToCloud } from '@/lib/familySync';
 
 export interface CloudBackup {
   id: string;
